@@ -1,0 +1,23 @@
+{% extends 'english/base.html' %}
+
+{% block content %}
+        <h1>{{course.name}}</h1>
+        <p>{{course.description}}</p>
+
+        <ul class="list-unstyled">
+          {% for tarif in course.tariffs.all %}
+            <li class="d-inline-block">
+              <div class="card" style="width: 18rem;">
+  <div class="card-body">
+    <h5 class="card-title">{{ tarif.name }}</h5>
+    <p class="card-text">цена тарифа: {{ tarif.price }}</p>
+    <a href="#" class="btn btn-primary">Go somewhere</a>
+  </div>
+</div>
+
+            </li>
+          {% endfor %}
+        </ul>
+
+
+{% endblock content %}

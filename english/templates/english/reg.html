@@ -1,0 +1,18 @@
+{% extends 'english/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
+  <form class="card shadow-sm p-4" method="post" style="max-width: 400px; width: 100%;">
+    {% csrf_token %}
+    <h5 class="text-center mb-3">Введите код</h5>
+    <p>Telegram bot: <a href="tg://resolve?domain=studyeng_login_bot">@studyeng_login_bot</a></p>
+    <div>
+      <input type="number" name="code" class="form-control text-center" id="inputCode" placeholder="Код из Telegram" required>
+    </div>
+    {% if error_message %}
+      <div class="text-danger">{{error_message}}</div>
+    {% endif %}
+    <button type="submit" class="btn btn-primary w-100 mt-3 ">Войти</button>
+  </form>
+</div>
+{% endblock content %}

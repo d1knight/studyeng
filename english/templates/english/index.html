@@ -1,0 +1,140 @@
+{% extends 'english/base.html'%}
+{% block content%}
+
+<!-- Hero -->
+<section class="py-5">
+  <div class="row align-items-center">
+    <div class="col-md-6">
+      <h1 class="fw-bold mb-4">Подготовка к IELTS и вступительным тестам ВУЗов</h1>
+      <p class="lead">
+        Меня зовут Байрам, <span class="text-primary fw-bold">я профессиональный</span> преподаватель английского языка.  
+        Работаю более 8 лет. Мои выпускники <span class="text-primary fw-bold">учатся в МГУ, НИУ ВШЭ, МФТИ и за рубежом</span>.  
+        Все материалы разрабатываю самостоятельно. 
+      </p>
+      <p>Помогу закрыть пробелы в знаниях и подготовиться к экзаменам офлайн или онлайн.</p>
+      <a href="#tarifff" class="btn btn-success btn-lg mt-3">Записаться</a>
+    </div>
+    <div class="col-md-6 text-center">
+      <img
+        src="https://cdn.cpdonline.co.uk/wp-content/uploads/2023/02/24155222/Teacher-Teaching-Online.jpg"
+        class="rounded img-fluid shadow"
+        alt="Преподаватель"
+      />
+    </div>
+  </div>
+</section>
+
+<!-- Как проходит обучение -->
+<section class="py-5 bg-light">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Как проходит обучение</h2>
+  </div>
+  <div class="row g-4 justify-content-center">
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0">
+        <img src="https://antaltalent.ru/wp-content/uploads/2023/01/tpk_prev.jpg" class="card-img-top" alt="Тестирование">
+        <div class="card-body">
+          <h5 class="card-title">Бесплатное тестирование уровня</h5>
+          <p class="card-text">Определим ваш уровень знаний, чтобы построить индивидуальный план обучения.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0">
+        <img src="https://www.unicraft.org/wp-content/uploads/2021/02/cropped-colleagues-generating-business-ideas_1098-19137.jpg" class="card-img-top" alt="Обратная связь">
+        <div class="card-body">
+          <h5 class="card-title">Обратная связь от преподавателя</h5>
+          <p class="card-text">Вы всегда знаете, над чем работать, и получаете поддержку на каждом этапе.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0">
+        <img src="https://shablon.klev.club/uploads/posts/2024-09/shablon-klev-club-zl8b-p-shabloni-kalendar-na-mesyats-bez-dat-1.jpg" class="card-img-top" alt="График занятий">
+        <div class="card-body">
+          <h5 class="card-title">Удобный график</h5>
+          <p class="card-text">Вы сами выбираете время занятий, чтобы обучение было комфортным.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Тарифы -->
+<section id="tarifff" class="py-5">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Тарифы</h2>
+    <p class="text-muted">Индивидуальный подход к каждому ученику</p>
+  </div>
+  <div class="row justify-content-center g-4">
+    {% for tariff in tariffs %}
+    <div class="col-sm-6 col-md-4 col-lg-3">
+      <div class="card h-100 shadow border-0 p-3">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-center">{{ tariff.name }}</h5>
+          <h6 class="text-primary text-center">{{ tariff.description|truncatewords:10 }}</h6>
+          <h4 class="text-center border-bottom pb-2 mb-3">{{ tariff.price }}</h4>
+          <ul class="list-unstyled flex-grow-1">
+            <li class="bi bi-check-lg"> Lorem ipsum.</li>
+            <li class="bi bi-check-lg"> Lorem ipsum.</li>
+            <li class="bi bi-check-lg"> Lorem ipsum.</li>
+          </ul>
+          <a href="#" class="btn btn-primary mt-auto">Купить</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Отзывы -->
+<section class="py-5 bg-light">
+  <div class="text-center mb-5">
+    <h2 class="fw-bold">Отзывы учеников</h2>
+  </div>
+  <div id="carouselExampleDark" class="carousel carousel-dark slide text-center">
+    <div class="carousel-inner">
+      <div class="carousel-item active" data-bs-interval="5000">
+        <img src="https://picsum.photos/200/200?random=1" class="d-block mx-auto rounded-circle shadow" alt="..." width="200" height="200">
+        <div class="mt-3">
+          <h5>Мария</h5>
+          <p>Занятия помогли сдать IELTS на высокий балл и поступить в ВУЗ мечты.</p>
+        </div>
+      </div>
+      <div class="carousel-item" data-bs-interval="5000">
+        <img src="https://picsum.photos/200/200?random=2" class="d-block mx-auto rounded-circle shadow" alt="..." width="200" height="200">
+        <div class="mt-3">
+          <h5>Алексей</h5>
+          <p>Очень доступное объяснение материала, результат заметен уже через месяц.</p>
+        </div>
+      </div>
+      <div class="carousel-item" data-bs-interval="5000">
+        <img src="https://picsum.photos/200/200?random=3" class="d-block mx-auto rounded-circle shadow" alt="..." width="200" height="200">
+        <div class="mt-3">
+          <h5>Диана</h5>
+          <p>Занятия помогли уверенно чувствовать себя на экзамене.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- индикаторы -->
+    <div class="carousel-indicators position-static mt-3">
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1"></button>
+      <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2"></button>
+    </div>
+
+    <!-- кнопки влево/вправо -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Предыдущий</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Следующий</span>
+    </button>
+  </div>
+</section>
+
+
+{% endblock content%}
