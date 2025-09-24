@@ -1,0 +1,17 @@
+{% extends 'english/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Оплата тарифа: {{ tariff.name }}</h2>
+  <p>Цена: {{ tariff.price }} сум.</p>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="receipt" class="form-label">Загрузите скриншот чека</label>
+      <input type="file" name="receipt" id="receipt" class="form-control" accept="image/*" required>
+    </div>
+    <button type="submit" class="btn btn-success">Отправить чек</button>
+  </form>
+</div>
+{% endblock %}

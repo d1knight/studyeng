@@ -3,7 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
-
+from ckeditor_uploader.fields import RichTextUploadingField
 
 class UserManager(BaseUserManager):
     def create_user(self, phone_number, first_name, last_name, tg_id, password=None, **extra_fields):
@@ -167,7 +167,7 @@ class Topic(models.Model):
     )
     name = models.CharField(max_length=255, verbose_name='Название темы')
     video_path = models.CharField(max_length=255, verbose_name='Путь к видео')
-    content = models.TextField(verbose_name='Содержание')
+    content = RichTextUploadingField(verbose_name="Содержание")
     
     class Meta:
         db_table = 'topic'
@@ -320,7 +320,7 @@ class Payment(models.Model):
         auto_now_add=True,  # ✅ автоматически ставится при создании записи
         verbose_name='Дата создания'
     )
-    receipt = models.CharField(max_length=255, verbose_name='Чек')
+    receipt = models.ImageField(upload_to='receipts/', verbose_name='Скриншот чека')
     status = models.CharField(
         max_length=255,
         choices=PAYMENT_STATUSES,

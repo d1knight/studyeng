@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from .models import *
 from django.core.cache import cache
@@ -32,6 +32,18 @@ def course_detail(request, course_id):
         'courses': courses
     }
     return render(request, 'english/course.html', context)
+
+
+def topic_detail(request, topic_id):
+    topic = Topic.objects.filter(id=topic_id).first()
+
+    context = {
+        'topic': topic
+    }
+    print(topic.id)
+    return render(request, 'english/topic.html', context)
+
+
 
 
 def reg(request: HttpRequest):
@@ -104,3 +116,27 @@ def profile(request):
 def logout_view(request):
     logout(request)
     return redirect('/')
+
+
+
+@login_required
+def buy_tariff(request, tariff_id):
+    tariff = get_object_or_404(CourseTariff, id=tariff_id)
+
+    if request.method == "POST":
+        receipt = request.FILES.get("receipt")
+
+        Payment.objects.create(
+            user=request.user,
+            tariff=tariff,
+            amount=tariff.price,
+            receipt=receipt,
+            status="pending"
+        )
+        course = tariff.course
+        chapters = course.chapters
+        print(chapters)
+
+        return redirect("profile")  # куда-то перенаправляем после отправки
+
+    return render(request, "english/buy_tariff.html", {"tariff": tariff})

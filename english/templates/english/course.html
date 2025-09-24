@@ -4,20 +4,32 @@
         <h1>{{course.name}}</h1>
         <p>{{course.description}}</p>
 
-        <ul class="list-unstyled">
-          {% for tarif in course.tariffs.all %}
-            <li class="d-inline-block">
-              <div class="card" style="width: 18rem;">
-  <div class="card-body">
-    <h5 class="card-title">{{ tarif.name }}</h5>
-    <p class="card-text">цена тарифа: {{ tarif.price }}</p>
-    <a href="#" class="btn btn-primary">Go somewhere</a>
-  </div>
-</div>
+        <ul>
+          
+          
+        </ul>
 
-            </li>
+<div class="accordion" id="accordionExample">
+  {% for chapter in course.chapters.all %}
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{chapter.id}}" aria-expanded="false" aria-controls="collapseOne-{{chapter.id}}">
+        Chapter-{{chapter.order_index}}. {{chapter.name}}
+      </button>
+    </h2>
+    <div id="collapseOne-{{chapter.id}}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <ul class="list-group list-group-flush">
+          {% for topic in chapter.topics.all %}
+          <li class="list-group-item"><a href="{% url 'topic' topic.id %}">{{ topic.order_index }}. {{ topic.name }}</a></li>
           {% endfor %}
         </ul>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+</div>
+        
 
 
 {% endblock content %}
