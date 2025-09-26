@@ -7,7 +7,7 @@ from .utils import generate_unique_otp
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.contrib.auth import login, logout
-
+from .utils import render_question
 
 
 def main_page(request):
@@ -35,13 +35,19 @@ def course_detail(request, course_id):
 
 
 def topic_detail(request, topic_id):
-    topic = Topic.objects.filter(id=topic_id).first()
+    topic = get_object_or_404(Topic, id=topic_id)
+    exercises = Exercise.objects.filter(topic=topic).prefetch_related("questions")
 
-    context = {
-        'topic': topic
-    }
-    print(topic.id)
-    return render(request, 'english/topic.html', context)
+    user_answers = {}
+    if request.method == "POST":
+        for q in Question.objects.filter(exercise__topic=topic):
+            user_answers[q.id] = request.POST.get(f"answer_{q.id}", "").strip()
+
+    return render(request, "english/topic.html", {
+        "topic": topic,
+        "exercises": exercises,
+        "user_answers": user_answers,
+    })
 
 
 
@@ -140,3 +146,13 @@ def buy_tariff(request, tariff_id):
         return redirect("profile")  # куда-то перенаправляем после отправки
 
     return render(request, "english/buy_tariff.html", {"tariff": tariff})
+
+
+def exercise_view(request, pk):
+    exercise = Exercise.objects.get(pk=pk)
+    questions = exercise.questions.all()
+
+    for q in questions:
+        q.rendered_text = render_question(q.text)
+
+    return render(request, "exercise.html", {"exercise": exercise, "questions": questions})

@@ -8,3 +8,6 @@ admin.site.register(Payment)
 admin.site.register(User)
 admin.site.register(Chapter)
 admin.site.register(Topic)
+admin.site.register(Exercise)
+admin.site.register(Question)
+

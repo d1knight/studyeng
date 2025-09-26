@@ -128,7 +128,7 @@ CKEDITOR_UPLOAD_PATH = "uploads/" # Redaktor arqalı júklengen fayllar media pa
 CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'full', # Yamasa 'basic', 'Custom' h.t.b. anıqlaw múmkin
-        'height': 600,
+        'height': 350,
         'width': '100%',
         'allowedContent': True,
     },
