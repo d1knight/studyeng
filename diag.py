@@ -34,3 +34,24 @@ file_path = "/mnt/data/er_diagram"
 dot.render(file_path, view=False)
 
 file_path + ".png"
+
+
+
+    # def render_with_inputs(self):
+        """Заменяет {{blank1}}, {{blank2}} на input-поля"""
+        text = self.text
+
+        def replace_placeholder(match):
+            blank = match.group(1)
+            answers = self.correct_answer.get(blank, [])
+            if isinstance(answers, list):
+                answers_str = "|".join(answers)
+            else:
+                answers_str = str(answers)
+            return (
+                f'<input type="text" class="answer-field form-control d-inline w-auto" '
+                f'name="{blank}_{self.id}" data-correct="{answers_str}">'
+            )
+
+        rendered = re.sub(r"\{\{(blank\d+)\}\}", replace_placeholder, text)
+        return mark_safe(rendered)

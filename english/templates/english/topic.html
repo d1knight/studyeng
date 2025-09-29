@@ -3,65 +3,54 @@
 <div class="container mt-4">
   <h1 class="mb-4 text-center">{{ topic.name }}</h1>
 
-  <!-- Навигация -->
-  <nav>
-    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-      <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab">
-        📘 Теория
-      </button>
-      <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab">
-        ✍️ Упражнения
-      </button>
-    </div>
-  </nav>
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#theory">📘 Теория</button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#exercises">✍️ Упражнения</button>
+    </li>
+  </ul>
 
-  <div class="tab-content mt-3" id="nav-tabContent">
-    <!-- Теория -->
-    <div class="tab-pane fade show active" id="nav-home" role="tabpanel">
+  <div class="tab-content mt-3">
+    <div class="tab-pane fade show active" id="theory">
       <div class="card shadow-sm">
         <div class="card-body">
-          <p class="fs-5">{{ topic.content|safe }}</p>
+          {{ topic.content|safe }}
         </div>
       </div>
     </div>
 
-    <!-- Упражнения -->
-    <div class="tab-pane fade" id="nav-profile" role="tabpanel">
-      <form id="exerciseForm" class="mt-2">
+    <div class="tab-pane fade" id="exercises">
+      <form id="exerciseForm" method="post">
         {% csrf_token %}
         {% for exercise in exercises %}
-        <div class="card shadow-sm mb-2 exercise-block">
-          <div class="card-header bg-primary text-white py-1 px-2">
+        <div class="card shadow-sm mb-2">
+          <div class="card-header bg-primary text-white">
             Упражнение {{ forloop.counter }}
           </div>
-          <div class="card-body py-2 px-2">
+          <div class="card-body">
+            <p>{{ exercise.instruction }} <small class="text-muted">(Вставьте только правильную форму слова в пропуски)</small></p>
             {% for q in exercise.questions.all %}
-            <div class="mb-1">
-              <label class="form-label small mb-0 text-muted">
-                Вопрос {{ forloop.counter }}
-              </label>
-              <div class="d-inline-block">
+              <div class="mb-2">
                 {{ q.render_with_inputs|safe }}
               </div>
-            </div>
             {% endfor %}
           </div>
         </div>
         {% endfor %}
-        <button type="submit" class="btn btn-success btn-sm w-100 mt-2">
-          Проверить ответы
-        </button>
+        <button type="submit" class="btn btn-success w-100 mt-2">Проверить</button>
       </form>
 
       <!-- Modal -->
-      <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+      <div class="modal fade" id="resultModal">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
-            <div class="modal-header bg-success text-white py-2">
+            <div class="modal-header bg-success text-white">
               <h5 class="modal-title">Результаты</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-3" id="resultsBody"></div>
+            <div class="modal-body" id="resultsBody"></div>
           </div>
         </div>
       </div>
@@ -70,50 +59,44 @@
 </div>
 
 <script>
-  document.getElementById("exerciseForm").addEventListener("submit", function (e) {
-    e.preventDefault();
+document.getElementById("exerciseForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  let formData = new FormData(this);
 
-    let exercises = document.querySelectorAll(".exercise-block");
-    let totalInputs = 0;
-    let correctCount = 0;
-    let resultsHtml = "";
-
-    exercises.forEach((exerciseBlock, index) => {
-      let inputs = exerciseBlock.querySelectorAll(".answer-field");
-      if (inputs.length === 0) return;
-
-      resultsHtml += `<div class="mb-2"><h6>Упражнение ${index + 1}</h6><ul class="list-group list-group-flush">`;
-
-      inputs.forEach((input) => {
-        totalInputs++;
-        let correctAnswers = input.dataset.correct
-          .split("|")
-          .map((a) => a.trim().toLowerCase());
-        let userAnswer = input.value.trim();
-
-        if (correctAnswers.includes(userAnswer.toLowerCase())) {
-          correctCount++;
-          resultsHtml += `<li class="list-group-item list-group-item-success py-1">
-              ✅ <b>${userAnswer || "—"}</b>
-            </li>`;
-        } else {
-          resultsHtml += `<li class="list-group-item list-group-item-danger py-1">
-              ❌ <s>${userAnswer || "—"}</s> → ✅ <b>${correctAnswers.join(" / ")}</b>
-            </li>`;
-        }
-      });
-
-      resultsHtml += "</ul></div>";
-    });
-
-    resultsHtml =
-      `<p class="mb-2">Правильных ответов: <b>${correctCount}</b> из <b>${totalInputs}</b></p>` +
-      resultsHtml;
-
-    document.getElementById("resultsBody").innerHTML = resultsHtml;
-
-    let modal = new bootstrap.Modal(document.getElementById("resultModal"));
-    modal.show();
+  let response = await fetch("", {
+    method: "POST",
+    body: formData,
+    headers: { "X-Requested-With": "XMLHttpRequest" }
   });
+  let data = await response.json();
+
+  let resultsHtml = "";
+  let correctCount = 0;
+  let total = Object.keys(data.results).length;
+
+  Object.keys(data.results).forEach((qid, idx) => {
+    let isCorrect = data.results[qid];
+    let userAnswer = Object.values(data.user_answers[qid] || {}).join(", ") || "—";
+    let correctAnswer = Object.values(data.correct_answers[qid] || {}).join(", ");
+
+    if (isCorrect) {
+      correctCount++;
+      resultsHtml += `
+        <div class="alert alert-success p-2 mb-2">
+          <b>Вопрос ${idx+1}:</b> ✅ Ваш ответ: <u>${userAnswer}</u>
+        </div>`;
+    } else {
+      resultsHtml += `
+        <div class="alert alert-danger p-2 mb-2">
+          <b>Вопрос ${idx+1}:</b> ❌ Ваш ответ: <s>${userAnswer}</s> → Правильный: <u>${correctAnswer}</u>
+        </div>`;
+    }
+  });
+
+  resultsHtml = `<p><b>Правильных ответов: ${correctCount} из ${total}</b></p>` + resultsHtml;
+  document.getElementById("resultsBody").innerHTML = resultsHtml;
+
+  new bootstrap.Modal(document.getElementById("resultModal")).show();
+});
 </script>
 {% endblock %}

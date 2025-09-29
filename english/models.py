@@ -179,6 +179,7 @@ class Topic(models.Model):
         return f"{self.chapter.name} - {self.name}"
 
 
+
 # ===================== Упражнения =====================
 class Exercise(models.Model):
     """Модель упражнения"""
@@ -204,6 +205,13 @@ class Exercise(models.Model):
         choices=EXERCISE_TYPES,
         verbose_name='Тип упражнения'
     )
+    instruction = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        verbose_name='Задание',
+        help_text="Например: Заполни пропуски правильной формой глагола."
+    )
 
     class Meta:
         db_table = 'exercises'
@@ -219,6 +227,7 @@ class Exercise(models.Model):
 class Question(models.Model):
     """Модель вопроса в упражнении"""
     id = models.BigAutoField(primary_key=True)
+
     exercise = models.ForeignKey(
         Exercise,
         on_delete=models.CASCADE,
@@ -260,23 +269,14 @@ class Question(models.Model):
 
     formatted_correct_answers.short_description = "Правильные ответы"
 
+
+
     def render_with_inputs(self):
-        """Заменяет {{blank1}}, {{blank2}} на input-поля"""
-        text = self.text
+        def replacer(match):
+            blank_name = match.group(1)  # например "blank1"
+            return f"<input type='text' name='q_{self.id}_{blank_name}' class='form-control d-inline w-auto' placeholder='...' />"
 
-        def replace_placeholder(match):
-            blank = match.group(1)
-            answers = self.correct_answer.get(blank, [])
-            if isinstance(answers, list):
-                answers_str = "|".join(answers)
-            else:
-                answers_str = str(answers)
-            return (
-                f'<input type="text" class="answer-field form-control d-inline w-auto" '
-                f'name="{blank}_{self.id}" data-correct="{answers_str}">'
-            )
-
-        rendered = re.sub(r"\{\{(blank\d+)\}\}", replace_placeholder, text)
+        rendered = re.sub(r"\{\{(blank\d*)\}\}", replacer, self.text)
         return mark_safe(rendered)
 
     def check_user_answer(self, user_answer: dict) -> bool:
@@ -290,7 +290,7 @@ class Question(models.Model):
             else str(user_answer.get(k, "")).strip().lower() == str(correct.get(k)).strip().lower()
             for k in correct.keys()
         )
-
+    
 
 # ===================== Прогресс и ответы =====================
 class UserChapter(models.Model):

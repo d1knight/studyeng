@@ -34,23 +34,56 @@ def course_detail(request, course_id):
     return render(request, 'english/course.html', context)
 
 
+
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
     exercises = Exercise.objects.filter(topic=topic).prefetch_related("questions")
 
-    user_answers = {}
-    if request.method == "POST":
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        results = {}
+        user_answers_dict = {}
+        correct_answers_dict = {}
+
         for q in Question.objects.filter(exercise__topic=topic):
-            user_answers[q.id] = request.POST.get(f"answer_{q.id}", "").strip()
+            # Извлечение blanks только для этого вопроса (с префиксом q_{id}_)
+            blanks = {
+                k.split('_')[-1]: v.strip()  # blank1: value
+                for k, v in request.POST.items()
+                if k.startswith(f"q_{q.id}_blank")
+            }
+            print(f"Question {q.id}: User blanks = {blanks}, Correct = {q.correct_answer}")  # Отладка (удалить в продакшене)
+
+            correct = q.correct_answer or {}
+            correct_answers_dict[q.id] = correct
+
+            is_correct = True
+            for blank_key, correct_vals in correct.items():
+                user_val = blanks.get(blank_key, "").strip().lower()
+                if isinstance(correct_vals, list):
+                    if user_val not in [a.strip().lower() for a in correct_vals]:
+                        is_correct = False
+                else:
+                    if user_val != str(correct_vals).strip().lower():
+                        is_correct = False
+
+            UserQuestion.objects.update_or_create(
+                user=request.user,
+                question=q,
+                defaults={"user_answer": blanks, "is_correct": is_correct}
+            )
+            user_answers_dict[q.id] = blanks
+            results[q.id] = is_correct
+
+        return JsonResponse({
+            "results": results,
+            "user_answers": user_answers_dict,
+            "correct_answers": correct_answers_dict,
+        })
 
     return render(request, "english/topic.html", {
         "topic": topic,
         "exercises": exercises,
-        "user_answers": user_answers,
     })
-
-
-
 
 def reg(request: HttpRequest):
     if request.method == 'POST':
