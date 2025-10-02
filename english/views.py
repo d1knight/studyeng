@@ -51,7 +51,11 @@ def topic_detail(request, topic_id):
                 for k, v in request.POST.items()
                 if k.startswith(f"q_{q.id}_blank")
             }
-            print(f"Question {q.id}: User blanks = {blanks}, Correct = {q.correct_answer}")  # Отладка (удалить в продакшене)
+            print(f"Question {q.id}: User blanks = {blanks}, Correct = {q.correct_answer}")  # Отладка
+
+            # Пропускаем, если нет ответа
+            if not any(blanks.values()):
+                continue
 
             correct = q.correct_answer or {}
             correct_answers_dict[q.id] = correct
@@ -59,19 +63,22 @@ def topic_detail(request, topic_id):
             is_correct = True
             for blank_key, correct_vals in correct.items():
                 user_val = blanks.get(blank_key, "").strip().lower()
-                if isinstance(correct_vals, list):
-                    if user_val not in [a.strip().lower() for a in correct_vals]:
-                        is_correct = False
+                if user_val:  # Проверяем только заполненные поля
+                    if isinstance(correct_vals, list):
+                        if user_val not in [a.strip().lower() for a in correct_vals]:
+                            is_correct = False
+                    else:
+                        if user_val != str(correct_vals).strip().lower():
+                            is_correct = False
                 else:
-                    if user_val != str(correct_vals).strip().lower():
-                        is_correct = False
+                    is_correct = False  # Пустой ответ считаем неверным
 
             UserQuestion.objects.update_or_create(
                 user=request.user,
                 question=q,
                 defaults={"user_answer": blanks, "is_correct": is_correct}
             )
-            user_answers_dict[q.id] = blanks
+            user_answers_dict[q.id] = {"answer": blanks, "exercise_id": q.exercise.id}
             results[q.id] = is_correct
 
         return JsonResponse({
@@ -84,6 +91,7 @@ def topic_detail(request, topic_id):
         "topic": topic,
         "exercises": exercises,
     })
+
 
 def reg(request: HttpRequest):
     if request.method == 'POST':

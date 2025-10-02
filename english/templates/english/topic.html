@@ -1,56 +1,88 @@
 {% extends 'english/base.html' %}
 {% block content %}
-<div class="container mt-4">
-  <h1 class="mb-4 text-center">{{ topic.name }}</h1>
+<div class="container mt-5">
+  <h1 class="mb-4 text-center display-5 fw-bold text-primary">{{ topic.name }}</h1>
 
-  <ul class="nav nav-tabs">
+  <ul class="nav nav-tabs nav-justified mb-4" style="background-color: #e9ecef; border-radius: 15px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);">
     <li class="nav-item">
-      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#theory">📘 Теория</button>
+      <button class="nav-link active text-success" data-bs-toggle="tab" data-bs-target="#theory">
+        <span class="me-2">📘</span> Теория
+      </button>
     </li>
     <li class="nav-item">
-      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#exercises">✍️ Упражнения</button>
+      <button class="nav-link text-primary" data-bs-toggle="tab" data-bs-target="#exercises">
+        <span class="me-2">✍️</span> Упражнения
+      </button>
     </li>
   </ul>
 
-  <div class="tab-content mt-3">
+  <div class="tab-content">
     <div class="tab-pane fade show active" id="theory">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          {{ topic.content|safe }}
+      <div class="card border-0 shadow-sm rounded-15">
+        <div class="card-body p-4">
+          {% if topic.video_path %}
+            <div class="mb-4">
+              <h5 class="mb-3 text-secondary fw-bold">Видео-урок</h5>
+              {% if topic.video_path|slice:":23" == "https://www.youtube.com" %}
+                <div class="ratio ratio-16x9">
+                  <iframe src="https://www.youtube.com/embed/{{ topic.video_path|slice:"32:" }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-15"></iframe>
+                </div>
+              {% else %}
+                <div class="ratio ratio-16x9">
+                  <video controls class="rounded-15">
+                    <source src="{{ topic.video_path|default:''|add:MEDIA_URL }}" type="video/mp4">
+                    Ваш браузер не поддерживает воспроизведение видео.
+                  </video>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+          <div class="mt-4">
+            {{ topic.content|safe }}
+          </div>
         </div>
       </div>
     </div>
 
     <div class="tab-pane fade" id="exercises">
-      <form id="exerciseForm" method="post">
-        {% csrf_token %}
-        {% for exercise in exercises %}
-        <div class="card shadow-sm mb-2">
-          <div class="card-header bg-primary text-white">
-            Упражнение {{ forloop.counter }}
-          </div>
-          <div class="card-body">
-            <p>{{ exercise.instruction }} <small class="text-muted">(Вставьте только правильную форму слова в пропуски)</small></p>
-            {% for q in exercise.questions.all %}
-              <div class="mb-2">
-                {{ q.render_with_inputs|safe }}
-              </div>
-            {% endfor %}
-          </div>
+      <div class="card border-0 shadow-sm rounded-15">
+        <div class="card-body p-3"> <!-- Уменьшен p-4 до p-3 для меньшего внутреннего отступа -->
+          <form id="exerciseForm" method="post">
+            {% csrf_token %}
+{% for exercise in exercises %}
+<div class="card mb-4 border-0 shadow-sm rounded-15">
+  <div class="card-header bg-primary text-white rounded-top-15 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapse-{{ exercise.id }}" aria-expanded="false" aria-controls="collapse-{{ exercise.id }}">
+    <h6 class="mb-0 fw-bold">Упражнение {{ forloop.counter }}</h6>
+    <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ exercise.id }}" aria-expanded="false" aria-controls="collapse-{{ exercise.id }}">
+      <i class="bi bi-chevron-down"></i>
+    </button>
+  </div>
+  <div class="collapse" id="collapse-{{ exercise.id }}">
+    <div class="card-body p-2">
+      <p class="mb-2 text-muted">{{ exercise.instruction }} <small>(Вставьте только правильную форму слова в пропуски)</small></p>
+      {% for q in exercise.questions.all %}
+        <div class="mb-1">
+          {{ q.render_with_inputs|safe }}
         </div>
-        {% endfor %}
-        <button type="submit" class="btn btn-success w-100 mt-2">Проверить</button>
-      </form>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endfor %}
+            <button type="submit" class="btn btn-success w-100 py-2 mt-3 rounded-30">Проверить</button>
+          </form>
 
-      <!-- Modal -->
-      <div class="modal fade" id="resultModal">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-              <h5 class="modal-title">Результаты</h5>
-              <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          <!-- Modal -->
+          <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content rounded-15">
+                <div class="modal-header bg-success text-white rounded-top-15">
+                  <h5 class="modal-title fw-bold" id="resultModalLabel">Результаты</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="resultsBody"></div>
+              </div>
             </div>
-            <div class="modal-body" id="resultsBody"></div>
           </div>
         </div>
       </div>
@@ -71,32 +103,67 @@ document.getElementById("exerciseForm").addEventListener("submit", async functio
   let data = await response.json();
 
   let resultsHtml = "";
-  let correctCount = 0;
-  let total = Object.keys(data.results).length;
+  let exerciseResults = {};
+  let totalExercises = 0;
+  let checkedQuestions = 0;
 
-  Object.keys(data.results).forEach((qid, idx) => {
+  Object.keys(data.results).forEach(qid => {
+    let exerciseId = data.user_answers[qid].exercise_id;
+    if (!exerciseResults[exerciseId]) {
+      exerciseResults[exerciseId] = { correct: 0, totalChecked: 0, details: [] };
+    }
     let isCorrect = data.results[qid];
-    let userAnswer = Object.values(data.user_answers[qid] || {}).join(", ") || "—";
+    let userAnswer = Object.values(data.user_answers[qid].answer || {}).join(", ") || "—";
     let correctAnswer = Object.values(data.correct_answers[qid] || {}).join(", ");
-
-    if (isCorrect) {
-      correctCount++;
-      resultsHtml += `
-        <div class="alert alert-success p-2 mb-2">
-          <b>Вопрос ${idx+1}:</b> ✅ Ваш ответ: <u>${userAnswer}</u>
-        </div>`;
-    } else {
-      resultsHtml += `
-        <div class="alert alert-danger p-2 mb-2">
-          <b>Вопрос ${idx+1}:</b> ❌ Ваш ответ: <s>${userAnswer}</s> → Правильный: <u>${correctAnswer}</u>
-        </div>`;
+    if (userAnswer !== "—" && userAnswer.trim() !== "") {
+      exerciseResults[exerciseId].totalChecked += 1;
+      if (isCorrect) exerciseResults[exerciseId].correct += 1;
+      exerciseResults[exerciseId].details.push({ qid, isCorrect, userAnswer, correctAnswer });
     }
   });
 
-  resultsHtml = `<p><b>Правильных ответов: ${correctCount} из ${total}</b></p>` + resultsHtml;
-  document.getElementById("resultsBody").innerHTML = resultsHtml;
+  totalExercises = Object.keys(exerciseResults).length;
+  checkedQuestions = Object.values(exerciseResults).reduce((sum, r) => sum + r.totalChecked, 0);
 
-  new bootstrap.Modal(document.getElementById("resultModal")).show();
+  Object.keys(exerciseResults).forEach(exerciseId => {
+    let result = exerciseResults[exerciseId];
+    let exerciseNumber = Object.keys(exerciseResults).indexOf(exerciseId) + 1;
+    if (result.totalChecked > 0) {
+      resultsHtml += `<h5 class="mt-4 mb-3 text-primary fw-bold">Упражнение ${exerciseNumber}</h5>`;
+      result.details.forEach((item, idx) => {
+        if (item.isCorrect) {
+          resultsHtml += `
+            <div class="alert alert-success p-2 mb-2 rounded-15">
+              <b class="fw-bold">Вопрос ${idx + 1}:</b> ✅ Ваш ответ: <u>${item.userAnswer}</u>
+            </div>`;
+        } else {
+          resultsHtml += `
+            <div class="alert alert-danger p-2 mb-2 rounded-15">
+              <b class="fw-bold">Вопрос ${idx + 1}:</b> ❌ Ваш ответ: <s>${item.userAnswer}</s> → Правильный: <u>${item.correctAnswer}</u>
+            </div>`;
+        }
+      });
+    }
+  });
+
+  resultsHtml = `<p class="fw-bold text-dark mb-3">Проверено вопросов: ${checkedQuestions}</p>` + resultsHtml;
+  const modalBody = document.getElementById("resultsBody");
+  modalBody.innerHTML = resultsHtml;
+
+  const modal = document.getElementById("resultModal");
+  const bootstrapModal = new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false });
+  if (checkedQuestions > 0 && !modal.classList.contains('show')) {
+    bootstrapModal.show();
+  }
 });
 </script>
+<style>
+  .host-bincmiainjofjnhchmcalkanjebghoen {
+    display: none !important; /* Полностью убирает элемент */
+    /* Или минимизируем: */
+    /* width: 0 !important; */
+    /* height: 0 !important; */
+    /* opacity: 0 !important; */
+  }
+</style>
 {% endblock %}
