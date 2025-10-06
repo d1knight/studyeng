@@ -10,6 +10,8 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 import random
 from django.contrib import messages
+from types import SimpleNamespace
+
 
 
 def main_page(request):
@@ -22,44 +24,59 @@ def main_page(request):
     }
     return render(request, 'english/index.html', context)
 
-@login_required
+
 def course_detail(request, course_id):
     try:
         course = get_object_or_404(Course, id=course_id)
         chapters = course.chapters.all().order_by('order_index').prefetch_related('topics')
 
         chapter_user_chapters = []
-        if request.user.is_authenticated:
-            for chapter in chapters:
-                user_chapter, created = UserChapter.objects.get_or_create(user=request.user, chapter=chapter)
+        user = request.user if request.user.is_authenticated else None
+
+        # проверяем, есть ли у залогиненного пользователя оплаченный тариф для этого курса
+        has_paid_access = False
+        if user:
+            has_paid_access = user.payments.filter(tariff__course=course, status="paid").exists()
+
+        for chapter in chapters:
+            if user:
+                user_chapter, created = UserChapter.objects.get_or_create(user=user, chapter=chapter)
+                # по умолчанию открыта только первая глава
                 if created or not hasattr(user_chapter, 'is_open'):
-                    user_chapter.is_open = chapter.order_index == 1  # Открываем только первую главу
+                    user_chapter.is_open = chapter.order_index == 1
                     user_chapter.save()
 
+                # если предыдущая глава пройдена >= 80 — открыть текущую
                 if chapter.order_index > 1:
                     prev_chapter = Chapter.objects.filter(course=course, order_index=chapter.order_index - 1).first()
                     if prev_chapter:
-                        prev_user_chapter = request.user.user_chapters.filter(chapter=prev_chapter).first()
+                        prev_user_chapter = user.user_chapters.filter(chapter=prev_chapter).first()
                         if prev_user_chapter and prev_user_chapter.completion_score is not None and prev_user_chapter.completion_score >= 80 and not user_chapter.is_open:
                             user_chapter.is_open = True
                             user_chapter.save()
-                            user_chapter.refresh_from_db()
+                curr_user_chapter = user_chapter
+            else:
+                # для анонима не создаём записи в БД — но в шаблоне нам удобнее иметь объект с нужными атрибутами
+                curr_user_chapter = SimpleNamespace(is_open=False, completion_score=None)
 
-                chapter_user_chapters.append((chapter, user_chapter))
+            # Проверяем доступность тем в главе
+            topics = chapter.topics.all().order_by('order_index')
+            for topic in topics:
+                # публичные темы всегда доступны
+                if topic.is_public:
+                    topic.is_accessible = True
+                else:
+                    # непубличные: доступны только если глава открыта и пользователь авторизован + (первая тема или оплачен тариф)
+                    topic.is_accessible = bool(
+                        curr_user_chapter.is_open and
+                        user and
+                        (topic.order_index == 1 or has_paid_access)
+                    )
 
-            # Проверяем доступность тем
-            for chapter, user_chapter in chapter_user_chapters:
-                topics = chapter.topics.all().order_by('order_index')
-                for topic in topics:
-                    topic.is_accessible = (user_chapter.is_open and 
-                                          (topic.order_index == 1 or 
-                                           request.user.payments.filter(tariff__course=course, status="paid").exists()))
+            # Контрольная работа доступна только если глава открыта и тариф оплачен
+            chapter.control_test_accessible = bool(curr_user_chapter.is_open and user and has_paid_access)
 
-            # Проверяем доступность контрольной работы
-            for chapter, user_chapter in chapter_user_chapters:
-                chapter.control_test_accessible = (chapter.order_index == 1 or 
-                                                 (user_chapter.is_open and 
-                                                  request.user.payments.filter(tariff__course=course, status="paid").exists()))
+            chapter_user_chapters.append((chapter, curr_user_chapter))
 
         context = {
             'course': course,
@@ -70,9 +87,26 @@ def course_detail(request, course_id):
         return render(request, 'english/course.html', context)
     except Exception as e:
         return HttpResponse(f"Error: {str(e)}", status=500)
+    
 
 def topic_detail(request, topic_id):
     topic = get_object_or_404(Topic, id=topic_id)
+    user = request.user if request.user.is_authenticated else None
+
+    # Проверка доступа: публичная — всегда, иначе — только если пользователь авторизован,
+    # глава открыта и (первая тема или оплачен тариф)
+    allowed = topic.is_public
+    if not allowed and user:
+        user_chapter = user.user_chapters.filter(chapter=topic.chapter).first()
+        has_paid = user.payments.filter(tariff__course=topic.chapter.course, status="paid").exists()
+        if user_chapter and user_chapter.is_open and (topic.order_index == 1 or has_paid):
+            allowed = True
+
+    if not allowed:
+        # можно перенаправить на страницу курса с сообщением
+        messages.info(request, "Тема недоступна. Авторизуйтесь и/или купите тариф для доступа.")
+        return redirect('course_detail', course_id=topic.chapter.course.id)
+
     exercises = Exercise.objects.filter(topic=topic).prefetch_related("questions")
 
     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -106,11 +140,14 @@ def topic_detail(request, topic_id):
                 else:
                     is_correct = False
 
-            UserQuestion.objects.update_or_create(
-                user=request.user,
-                question=q,
-                defaults={"user_answer": blanks, "is_correct": is_correct}
-            )
+            # Сохраняем ответ только если пользователь авторизован
+            if request.user.is_authenticated:
+                UserQuestion.objects.update_or_create(
+                    user=request.user,
+                    question=q,
+                    defaults={"user_answer": blanks, "is_correct": is_correct}
+                )
+
             user_answers_dict[q.id] = {"answer": blanks, "exercise_id": q.exercise.id}
             results[q.id] = is_correct
 
@@ -124,6 +161,7 @@ def topic_detail(request, topic_id):
         "topic": topic,
         "exercises": exercises,
     })
+
 
 def reg(request: HttpRequest):
     if request.method == 'POST':
@@ -188,6 +226,7 @@ def logout_view(request):
     logout(request)
     return redirect('/')
 
+#нужно вывести сообщение что нужно авторизироваться чтобы купить тариф 
 @login_required
 def buy_tariff(request, tariff_id):
     tariff = get_object_or_404(CourseTariff, id=tariff_id)
@@ -219,12 +258,15 @@ def exercise_view(request, pk):
 
     return render(request, "exercise.html", {"exercise": exercise, "questions": questions})
 
+
 @login_required
 def control_test(request, chapter_id):
+    """Контрольная работа — доступ только авторизованным пользователям"""
     chapter = get_object_or_404(Chapter, id=chapter_id)
     exercises = Exercise.objects.filter(topic__chapter=chapter).prefetch_related('questions')
     all_questions = Question.objects.filter(exercise__in=exercises).distinct()
 
+    # --- POST: проверка ответов ---
     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
         results = {}
         user_answers_dict = {}
@@ -233,18 +275,22 @@ def control_test(request, chapter_id):
         selected_questions = request.session.get('control_questions', [])
         for q_id in selected_questions:
             q = get_object_or_404(Question, id=q_id)
+
+            # Получаем все ответы пользователя по бланкам
             blanks = {
                 k.split('_')[-1]: v.strip()
                 for k, v in request.POST.items()
                 if k.startswith(f"q_{q.id}_blank")
             }
 
+            # Пропускаем пустые
             if not any(blanks.values()):
                 continue
 
             correct = q.correct_answer or {}
             correct_answers_dict[q_id] = correct
 
+            # Проверяем правильность
             is_correct = True
             for blank_key, correct_vals in correct.items():
                 user_val = blanks.get(blank_key, "").strip().lower()
@@ -261,24 +307,34 @@ def control_test(request, chapter_id):
             results[q_id] = is_correct
             user_answers_dict[q_id] = {"answer": blanks, "exercise_id": q.exercise.id}
 
+        # --- Подсчёт результата ---
         total_questions = len(selected_questions)
         correct_count = sum(1 for r in results.values() if r)
         score = (correct_count / total_questions * 100) if total_questions > 0 else 0
 
-        user_chapter = request.user.user_chapters.filter(chapter=chapter).first()
+        # --- Обновляем статус главы ---
+        user_chapter, _ = UserChapter.objects.get_or_create(user=request.user, chapter=chapter)
+        user_chapter.completion_score = score
+        user_chapter.save()
+
         next_chapter_id = None
-        if user_chapter:
-            user_chapter.completion_score = score
+        if score >= 80:
+            user_chapter.is_open = True
             user_chapter.save()
-            if score >= 80:
-                user_chapter.is_open = True
-                user_chapter.save()
-                next_chapter = Chapter.objects.filter(course=chapter.course, order_index=chapter.order_index + 1).first()
-                if next_chapter:
-                    next_user_chapter, _ = UserChapter.objects.get_or_create(user=request.user, chapter=next_chapter)
-                    next_user_chapter.is_open = True
-                    next_user_chapter.save()
-                    next_chapter_id = next_chapter.id
+
+            next_chapter = Chapter.objects.filter(
+                course=chapter.course,
+                order_index=chapter.order_index + 1
+            ).first()
+
+            if next_chapter:
+                next_user_chapter, _ = UserChapter.objects.get_or_create(
+                    user=request.user,
+                    chapter=next_chapter
+                )
+                next_user_chapter.is_open = True
+                next_user_chapter.save()
+                next_chapter_id = next_chapter.id
 
         return JsonResponse({
             "results": results,
@@ -288,9 +344,11 @@ def control_test(request, chapter_id):
             "next_chapter_id": next_chapter_id,
         })
 
+    # --- GET: формируем тест ---
     selected_questions = random.sample(list(all_questions), min(20, all_questions.count()))
     request.session['control_questions'] = [q.id for q in selected_questions]
 
+    # Рендерим вопросы
     for q in selected_questions:
         q.rendered_text = q.render_with_inputs()
 

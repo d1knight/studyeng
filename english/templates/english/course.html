@@ -1,15 +1,21 @@
 {% extends 'english/base.html' %}
 
 {% block content %}
-    <h1>{{ course.name }}</h1>
-    <p>{{ course.description }}</p>
+<div class="container my-5">
+    <h1 class="fw-bold mb-3">{{ course.name }}</h1>
+    <p class="text-muted mb-4">{{ course.description }}</p>
 
     <div class="accordion" id="accordionExample">
         {% for chapter, user_chapter in chapter_user_chapters %}
-            <div class="accordion-item {% if user_chapter and not user_chapter.is_open %}disabled{% endif %}">
+            <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 {% if user_chapter and not user_chapter.is_open %}opacity-75{% endif %}">
                 <h2 class="accordion-header">
-                    <button class="accordion-button collapsed fw-bold {% if user_chapter and not user_chapter.is_open %}disabled{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ chapter.id }}" aria-expanded="false" aria-controls="collapseOne-{{ chapter.id }}">
-                        Глава-{{ chapter.order_index }}. {{ chapter.name }} 
+                    <button class="accordion-button collapsed fw-semibold {% if user_chapter and not user_chapter.is_open %}bg-light text-muted{% endif %}"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapse-{{ chapter.id }}"
+                            aria-expanded="false"
+                            aria-controls="collapse-{{ chapter.id }}">
+                        <span class="me-2">Глава {{ chapter.order_index }}:</span> {{ chapter.name }}
                         {% if user_chapter %}
                             {% if user_chapter.is_open %}
                                 <i class="bi bi-unlock ms-2 text-success"></i>
@@ -19,30 +25,65 @@
                         {% endif %}
                     </button>
                 </h2>
-                <div id="collapseOne-{{ chapter.id }}" class="accordion-collapse collapse {% if user_chapter and not user_chapter.is_open %}disabled{% endif %}" data-bs-parent="#accordionExample">
-                    <div class="accordion-body">
+
+                <div id="collapse-{{ chapter.id }}"
+                     class="accordion-collapse collapse {% if user_chapter and not user_chapter.is_open %}disabled{% endif %}"
+                     data-bs-parent="#accordionExample">
+                    <div class="accordion-body bg-white rounded-bottom-3">
+
+                        <!-- Список тем -->
                         <ul class="list-group list-group-flush">
                             {% for topic in chapter.topics.all|dictsort:"order_index" %}
-                                <li class="list-group-item">
-                                    {{ topic.order_index }}. {{ topic.name }}
-                                    {% if not topic.is_accessible %}
-                                        <span class="text-danger ms-2">🔒 Купите тариф для доступа</span>
-                                    {% else %}
-                                        <a href="{% url 'topic' topic.id %}" class="custom-btn-primary ms-2">Открыть</a>
+                                <li class="list-group-item d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <span class="fw-semibold">{{ topic.order_index }}.</span>
+                                        {% if topic.is_public %}
+                                            <!-- Публичная тема — активная ссылка -->
+                                            <a href="{% url 'topic' topic.id %}" class="text-decoration-none fw-semibold ms-1">
+                                                {{ topic.name }}
+                                            </a>
+                                        {% elif topic.is_accessible %}
+                                            <!-- Доступная по тарифу -->
+                                            <a href="{% url 'topic' topic.id %}" class="text-decoration-none fw-semibold ms-1">
+                                                {{ topic.name }}
+                                            </a>
+                                        {% else %}
+                                            <!-- Недоступная тема — просто текст -->
+                                            <span class="text-muted ms-1">{{ topic.name }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if not topic.is_public and not topic.is_accessible %}
+                                        <span class="badge bg-light text-danger border ms-2">🔒 Закрыто</span>
                                     {% endif %}
                                 </li>
                             {% endfor %}
                         </ul>
-                        {% if chapter.control_test_accessible %}
-                            <div class="mt-3">
-                                <a href="{% url 'control_test' chapter.id %}" class="custom-btn-success">Пройти контрольную работу</a>
-                            </div>
-                        {% else %}
-                            <p class="text-muted mt-4">Контрольная работа доступна после покупки тарифа.</p>
-                        {% endif %}
+
+                        <!-- Контрольная работа -->
+                        <div class="mt-4">
+                            {% if user.is_authenticated %}
+                                {% if chapter.control_test_accessible %}
+                                    <a href="{% url 'control_test' chapter.id %}" class="btn btn-success px-4">
+                                        Пройти контрольную работу
+                                    </a>
+                                {% else %}
+                                    <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
+                                        <i class="bi bi-lock me-2"></i>
+                                        Контрольная работа будет доступна после покупки тарифа.
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    Авторизуйтесь, чтобы пройти контрольную работу.
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
+</div>
 {% endblock content %}
