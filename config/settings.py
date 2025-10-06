@@ -134,3 +134,5 @@ CKEDITOR_CONFIGS = {
         'allowedContent': True,
     },
 }
+
+LOGIN_URL = '/accounts/login/'  # Соответствует пути к reg

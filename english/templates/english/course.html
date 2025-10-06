@@ -1,35 +1,48 @@
 {% extends 'english/base.html' %}
 
 {% block content %}
-        <h1>{{course.name}}</h1>
-        <p>{{course.description}}</p>
+    <h1>{{ course.name }}</h1>
+    <p>{{ course.description }}</p>
 
-        <ul>
-          
-          
-        </ul>
-
-<div class="accordion" id="accordionExample">
-  {% for chapter in course.chapters.all %}
-  <div class="accordion-item">
-    <h2 class="accordion-header">
-      <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{chapter.id}}" aria-expanded="false" aria-controls="collapseOne-{{chapter.id}}">
-        Chapter-{{chapter.order_index}}. {{chapter.name}}
-      </button>
-    </h2>
-    <div id="collapseOne-{{chapter.id}}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-      <div class="accordion-body">
-        <ul class="list-group list-group-flush">
-          {% for topic in chapter.topics.all %}
-          <li class="list-group-item"><a href="{% url 'topic' topic.id %}">{{ topic.order_index }}. {{ topic.name }}</a></li>
-          {% endfor %}
-        </ul>
-      </div>
+    <div class="accordion" id="accordionExample">
+        {% for chapter, user_chapter in chapter_user_chapters %}
+            <div class="accordion-item {% if user_chapter and not user_chapter.is_open %}disabled{% endif %}">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-bold {% if user_chapter and not user_chapter.is_open %}disabled{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-{{ chapter.id }}" aria-expanded="false" aria-controls="collapseOne-{{ chapter.id }}">
+                        Глава-{{ chapter.order_index }}. {{ chapter.name }} 
+                        {% if user_chapter %}
+                            {% if user_chapter.is_open %}
+                                <i class="bi bi-unlock ms-2 text-success"></i>
+                            {% else %}
+                                <i class="bi bi-lock ms-2 text-danger"></i>
+                            {% endif %}
+                        {% endif %}
+                    </button>
+                </h2>
+                <div id="collapseOne-{{ chapter.id }}" class="accordion-collapse collapse {% if user_chapter and not user_chapter.is_open %}disabled{% endif %}" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <ul class="list-group list-group-flush">
+                            {% for topic in chapter.topics.all|dictsort:"order_index" %}
+                                <li class="list-group-item">
+                                    {{ topic.order_index }}. {{ topic.name }}
+                                    {% if not topic.is_accessible %}
+                                        <span class="text-danger ms-2">🔒 Купите тариф для доступа</span>
+                                    {% else %}
+                                        <a href="{% url 'topic' topic.id %}" class="custom-btn-primary ms-2">Открыть</a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        {% if chapter.control_test_accessible %}
+                            <div class="mt-3">
+                                <a href="{% url 'control_test' chapter.id %}" class="custom-btn-success">Пройти контрольную работу</a>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mt-4">Контрольная работа доступна после покупки тарифа.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
     </div>
-  </div>
-{% endfor %}
-</div>
-        
-
-
 {% endblock content %}

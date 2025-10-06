@@ -1,4 +1,4 @@
-{% extends 'english/base.html'%} {% block content%}
+{% extends 'english/base.html' %} {% block content %}
 
 <!-- Hero -->
 <section class="py-5">
@@ -105,11 +105,14 @@
 
           <ul class="list-unstyled flex-grow-1">
             {% for tarif in course.tariffs.all %}
-            <li class="bi bi-check-lg">{{ tarif.name }} - {{tarif.price}}</li>
+            <li class="bi bi-check-lg">
+              {{ tarif.name }} - {{ tarif.price }} сум
+              <a href="{% url 'buy_tariff' tarif.id %}" class="btn btn-success btn-sm ms-2">Купить</a>
+            </li>
             {% endfor %}
           </ul>
 
-          <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">Перейти</a>
+          <a href="{% url 'course_detail' course.id %}" class="btn btn-primary mt-3">Перейти</a>
         </div>
       </div>
     </div>
@@ -118,7 +121,7 @@
 </section>
 
 <!-- Отзывы -->
-<section class="py-5 bg-light">
+<section class="py-5 bg-light" id="comments">
   <div class="text-center mb-5">
     <h2 class="fw-bold">Отзывы учеников</h2>
   </div>
@@ -215,4 +218,4 @@
   </div>
 </section>
 
-{% endblock content%}
+{% endblock content %}

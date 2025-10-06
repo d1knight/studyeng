@@ -5,97 +5,158 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>StudyEng</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/logo.png' %}" />
-
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{% static 'img/logo.png' %}"
+    />
     <style>
       body {
-        background-color: #f8f9fa;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #ffffff;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         color: #333;
       }
       .navbar {
-        background: linear-gradient(90deg, #ffffff 0%, #e9ecef 100%);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        background-color: #ffffff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
       }
       .navbar:hover {
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
       }
       .navbar-brand {
         font-size: 1.5rem;
-        transition: color 0.3s ease;
+        color: #2c3e50;
+        transition: color 0.2s ease;
       }
       .navbar-brand:hover {
-        color: #007bff !important;
+        color: #007bff;
       }
       .nav-link {
         color: #495057;
-        transition: color 0.3s ease, transform 0.2s ease;
+        transition: color 0.2s ease;
         padding: 0.5rem 1rem;
-        border-radius: 5px;
       }
       .nav-link:hover,
       .nav-link.active {
         color: #007bff;
-        background-color: rgba(0, 123, 255, 0.1);
-        /* transform: scale(1.05); */
+        background-color: transparent;
       }
       .dropdown-menu {
-        border: none;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        border-radius: 10px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        border-radius: 6px;
         background: #ffffff;
       }
       .dropdown-item {
-        transition: background-color 0.3s ease;
+        transition: color 0.2s ease;
       }
       .dropdown-item:hover {
-        background-color: #e9ecef;
+        background-color: #f8f9fa;
         color: #007bff;
       }
       .btn-outline-primary {
         border-color: #007bff;
         color: #007bff;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
       }
       .btn-outline-primary:hover {
         background-color: #007bff;
         color: #ffffff;
-        /* transform: translateY(-2px); */
       }
       .card {
-        border-radius: 15px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+        transition: box-shadow 0.2s ease;
       }
       .card:hover {
-        /* transform: translateY(-8px); */
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
       }
-      .btn-success,
-      .btn-primary {
-        border-radius: 30px;
-        padding: 10px 20px;
-        transition: all 0.3s ease;
+
+      /* Минималистичные стили для форм и кнопок */
+      .form-label {
+        font-weight: 500;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
       }
-      .btn-success:hover,
-      .btn-primary:hover {
-        /* transform: translateY(-2px); */
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      .form-control {
+        padding: 0.6rem 0.9rem; /* Уменьшен паддинг */
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        font-size: 0.95rem;
+        transition: border-color 0.2s ease;
       }
-      h1,
-      h5 {
-        font-weight: 700;
+      .form-control:focus {
+        border-color: #007bff;
+        box-shadow: none;
+        outline: none;
+      }
+      .form-control:invalid {
+        border-color: #dc3545;
+      }
+      .form-control:valid {
+        border-color: #198754;
+      }
+      .invalid-feedback {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        color: #dc3545;
+      }
+
+      .custom-btn-primary,
+      .custom-btn-success {
+        padding: 6px 16px; /* Минималистичный паддинг */
+        border: 1px solid transparent;
+        border-radius: 6px; /* Уменьшен радиус */
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+
+      .custom-btn-primary {
+        background-color: #007bff;
+        color: #fff;
+      }
+      .custom-btn-primary:hover {
+        background-color: #0056b3;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .custom-btn-success {
+        background-color: #28a745;
+        color: #fff;
+      }
+      .custom-btn-success:hover {
+        background-color: #218838;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      h1, h2, h5 {
+        font-weight: 600;
         color: #2c3e50;
       }
       footer {
-        background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%);
+        background-color: #2c3e50;
         color: #ffffff;
-        padding: 20px 0;
-        border-top-left-radius: 15px;
-        border-top-right-radius: 15px;
-        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        padding: 15px 0;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.05);
       }
       footer p {
         margin-bottom: 0;
@@ -104,15 +165,24 @@
       @media (max-width: 768px) {
         .navbar-nav {
           background-color: #ffffff;
-          border-radius: 10px;
-          padding: 10px;
-          margin-top: 10px;
+          border-radius: 6px;
+          padding: 8px;
+          margin-top: 8px;
         }
         .navbar-brand {
           font-size: 1.2rem;
         }
         .nav-link {
-          padding: 0.3rem 0.5rem;
+          padding: 0.3rem 0.7rem;
+        }
+        .form-control {
+          font-size: 0.9rem;
+          padding: 0.5rem 0.8rem;
+        }
+        .custom-btn-primary,
+        .custom-btn-success {
+          padding: 5px 12px;
+          font-size: 0.9rem;
         }
       }
     </style>
@@ -120,7 +190,7 @@
   <body>
     <nav class="navbar navbar-expand-lg bg-white sticky-top">
       <div class="container">
-        <a class="navbar-brand fw-bold text-primary" href="/">StudyEng</a>
+        <a class="navbar-brand fw-bold" href="{% url 'home' %}">StudyEng</a>
         <button
           class="navbar-toggler"
           type="button"
@@ -132,24 +202,26 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" href="/">Главная</a>
+              <a class="nav-link active" href="{% url 'home' %}">Главная</a>
             </li>
             <li class="nav-item"><a class="nav-link" href="/#">О нас</a></li>
             <li class="nav-item">
               <a class="nav-link" href="/#my-div">Отзывы</a>
             </li>
             <li class="nav-item"><a class="nav-link" href="/#">FAQ</a></li>
-            <li class="nav-item">
-              <a class="nav-link" href="/#tarifff">Тарифы</a>
-            </li>
+            <li class="nav-item"><a class="nav-link" href="/#tarifff">Тарифы</a></li>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Курсы</a>
-              <ul class="dropdown-menu">
-                {% for course in courses %}
-                <li>
-                  <a class="dropdown-item" href="/courses/{{ course.id }}">{{ course.name }}</a>
-                </li>
-                {% endfor %}
+              <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Курсы
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
+                {% if courses %}
+                  {% for course in courses %}
+                    <li><a class="dropdown-item" href="{% url 'course_detail' course.id %}">{{ course.name }}</a></li>
+                  {% endfor %}
+                {% else %}
+                  <li><a class="dropdown-item disabled">Курсы не загружены</a></li>
+                {% endif %}
               </ul>
             </li>
           </ul>
@@ -167,24 +239,33 @@
               >
                 <i class="bi bi-person-circle me-1"></i> Профиль
               </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+              <ul
+                class="dropdown-menu dropdown-menu-end"
+                aria-labelledby="profileDropdown"
+              >
                 <li>
-                  <a class="dropdown-item disabled"><i class="bi bi-telephone me-2"></i> 📞 {{ user.phone_number }}</a>
+                  <a class="dropdown-item disabled"
+                    ><i class="bi bi-telephone me-2"></i> 📞 {{ user.phone_number }}</a
+                  >
                 </li>
                 <li>
-                  <a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-book me-2"></i> 📚 Мои курсы</a>
+                  <a class="dropdown-item" href="{% url 'profile' %}"
+                    ><i class="bi bi-book me-2"></i> 📚 Мои курсы</a
+                  >
                 </li>
                 <li>
                   <hr class="dropdown-divider" />
                 </li>
                 <li>
-                  <a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> 🚪 Выйти</a>
+                  <a class="dropdown-item text-danger" href="{% url 'logout' %}"
+                    ><i class="bi bi-box-arrow-right me-2"></i> 🚪 Выйти</a
+                  >
                 </li>
               </ul>
             </li>
             {% else %}
             <li class="nav-item">
-              <a class="btn btn-outline-primary ms-auto" href="{% url 'login' %}">
+              <a class="btn-outline-primary ms-auto" href="{% url 'login' %}">
                 <i class="bi bi-box-arrow-in-right me-1"></i> Войти
               </a>
             </li>
@@ -194,9 +275,9 @@
       </div>
     </nav>
 
-    <main class="container py-5">{% block content %}{% endblock %}</main>
+    <main class="container py-4">{% block content %}{% endblock %}</main>
 
-    <footer class="bg-dark text-light text-center py-3 mt-5">
+    <footer class="bg-dark text-light text-center py-2 mt-4">
       <p class="mb-0">&copy; 2025 StudyEng. Все права защищены.</p>
     </footer>
 

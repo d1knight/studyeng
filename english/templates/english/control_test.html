@@ -1,0 +1,95 @@
+{% extends 'english/base.html' %}
+
+{% block content %}
+    <h1>Контрольная работа: {{ chapter.name }}</h1>
+
+    <form method="post" action="" enctype="multipart/form-data" id="controlForm">
+        {% csrf_token %}
+        {% for question in questions %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Вопрос</h5>
+                    <p class="card-text">{{ question.rendered_text|safe }}</p>
+                </div>
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary">Отправить ответы</button>
+    </form>
+
+    <!-- Модальное окно для результата -->
+    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="resultModalLabel">Результат контрольной работы</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Общий результат:</h6>
+                    <p>Ваш процент: <strong><span id="scoreResult"></span>%</strong></p>
+                    <p id="statusResult"></p>
+
+                    <h6>Статистика:</h6>
+                    <p>Правильных ответов: <span id="correctCount"></span></p>
+                    <p>Неправильных ответов: <span id="incorrectCount"></span></p>
+                    <p>Всего вопросов: <span id="totalQuestions"></span></p>
+
+                    {% if chapter.order_index < course.chapters|length %}
+                        <h6>Следующий шаг:</h6>
+                        <p>Следующая глава: <a id="nextChapterLink" href="#">Глава {{ chapter.order_index|add:1 }}</a></p>
+                    {% endif %}
+
+                    <p id="recommendation"></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">Перейти к списку глав</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('controlForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Общие данные
+                const totalQuestions = Object.keys(data.results).length;
+                const correctCount = Object.values(data.results).filter(r => r).length;
+                const incorrectCount = totalQuestions - correctCount;
+                document.getElementById('scoreResult').textContent = data.score.toFixed(2);
+                document.getElementById('correctCount').textContent = correctCount;
+                document.getElementById('incorrectCount').textContent = incorrectCount;
+                document.getElementById('totalQuestions').textContent = totalQuestions;
+
+                // Статус
+                if (data.score >= 80) {
+                    document.getElementById('statusResult').innerHTML = 'Поздравляем! Вы успешно прошли контрольную.';
+                    if (document.getElementById('nextChapterLink') && data.next_chapter_id) {
+                        document.getElementById('nextChapterLink').href = `/courses/${data.next_chapter_id}/`;
+                    }
+                    document.getElementById('recommendation').textContent = 'Перейдите к следующей главе для продолжения обучения.';
+                } else {
+                    document.getElementById('statusResult').innerHTML = 'К сожалению, вы не прошли контрольную.';
+                    document.getElementById('recommendation').textContent = 'Рекомендуем повторить материал и попробовать снова.';
+                }
+
+                // Показ модального окна
+                var myModal = new bootstrap.Modal(document.getElementById('resultModal'));
+                myModal.show();
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+{% endblock content %}

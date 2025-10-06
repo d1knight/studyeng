@@ -16,7 +16,9 @@ urlpatterns = [
     path("profile/", views.profile, name="profile"),
     path("logout/", views.logout_view, name="logout"),
     path("tariff/<int:tariff_id>/buy/", views.buy_tariff, name="buy_tariff"),
-    path("topic/<int:topic_id>/", views.topic_detail, name="topic")
+    path("topic/<int:topic_id>/", views.topic_detail, name="topic"),
+    path('control-test/<int:chapter_id>/', views.control_test, name='control_test'),
+
 ]
 
 if settings.DEBUG:

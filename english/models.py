@@ -104,7 +104,7 @@ class CourseTariff(models.Model):
         verbose_name='Курс'
     )
     price = models.DecimalField(
-        max_digits=8,
+        max_digits=9,
         decimal_places=2,
         verbose_name='Цена',
         validators=[MinValueValidator(Decimal('0.01'))]
@@ -294,7 +294,6 @@ class Question(models.Model):
 
 # ===================== Прогресс и ответы =====================
 class UserChapter(models.Model):
-    """Связь пользователя с главой"""
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
         User,
@@ -310,16 +309,19 @@ class UserChapter(models.Model):
     )
     is_active = models.BooleanField(default=False, verbose_name='Активная глава')
     is_open = models.BooleanField(default=False, verbose_name='Открытая глава')
+    completion_score = models.FloatField(default=0.0, verbose_name='Процент выполнения')
 
     class Meta:
         db_table = 'users_and_chapters'
         verbose_name = 'Пользователь и глава'
         verbose_name_plural = 'Пользователи и главы'
         unique_together = ['user', 'chapter']
+        indexes = [
+            models.Index(fields=['user', 'chapter']),
+        ]  # Опционально для производительности
 
     def __str__(self):
         return f"{self.user.full_name} - {self.chapter.name}"
-
 
 class UserQuestion(models.Model):
     """Ответы пользователя"""
@@ -387,7 +389,7 @@ class Payment(models.Model):
         verbose_name='Пользователь'
     )
     amount = models.DecimalField(
-        max_digits=8,
+        max_digits=9,
         decimal_places=2,
         verbose_name='Сумма',
         validators=[MinValueValidator(Decimal('0.01'))]

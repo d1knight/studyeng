@@ -1,5 +1,5 @@
 {% extends "english/base.html" %}
- {% block content %}
+{% block content %}
 <div class="container mt-4">
   <h2>Мой профиль</h2>
 
@@ -7,15 +7,15 @@
 
   <h3>Мои курсы</h3>
   {% if courses %}
-  <ul>
-    {% for course in courses.all %}
-    <li>{{ course.title }}</li>
+  <ul class="list-group">
+    {% for course in courses %}
+    <li class="list-group-item">{{ course.name }}</li>
     {% endfor %}
   </ul>
   {% else %}
-  <p>Пока нет курсов</p>
+  <p class="text-muted">Пока нет курсов</p>
   {% endif %}
 
-  <a href="{% url 'logout' %}" class="btn btn-danger">Выйти</a>
+  <a href="{% url 'logout' %}" class="custom-btn-primary mt-3">Выйти</a>
 </div>
 {% endblock %}
