@@ -1,29 +1,109 @@
 {% extends 'english/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-  <h2 class="text-center mb-3">Оплата тарифа: {{ tariff.name }}</h2>
-  <p class="text-center mb-3">Цена: <span class="text-primary fw-bold">{{ tariff.price }} сум</span></p>
+<div class="container my-5">
 
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <!-- === Блок текущего тарифа === -->
+  <div class="card shadow-sm border-0 rounded-4 mx-auto p-3" style="max-width: 600px;">
+    <div class="card-body p-4">
+      <h2 class="text-center mb-3 fw-bold text-dark">Оплата тарифа</h2>
+      <h4 class="text-center text-primary mb-4">{{ tariff.name }}</h4>
+
+      <div class="text-center mb-4">
+        <p class="fs-5">
+          Стоимость: <span class="fw-bold text-success">{{ tariff.price|floatformat:0 }} сум</span>
+        </p>
       </div>
-    {% endfor %}
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% if not user_authenticated %}
+        <div class="alert alert-info text-center py-2 px-3 rounded-3 mb-4 shadow-sm">
+          <i class="bi bi-person-circle me-2"></i>
+          Авторизуйтесь, чтобы купить тариф.
+        </div>
+        <div class="text-center">
+          <a href="{% url 'login' %}" class="btn btn-outline-primary rounded-3 px-4">
+            Войти в аккаунт
+          </a>
+        </div>
+      {% else %}
+        <form method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="receipt" class="form-label fw-semibold text-secondary">Загрузите скриншот чека</label>
+            <input
+              type="file"
+              name="receipt"
+              id="receipt"
+              class="form-control form-control-lg rounded-3 shadow-sm"
+              accept="image/*"
+              required
+            >
+            <div class="invalid-feedback">Пожалуйста, выберите файл.</div>
+          </div>
+
+          <button type="submit" class="custom-btn-success w-100 py-2 fs-5 rounded-3 shadow-sm mt-3">
+            <i class="bi bi-upload me-2"></i> Отправить чек
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- === Разделитель между тарифами === -->
+  {% if other_tariffs %}
+    <div class="text-center my-5 position-relative">
+      <hr class="w-25 mx-auto opacity-50">
+      <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+        или выберите другой тариф
+      </span>
+    </div>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-    {% csrf_token %}
-    <div class="mb-3">
-      <label for="receipt" class="form-label">Загрузите скриншот чека</label>
-      <input type="file" name="receipt" id="receipt" class="form-control" accept="image/*" required>
-      <div class="invalid-feedback">Пожалуйста, выберите файл.</div>
+  <!-- === Другие тарифы === -->
+  {% if other_tariffs %}
+    <div class="row justify-content-center g-4">
+      {% for t in other_tariffs %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card border-0 rounded-4 shadow-sm h-100 tariff-card" style="transition: all 0.3s ease;">
+            <div class="card-body text-center p-4">
+              <h5 class="fw-bold text-primary mb-2">{{ t.name }}</h5>
+              <p class="fs-5 text-success fw-semibold mb-3">{{ t.price|floatformat:0 }} сум</p>
+              <p class="text-muted small mb-4">{{ t.description|truncatechars:80 }}</p>
+
+              {% if user_authenticated %}
+                <a href="{% url 'buy_tariff' t.id %}" class="btn btn-outline-primary w-100 rounded-3 shadow-sm">
+                  💳 Купить тариф
+                </a>
+              {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-secondary w-100 rounded-3 shadow-sm">
+                  🔐 Авторизуйтесь
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
     </div>
-    <button type="submit" class="custom-btn-success w-100">Отправить чек</button>
-  </form>
+  {% endif %}
+
 </div>
+
+<!-- === Мини-анимация карточек тарифов === -->
+<style>
+  .tariff-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+</style>
 
 <script>
   // Валидация формы Bootstrap

@@ -1,21 +1,73 @@
 {% extends "english/base.html" %}
+
 {% block content %}
-<div class="container mt-4">
-  <h2>Мой профиль</h2>
 
-  <p><strong>Телефон:</strong> {{ user.phone_number }}</p>
+<div class="container my-5">
+  <div class="card shadow-sm border-0 rounded-4 mx-auto" style="max-width: 700px;">
+    <div class="card-body p-4">
+      <h2 class="fw-bold text-center mb-4 text-dark">Мой профиль</h2>
 
-  <h3>Мои курсы</h3>
-  {% if courses %}
-  <ul class="list-group">
-    {% for course in courses %}
-    <li class="list-group-item">{{ course.name }}</li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p class="text-muted">Пока нет курсов</p>
-  {% endif %}
+      <!-- Аватар и информация о пользователе -->
+      <div class="text-center mb-4">
+        <div class="bg-primary text-white d-inline-flex justify-content-center align-items-center rounded-circle shadow-sm" 
+             style="width: 80px; height: 80px; font-size: 2rem;">
+          {{ user.first_name|default:user.full_name|default:user.phone_number|first|upper }}
+        </div>
+        <h5 class="mt-3 mb-0 fw-semibold">{{ user.first_name }} {{ user.last_name }}</h5>
+        <p class="text-muted mb-2">{{ user.email }}</p>
+        <p class="text-muted"><strong>Телефон:</strong> {{ user.phone_number }}</p>
+      </div>
 
-  <a href="{% url 'logout' %}" class="custom-btn-primary mt-3">Выйти</a>
+      <hr class="my-4">
+
+      <!-- Курсы пользователя -->
+      <h4 class="fw-semibold text-center mb-3">Мои курсы</h4>
+      {% if courses %}
+        <div class="row g-3">
+          {% for course in courses %}
+            <div class="col-md-6">
+              <div class="card h-100 shadow-sm border-0 rounded-3">
+                <div class="card-body">
+                  <h5 class="card-title">{{ course.title }}</h5>
+                  <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                  <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">Перейти к курсу</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-center text-muted">У вас пока нет курсов.</p>
+      {% endif %}
+
+      <hr class="my-4">
+
+      <!-- Форма комментария -->
+      <h4 class="fw-semibold mb-3">Оставьте комментарий</h4>
+      <form method="post" class="mb-4">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit" class="btn btn-success">Отправить</button>
+      </form>
+
+      <!-- Список комментариев -->
+      {% if comments %}
+        <h5 class="mb-3">Комментарии:</h5>
+        <div class="list-group">
+          {% for comment in comments %}
+            <div class="list-group-item mb-2">
+              <strong>{{ comment.user.first_name }} {{ comment.user.last_name }}:</strong>
+              <p class="mb-1">{{ comment.text }}</p>
+              <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">Комментариев пока нет.</p>
+      {% endif %}
+
+    </div>
+  </div>
 </div>
-{% endblock %}
+
+{% endblock content %}

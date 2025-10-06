@@ -1,6 +1,7 @@
 import re
 from django.utils import timezone
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
@@ -74,6 +75,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
 
+class Comment(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователь")
+    text = models.TextField(verbose_name="Комментарий")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.text[:20]}"
 
 # ===================== Курсы =====================
 class Course(models.Model):
@@ -179,8 +187,6 @@ class Topic(models.Model):
         return f"{self.chapter.name} - {self.name}"
 
 
-
-# ===================== Упражнения =====================
 class Exercise(models.Model):
     """Модель упражнения"""
     EXERCISE_TYPES = [

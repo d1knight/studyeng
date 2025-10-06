@@ -1,0 +1,148 @@
+/* === English course style (StudyEng unified look) === */
+
+/* Общие цвета и акценты */
+:root {
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --text-dark: #2c3e50;
+    --text-muted: #6c757d;
+    --bg-light: #f8f9fa;
+}
+
+/* Контейнеры */
+.container {
+    color: var(--text-dark);
+}
+
+/* Заголовки */
+h1, h2, h3 {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Accordion */
+.accordion-item {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+}
+
+.accordion-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.accordion-button {
+    background-color: #ffffff;
+    color: var(--text-dark);
+    font-weight: 500;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.accordion-button:hover {
+    background-color: var(--bg-light);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--bg-light);
+    color: var(--primary-color);
+}
+
+.accordion-button.disabled {
+    background-color: #f1f1f1;
+    color: #adb5bd;
+}
+
+/* Темы внутри глав */
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #f1f1f1;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}
+
+.list-group-item a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.list-group-item a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.badge {
+    font-size: 0.85rem;
+    border-radius: 6px;
+}
+
+/* Кнопки */
+.btn-success {
+    background-color: var(--success-color);
+    border: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-1px);
+}
+
+/* Alerts */
+.alert {
+    font-size: 0.95rem;
+    border-radius: 8px;
+}
+
+.alert-info {
+    background-color: #e8f2ff;
+    border-color: #b6daff;
+    color: var(--primary-color);
+}
+
+.alert-warning {
+    background-color: #fff8e5;
+    border-color: #ffe49c;
+    color: #b38300;
+}
+
+
+.hover-scale {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.hover-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+

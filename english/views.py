@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpRequest, JsonResponse
+from .forms import CommentForm
 from .models import *
 from django.core.cache import cache
 from http import HTTPStatus
@@ -13,14 +14,30 @@ from django.contrib import messages
 from types import SimpleNamespace
 
 
-
 def main_page(request):
     courses = Course.objects.all()
     tariffs = CourseTariff.objects.all()
+    comment_form = CommentForm()
+
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            messages.error(request, "Войдите, чтобы оставить комментарий.")
+        else:
+            comment_form = CommentForm(request.POST)
+            if comment_form.is_valid():
+                comment = comment_form.save(commit=False)
+                comment.user = request.user
+                comment.save()
+                messages.success(request, "Комментарий добавлен!")
+                comment_form = CommentForm()  # очистка формы
+
+    comments = Comment.objects.all().order_by('-created_at')
 
     context = {
         'courses': courses,
         'tariffs': tariffs,
+        'comments': comments,
+        'comment_form': comment_form,
     }
     return render(request, 'english/index.html', context)
 
@@ -83,6 +100,7 @@ def course_detail(request, course_id):
             'chapter_user_chapters': chapter_user_chapters,
             'chapters': chapters,
             'courses': Course.objects.all(),  # Для меню
+            'user_has_tariff': has_paid_access,  # <-- флаг для шаблона
         }
         return render(request, 'english/course.html', context)
     except Exception as e:
@@ -215,27 +233,43 @@ def generate_code(request: HttpRequest):
 def profile(request):
     user = request.user
     courses = Course.objects.filter(chapters__user_chapters__user=user).distinct()
+    comment_form = CommentForm()
+
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.user = request.user
+            comment.save()
+            comment_form = CommentForm()  # Очистка формы после отправки
 
     context = {
         'user': user,
-        'courses': courses,  # Курсы пользователя, уже фильтруются
+        'courses': courses,
+        'comment_form': comment_form,
+        'comments': Comment.objects.all().order_by('-created_at'),
     }
     return render(request, "english/profile.html", context)
-
 def logout_view(request):
     logout(request)
     return redirect('/')
 
-#нужно вывести сообщение что нужно авторизироваться чтобы купить тариф 
-@login_required
+
 def buy_tariff(request, tariff_id):
     tariff = get_object_or_404(CourseTariff, id=tariff_id)
+    course = tariff.course
+
+    user_authenticated = request.user.is_authenticated
 
     if request.method == "POST":
+        if not user_authenticated:
+            messages.error(request, "Авторизуйтесь, чтобы купить тариф.")
+            return redirect("login")  # или можно остаться на той же странице
+
         receipt = request.FILES.get("receipt")
         if not receipt:
             messages.error(request, "Пожалуйста, загрузите скриншот чека.")
-            return render(request, "english/buy_tariff.html", {"tariff": tariff})
+            return render(request, "english/buy_tariff.html", {"tariff": tariff, "user_authenticated": user_authenticated})
 
         Payment.objects.create(
             user=request.user,
@@ -247,7 +281,16 @@ def buy_tariff(request, tariff_id):
         messages.success(request, f"Платеж за тариф '{tariff.name}' отправлен на проверку. Проверьте статус в профиле.")
         return redirect("profile")
 
-    return render(request, "english/buy_tariff.html", {"tariff": tariff})
+    # Другие тарифы курса, кроме текущего
+    other_tariffs = course.tariffs.exclude(id=tariff.id)
+
+    context = {
+        "tariff": tariff,
+        "other_tariffs": other_tariffs,
+        "user_authenticated": user_authenticated,
+    }
+    return render(request, "english/buy_tariff.html", context)
+
 
 def exercise_view(request, pk):
     exercise = Exercise.objects.get(pk=pk)
