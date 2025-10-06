@@ -229,27 +229,57 @@ def generate_code(request: HttpRequest):
 
     return JsonResponse({"code": otp_code}, status=HTTPStatus.OK)
 
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Comment
+from .forms import CommentForm
+
 @login_required
 def profile(request):
-    user = request.user
-    courses = Course.objects.filter(chapters__user_chapters__user=user).distinct()
-    comment_form = CommentForm()
+    comments = Comment.objects.all().order_by('-created_at')
 
-    if request.method == 'POST':
-        comment_form = CommentForm(request.POST)
-        if comment_form.is_valid():
-            comment = comment_form.save(commit=False)
-            comment.user = request.user
+    # --- Добавление комментария ---
+    if request.method == "POST" and not request.headers.get("x-requested-with") == "XMLHttpRequest":
+        if "add_comment" in request.POST:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                new_comment = form.save(commit=False)
+                new_comment.user = request.user
+                new_comment.save()
+                return redirect('profile')  # обычная форма добавления
+        else:
+            form = CommentForm()
+    else:
+        form = CommentForm()
+
+    # --- AJAX: редактирование комментария ---
+    if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
+        # Редактирование
+        if "edit_comment" in request.POST:
+            comment_id = request.POST.get("comment_id")
+            new_text = request.POST.get("text")
+            comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+            comment.text = new_text
             comment.save()
-            comment_form = CommentForm()  # Очистка формы после отправки
+            return JsonResponse({
+                "success": True,
+                "comment": {
+                    "id": comment.id,
+                    "text": comment.text
+                }
+            })
 
-    context = {
-        'user': user,
-        'courses': courses,
-        'comment_form': comment_form,
-        'comments': Comment.objects.all().order_by('-created_at'),
-    }
-    return render(request, "english/profile.html", context)
+        # Удаление
+        elif "delete_comment" in request.POST:
+            comment_id = request.POST.get("comment_id")
+            comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+            comment.delete()
+            return JsonResponse({"success": True})
+
+    return render(request, 'english/profile.html', {'comment_form': form, 'comments': comments})
+
+
 def logout_view(request):
     logout(request)
     return redirect('/')
