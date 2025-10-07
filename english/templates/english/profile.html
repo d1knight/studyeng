@@ -20,6 +20,30 @@
 
       <hr class="my-4">
 
+      <!-- Мои курсы -->
+      <h4 class="fw-semibold mb-3">Мои курсы</h4>
+      {% if courses_data %}
+        <div class="list-group mb-4">
+          {% for course_data in courses_data %}
+            <div class="list-group-item mb-2 d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1 fw-bold">{{ course_data.course.name }}</h6>
+                <p class="mb-1 text-muted">{{ course_data.course.description|truncatewords:20 }}</p>
+                <small class="text-muted">
+                  Тариф: {{ course_data.tariff.name|default:"Не указан" }} |
+                  Прогресс: {{ course_data.progress }}%
+                </small>
+              </div>
+              <a href="{% url 'course_detail' course_data.course.id %}" class="btn btn-sm btn-primary">Перейти к курсу</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">У вас пока нет курсов. <a href="/#home">Выберите курс</a></p>
+      {% endif %}
+
+      <hr class="my-4">
+
       <!-- Форма добавления комментария -->
       <h4 class="fw-semibold mb-3">Оставьте комментарий</h4>
       <form method="post" class="mb-4">
@@ -84,7 +108,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-
   const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
   // --- Делегирование для редактирования ---

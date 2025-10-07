@@ -26,6 +26,9 @@
               {% else %}
                 <i class="bi bi-lock ms-2 text-danger"></i>
               {% endif %}
+              {% if user_chapter.completion_score %}
+                <span class="badge bg-success ms-2">{{ user_chapter.completion_score|floatformat:0 }}%</span>
+              {% endif %}
             {% endif %}
           </button>
         </h2>
@@ -35,54 +38,72 @@
 
             <!-- Список тем -->
             <ul class="list-group list-group-flush">
-              {% for topic in chapter.topics.all|dictsort:"order_index" %}
+              {% for topic in chapter.topics_list %}
                 <li
                   class="list-group-item d-flex align-items-center justify-content-between border-0 border-bottom"
                   style="transition: background-color 0.2s ease;"
                   onmouseover="this.style.backgroundColor='#f8f9fa'"
                   onmouseout="this.style.backgroundColor='transparent'"
                 >
-                  <div>
-                    <span class="fw-semibold text-primary">{{ topic.order_index }}.</span>
-                    {% if topic.is_public or topic.is_accessible %}
-                      <a
-                        href="{% url 'topic' topic.id %}"
-                        class="text-decoration-none fw-semibold ms-1 text-dark"
-                        style="transition: color 0.2s ease;"
-                        onmouseover="this.style.color='#007bff'"
-                        onmouseout="this.style.color='#212529'"
-                      >
-                        {{ topic.name }}
-                      </a>
-                    {% else %}
-                      <span class="text-muted ms-1">{{ topic.name }}</span>
-                    {% endif %}
+                  <div class="w-100">
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div>
+                        <span class="fw-semibold text-primary">{{ topic.order_index }}.</span>
+                        {% if topic.is_accessible %}
+                          <a
+                            href="{% url 'topic' topic.id %}"
+                            class="text-decoration-none fw-semibold ms-1 text-dark"
+                            style="transition: color 0.2s ease;"
+                            onmouseover="this.style.color='#007bff'"
+                            onmouseout="this.style.color='#212529'"
+                          >
+                            {{ topic.name }}
+                          </a>
+                          <span class="badge bg-success ms-2" style="font-size: 0.7rem;">✓ Доступно</span>
+                        {% else %}
+                          <span class="text-muted ms-1">{{ topic.name }}</span>
+                          <span class="badge bg-light text-danger border ms-2">🔒 Закрыто</span>
+                        {% endif %}
+                      </div>
+                    </div>
                   </div>
-
-                  {% if not topic.is_public and not topic.is_accessible %}
-                    <span class="badge bg-light text-danger border ms-2">🔒 Закрыто</span>
-                  {% endif %}
                 </li>
               {% endfor %}
             </ul>
 
-            <!-- Контрольная работа и покупка тарифа -->
+            <!-- Уведомление для закрытых глав -->
+            {% if user_chapter and not user_chapter.is_open and user.is_authenticated %}
+              <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
+                <i class="bi bi-info-circle me-2"></i>
+                Эта глава откроется после успешного прохождения контрольной работы предыдущей главы (80%+).
+              </div>
+            {% elif not user.is_authenticated and chapter.order_index > 1 %}
+              <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
+                <i class="bi bi-lock me-2"></i>
+                Авторизуйтесь и купите тариф, чтобы открыть эту главу.
+              </div>
+            {% endif %}
+
+            <!-- Контрольная работа -->
             <div class="mt-4">
-              {% if user.is_authenticated %}
-                {% if chapter.control_test_accessible %}
-                  <a href="{% url 'control_test' chapter.id %}" class="custom-btn-success">
-                    Пройти контрольную работу
-                  </a>
-                {% else %}
-                  <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
-                    <i class="bi bi-lock me-2"></i>
-                    Контрольная работа будет доступна после покупки тарифа.
-                  </div>
-                {% endif %}
-              {% else %}
+              {% if chapter.control_test_accessible %}
+                <a href="{% url 'control_test' chapter.id %}" class="btn btn-success px-4 py-2 rounded-3 shadow-sm">
+                  ✅ Пройти контрольную работу
+                </a>
+              {% elif user.is_authenticated and not user_has_tariff %}
+                <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
+                  <i class="bi bi-lock me-2"></i>
+                  Купите тариф, чтобы пройти контрольную работу.
+                </div>
+              {% elif user.is_authenticated and user_has_tariff and not user_chapter.is_open %}
+                <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
+                  <i class="bi bi-lock me-2"></i>
+                  Контрольная работа будет доступна после открытия главы.
+                </div>
+              {% elif not user.is_authenticated %}
                 <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
                   <i class="bi bi-person-circle me-2"></i>
-                  Авторизуйтесь, чтобы пройти контрольную работу.
+                  Авторизуйтесь и купите тариф, чтобы пройти контрольную работу.
                 </div>
               {% endif %}
             </div>
@@ -91,14 +112,35 @@
         </div>
       </div>
     {% endfor %}
-
-                  {% if not user_has_tariff %}
-                    <div class="text-center mt-3">
-                      <a href="{% url 'buy_tariff' course.id %}" class="btn btn-outline-primary px-4 py-2 rounded-3 shadow-sm">
-                        💳 Купить тариф для этого курса
-                      </a>
-                    </div>
-                  {% endif %}
   </div>
+
+  <!-- Кнопка покупки тарифа -->
+  {% if not user_has_tariff %}
+    <div class="text-center mt-4">
+      {% if course.tariffs.all %}
+        {% with first_tariff=course.tariffs.all.0 %}
+          <a href="{% url 'buy_tariff' first_tariff.id %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
+            💳 Купить тариф для этого курса
+          </a>
+        {% endwith %}
+      {% endif %}
+    </div>
+  {% endif %}
 </div>
+
+<style>
+  .accordion-button:not(.collapsed) {
+    background-color: #f8f9fa;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
+  }
+  
+  .accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(0,0,0,.125);
+  }
+  
+  .list-group-item:last-child {
+    border-bottom: none !important;
+  }
+</style>
 {% endblock content %}
