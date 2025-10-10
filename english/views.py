@@ -143,10 +143,8 @@ def topic_detail(request, topic_id):
     allowed = False
     error_message = ""
 
-    # 1-я глава и её темы доступны ВСЕМ
     if chapter.order_index == 1:
         allowed = True
-    # Остальные главы - только авторизованным с оплаченным тарифом
     elif user:
         user_chapter = user.user_chapters.filter(chapter=chapter).first()
         has_paid = user.payments.filter(tariff__course=chapter.course, status="paid").exists()
@@ -166,7 +164,18 @@ def topic_detail(request, topic_id):
         messages.info(request, error_message)
         return redirect('course_detail', course_id=chapter.course.id)
 
-    exercises = Exercise.objects.filter(topic=topic).prefetch_related("questions")
+    # Извлечение упражнений с явной сортировкой
+    exercises = Exercise.objects.filter(topic=topic).prefetch_related("questions").order_by('order_index')
+    
+    # Отладочный вывод
+    print(f"Topic ID: {topic_id}, Exercises found: {exercises.count()}")
+    for exercise in exercises:
+        print(f"Exercise ID: {exercise.id}, Order Index: {exercise.order_index}, Instruction: {exercise.instruction or 'No instruction'}")
+
+    # Очистка кэша для данной темы
+    from django.core.cache import cache
+    cache_key = f"exercises_for_topic_{topic_id}"
+    cache.delete(cache_key)
 
     if request.method == "POST" and request.headers.get("x-requested-with") == "XMLHttpRequest":
         results = {}
@@ -219,7 +228,6 @@ def topic_detail(request, topic_id):
         "topic": topic,
         "exercises": exercises,
     })
-
 
 def reg(request: HttpRequest):
     if request.method == 'POST':

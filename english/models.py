@@ -7,7 +7,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.utils.safestring import mark_safe
-
+import json
 
 # ===================== Пользователи =====================
 class UserManager(BaseUserManager):
@@ -230,23 +230,32 @@ class Exercise(models.Model):
         return f"{self.topic.name} - Упражнение {self.order_index}"
 
 
+
+
+
 class Question(models.Model):
     """Модель вопроса в упражнении"""
     id = models.BigAutoField(primary_key=True)
-
     exercise = models.ForeignKey(
         Exercise,
         on_delete=models.CASCADE,
         related_name='questions',
         verbose_name='Упражнение'
     )
-    text = RichTextUploadingField(
+    text = models.TextField(
         verbose_name='Текст вопроса',
-        help_text='Используй {{blank1}}, {{blank2}}, ... для пропусков'
+        help_text='Используйте ___ для обозначения пропусков (например: "I ___ a student.").'
+    )
+    raw_answers = models.TextField(
+        verbose_name='Правильные ответы',
+        help_text='Формат: blank1: answer1, answer2\nblank2: answer3\n... (по одному пропуску на строку)',
+        blank=True
     )
     correct_answer = models.JSONField(
-        verbose_name='Правильные ответы',
-        help_text='Формат: {"blank1": ["I am", "I\'m"], "blank2": ["is", "are"], ...}'
+        verbose_name='Правильные ответы (JSON)',
+        help_text='Автоматически формируется из поля "Правильные ответы".',
+        blank=True,
+        null=True
     )
 
     class Meta:
@@ -256,6 +265,25 @@ class Question(models.Model):
 
     def __str__(self):
         return f"Вопрос к {self.exercise}"
+
+    def save(self, *args, **kwargs):
+        """Преобразование raw_answers в JSON для correct_answer"""
+        if self.raw_answers:
+            correct_answer = {}
+            lines = self.raw_answers.strip().split('\n')
+            for index, line in enumerate(lines, 1):
+                if ':' in line:
+                    blank, answers = line.split(':', 1)
+                    blank = blank.strip()
+                    answers = [ans.strip() for ans in answers.split(',') if ans.strip()]
+                    if answers:
+                        correct_answer[f"blank{index}"] = answers if len(answers) > 1 else answers[0]
+                else:
+                    correct_answer[f"blank{index}"] = line.strip()
+            self.correct_answer = correct_answer
+        else:
+            self.correct_answer = {}
+        super().save(*args, **kwargs)
 
     def get_correct_answers_list(self):
         """Вернуть список правильных ответов"""
@@ -275,14 +303,15 @@ class Question(models.Model):
 
     formatted_correct_answers.short_description = "Правильные ответы"
 
-
-
     def render_with_inputs(self):
+        """Рендеринг текста вопроса с input-полями для пропусков"""
         def replacer(match):
-            blank_name = match.group(1)  # например "blank1"
+            # Генерируем имя blank на основе порядка (blank1, blank2, ...)
+            blank_index = len(re.findall(r'___', self.text[:match.start()])) + 1
+            blank_name = f"blank{blank_index}"
             return f"<input type='text' name='q_{self.id}_{blank_name}' class='form-control d-inline w-auto' placeholder='...' />"
 
-        rendered = re.sub(r"\{\{(blank\d*)\}\}", replacer, self.text)
+        rendered = re.sub(r'___', replacer, self.text)
         return mark_safe(rendered)
 
     def check_user_answer(self, user_answer: dict) -> bool:
@@ -296,7 +325,7 @@ class Question(models.Model):
             else str(user_answer.get(k, "")).strip().lower() == str(correct.get(k)).strip().lower()
             for k in correct.keys()
         )
-    
+
 
 # ===================== Прогресс и ответы =====================
 class UserChapter(models.Model):
