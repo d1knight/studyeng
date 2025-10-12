@@ -173,7 +173,6 @@ class Topic(models.Model):
         verbose_name='Глава'
     )
     name = models.CharField(max_length=255, verbose_name='Название темы')
-    video_path = models.CharField(max_length=255, verbose_name='Путь к видео')
     content = RichTextUploadingField(verbose_name="Содержание")
 
     class Meta:
