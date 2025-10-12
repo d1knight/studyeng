@@ -1,0 +1,14 @@
+.question-inline textarea {
+    width: 100%;
+    font-size: 14px;
+}
+
+.question-inline label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.add-question:hover {
+    background-color: #45a049 !important;
+}

@@ -5,6 +5,7 @@ from .models import (
     Course, CourseTariff, User, Chapter, Topic,
     Exercise, Question, Payment, UserChapter
 )
+import re
 
 # ===================== Форма для Question =====================
 class QuestionForm(forms.ModelForm):
@@ -32,23 +33,18 @@ class QuestionForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Добавляем инструкции в виде HTML
-        self.fields['text'].help_text = mark_safe("""
-            Используйте <strong>___</strong> для обозначения пропусков.<br>
-            <strong>Пример:</strong> I ___ a student, and you ___ happy.<br>
-            Каждый ___ будет заменен на поле ввода на странице темы.
-        """)
-        self.fields['raw_answers'].help_text = mark_safe("""
-            Вводите ответы в формате: <code>blank1: ответ1, ответ2\nblank2: ответ3</code><br>
-            <strong>Пример:</strong><br>
-            <pre style="background: #f8f9fa; padding: 10px; border-radius: 6px;">
-blank1: am, is
-blank2: are
-            </pre>
-            Каждый пропуск (___) соответствует строке в этом поле. Если несколько ответов, разделяйте их запятыми.
-        """)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        text = cleaned_data.get('text', '')
+        raw_answers = cleaned_data.get('raw_answers', '')
+        blank_count = len(re.findall(r'___', text))
+        answer_lines = len(raw_answers.strip().split('\n')) if raw_answers.strip() else 0
+        if blank_count != answer_lines:
+            raise forms.ValidationError(
+                f"Количество пропусков (___) в тексте ({blank_count}) должно совпадать с количеством строк в ответах ({answer_lines})."
+            )
+        return cleaned_data
 
 # ===================== Inline для Exercise =====================
 class ExerciseInline(admin.TabularInline):
@@ -131,11 +127,16 @@ class QuestionAdmin(admin.ModelAdmin):
 # ===================== Payment =====================
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ['id', 'user', 'tariff', 'amount', 'status', 'create_at']
+    list_display = ['id', 'user', 'tariff', 'amount', 'status', 'create_at', 'receipt_link']
     list_filter = ['status', 'create_at']
     search_fields = ['user__phone_number', 'tariff__name']
-
     actions = ['approve_payments', 'reject_payments']
+
+    def receipt_link(self, obj):
+        if obj.receipt:
+            return mark_safe(f'<a href="{obj.receipt.url}" target="_blank">Просмотреть чек</a>')
+        return "-"
+    receipt_link.short_description = "Чек"
 
     def approve_payments(self, request, queryset):
         updated = 0
@@ -143,7 +144,7 @@ class PaymentAdmin(admin.ModelAdmin):
             payment.status = 'paid'
             payment.save()
 
-            # Активация доступа к курсу
+            # Открываем все главы курса для пользователя
             course = payment.tariff.course
             chapters = course.chapters.all()
             for chapter in chapters:
@@ -151,14 +152,13 @@ class PaymentAdmin(admin.ModelAdmin):
                     user=payment.user,
                     chapter=chapter
                 )
-                # Открываем все главы для пользователя
                 user_chapter.is_open = True
                 user_chapter.save()
 
             updated += 1
 
         if updated:
-            self.message_user(request, f'✅ Одобрено {updated} платежей. Доступ к курсу активирован.', messages.SUCCESS)
+            self.message_user(request, f'✅ Одобрено {updated} платежей. Доступ к курсу открыт.', messages.SUCCESS)
         else:
             self.message_user(request, 'Нет платежей для одобрения.', messages.WARNING)
 

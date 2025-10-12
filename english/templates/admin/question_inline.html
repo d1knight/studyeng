@@ -1,0 +1,39 @@
+{% load static %}
+{% for form in inline_admin_formset %}
+  <div class="inline-related question-inline" style="display: flex; align-items: flex-start; margin-bottom: 8px;">
+    <div style="flex: 1; margin-right: 8px;">
+      {{ form.form.text.errors }}
+      {{ form.form.text.label_tag }}
+      {{ form.form.text }}
+    </div>
+    <div style="flex: 1;">
+      {{ form.form.raw_answers.errors }}
+      {{ form.form.raw_answers.label_tag }}
+      {{ form.form.raw_answers }}
+    </div>
+    <div style="margin-left: 8px;">
+      {% if form.original %}
+        {{ form.DELETE }}
+      {% endif %}
+    </div>
+  </div>
+{% endfor %}
+
+<div class="add-row" style="margin-top: 12px;">
+  <a href="javascript:void(0)" class="button add-question" style="background:#4caf50;color:white;padding:6px 10px;border-radius:4px;">+ Добавить вопрос</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addButton = document.querySelector('.add-question');
+    if (!addButton) return;
+    addButton.addEventListener('click', function() {
+        const totalForms = document.querySelector('#id_' + '{{ inline_admin_formset.formset.prefix }}' + '-TOTAL_FORMS');
+        const currentCount = parseInt(totalForms.value);
+        const emptyForm = document.querySelector('.empty-form');
+        const newFormHtml = emptyForm.outerHTML.replace(/__prefix__/g, currentCount);
+        emptyForm.insertAdjacentHTML('beforebegin', newFormHtml);
+        totalForms.value = currentCount + 1;
+    });
+});
+</script>
