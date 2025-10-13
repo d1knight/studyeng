@@ -1,6 +1,8 @@
 
 import os
 from pathlib import Path
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -56,6 +58,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.media',
+                'django.template.context_processors.static',
             ],
         },
     },
@@ -68,9 +71,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'studyeng',  # Имя базы данных, созданной ранее
-        'USER': 'postgres',   # Пользователь PostgreSQL
-        'PASSWORD': 'Nesli2024',  # Пароль, если задан
+        'NAME': config('PG_NAME'),  # Имя базы данных, созданной ранее
+        'USER': config('PG_USER'),   # Пользователь PostgreSQL
+        'PASSWORD': config('PG_PASSWORD'),  # Пароль, если задан
         'HOST': 'localhost',  # Или '127.0.0.1'
         'PORT': '5432',       # Порт PostgreSQL по умолчанию
     }

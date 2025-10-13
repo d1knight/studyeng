@@ -128,7 +128,7 @@ h1, h2, h3 {
     color: #b38300;
 }
 
-
+/* Классы для анимации */
 .hover-scale {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -145,4 +145,49 @@ h1, h2, h3 {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* Стили для стрелок карусели */
+.carousel-control-prev,
+.carousel-control-next {
+  filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
 
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: #3333; /* Черный фон для контраста */
+  border: 2px solid #ffffff; /* Белая обводка для выделения */
+  border-radius: 50%;
+  padding: 10px;
+  width: 30px;
+  height: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Тень для глубины */
+}
+
+.carousel-control-prev-icon::before,
+.carousel-control-next-icon::before {
+  filter: brightness(0) invert(1); /* Инверсия цвета иконок в черный */
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  opacity: 1;
+}
+
+.carousel-control-prev {
+  left: -50px;
+}
+
+.carousel-control-next {
+  right: -50px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .carousel-control-prev {
+    left: -20px;
+  }
+  .carousel-control-next {
+    right: -20px;
+  }
+}

@@ -153,7 +153,7 @@
     <p class="text-muted">Реальные истории успеха от наших студентов</p>
   </div>
 
-  <div id="carouselComments" class="carousel slide text-center">
+  <div id="carouselComments" class="carousel slide text-center" data-bs-ride="carousel">
     <div class="carousel-inner">
       {% for comment in comments %}
       <div
@@ -176,6 +176,16 @@
       </div>
       {% endfor %}
     </div>
+
+    <!-- Кнопки управления каруселью -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselComments" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselComments" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
 
     <!-- Индикаторы -->
     <div class="carousel-indicators position-static mt-4">
@@ -233,6 +243,18 @@
             </div>
         `;
         carouselInner.appendChild(newItem);
+
+        // Обновляем индикаторы
+        const indicators = document.querySelector(".carousel-indicators");
+        const newIndicator = document.createElement("button");
+        newIndicator.type = "button";
+        newIndicator.setAttribute("data-bs-target", "#carouselComments");
+        newIndicator.setAttribute("data-bs-slide-to", carouselInner.children.length - 1);
+        newIndicator.style.width = "10px";
+        newIndicator.style.height = "10px";
+        if (carouselInner.children.length === 1) newIndicator.className = "active";
+        indicators.appendChild(newIndicator);
+
         form.reset();
       } else {
         messageDiv.innerHTML =
@@ -240,4 +262,6 @@
       }
     });
 </script>
-{% endif %} {% endblock content %}
+{% endif %}
+<!-- AJAX для комментариев -->
+{% endblock content %}
