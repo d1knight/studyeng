@@ -2,341 +2,137 @@
 
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>StudyEng</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StudyEng</title>
 
-    <!-- Bootstrap CSS (всегда первым) -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-    <!-- Bootstrap Icons -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-    />
+  <!-- Встроенные стили -->
+  <style>
+    /* === StudyEng unified style === */
+    :root {
+      --primary-color: #007bff;
+      --success-color: #28a745;
+      --text-dark: #2c3e50;
+      --text-muted: #6c757d;
+      --bg-light: #f8f9fa;
+    }
 
-    <!-- Твои стили — всегда после Bootstrap -->
-    <style>
-      /* === English course style (StudyEng unified look) === */
+    body { color: var(--text-dark); }
 
-      /* Общие цвета и акценты */
-      :root {
-        --primary-color: #007bff;
-        --success-color: #28a745;
-        --text-dark: #2c3e50;
-        --text-muted: #6c757d;
-        --bg-light: #f8f9fa;
-      }
+    h1,h2,h3 { font-weight:600; color: var(--text-dark); }
 
-      /* Контейнеры */
-      .container {
-        color: var(--text-dark);
-      }
+    /* Аккордеоны */
+    .accordion-item {
+      border:1px solid #e9ecef; border-radius:8px; background:#fff; transition:.2s;
+    }
+    .accordion-item:hover { box-shadow:0 4px 10px rgba(0,0,0,0.05); }
+    .accordion-button {
+      background:#fff; color:var(--text-dark); font-weight:500; border-radius:8px;
+      transition:.2s;
+    }
+    .accordion-button:hover { background:var(--bg-light); }
+    .accordion-button:not(.collapsed) { background:var(--bg-light); color:var(--primary-color); }
+    .accordion-button.disabled { background:#f1f1f1; color:#adb5bd; }
 
-      /* Заголовки */
-      h1,
-      h2,
-      h3 {
-        font-weight: 600;
-        color: var(--text-dark);
-      }
+    /* Списки внутри аккордеона */
+    .list-group-item { border:none; border-bottom:1px solid #f1f1f1; padding:.75rem 1rem; font-size:.95rem; }
+    .list-group-item:last-child { border-bottom:none; }
+    .list-group-item a { color:var(--primary-color); text-decoration:none; font-weight:500; transition:.2s; }
+    .list-group-item a:hover { color:#0056b3; text-decoration:underline; }
 
-      /* Accordion */
-      .accordion-item {
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        background-color: #ffffff;
-      }
+    .text-muted { color: var(--text-muted) !important; }
+    .badge { font-size:.85rem; border-radius:6px; }
 
-      .accordion-item:hover {
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      }
+    /* Кнопки */
+    .btn-primary, .btn-success {
+      border:none; transition:.2s; font-weight:500;
+    }
+    .btn-primary { background:var(--primary-color); }
+    .btn-primary:hover { background:#0056b3; transform:translateY(-1px); }
+    .btn-success { background:var(--success-color); }
+    .btn-success:hover { background:#218838; transform:translateY(-1px); }
 
-      .accordion-button {
-        background-color: #ffffff;
-        color: var(--text-dark);
-        font-weight: 500;
-        border-radius: 8px;
-        transition: background-color 0.2s ease, color 0.2s ease;
-      }
+    /* Alerts */
+    .alert { font-size:.95rem; border-radius:8px; }
+    .alert-info { background:#e8f2ff; border-color:#b6daff; color:var(--primary-color); }
+    .alert-warning { background:#fff8e5; border-color:#ffe49c; color:#b38300; }
 
-      .accordion-button:hover {
-        background-color: var(--bg-light);
-      }
+    /* Hover эффекты */
+    .hover-scale { transition:.3s; }
+    .hover-scale:hover { transform:scale(1.02); box-shadow:0 6px 18px rgba(0,0,0,0.1); }
+    .hover-lift { transition:.25s; }
+    .hover-lift:hover { transform:translateY(-5px); box-shadow:0 6px 16px rgba(0,0,0,0.12); }
 
-      .accordion-button:not(.collapsed) {
-        background-color: var(--bg-light);
-        color: var(--primary-color);
-      }
+    /* Карусель */
+    .carousel-control-prev, .carousel-control-next { opacity:.8; transition:.2s; }
+    .carousel-control-prev:hover, .carousel-control-next:hover { opacity:1; }
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+      background-color:#3333; border:2px solid #fff; border-radius:50%; padding:10px; width:30px; height:30px;
+      box-shadow:0 2px 4px rgba(0,0,0,0.2);
+    }
+    @media (max-width:768px) { .carousel-control-prev{left:-20px;} .carousel-control-next{right:-20px;} }
+  </style>
 
-      .accordion-button.disabled {
-        background-color: #f1f1f1;
-        color: #adb5bd;
-      }
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/logo.png' %}" />
+</head>
 
-      /* Темы внутри глав */
-      .list-group-item {
-        border: none;
-        border-bottom: 1px solid #f1f1f1;
-        padding: 0.75rem 1rem;
-        font-size: 0.95rem;
-      }
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-white sticky-top">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="{% url 'home' %}">StudyEng</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link active" href="{% url 'home' %}">Главная</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#comments">Отзывы</a></li>
+          <li class="nav-item"><a class="nav-link" href="/#tarifff">Тарифы</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="coursesDropdown" role="button" data-bs-toggle="dropdown">Курсы</a>
+            <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
+              {% if courses %} {% for course in courses %}
+              <li><a class="dropdown-item" href="{% url 'course_detail' course.id %}">{{ course.name }}</a></li>
+              {% endfor %} {% else %}
+              <li><a class="dropdown-item disabled">Курсы не загружены</a></li>
+              {% endif %}
+            </ul>
+          </li>
+        </ul>
 
-      .list-group-item:last-child {
-        border-bottom: none;
-      }
-
-      .list-group-item a {
-        color: var(--primary-color);
-        text-decoration: none;
-        font-weight: 500;
-        transition: color 0.2s ease;
-      }
-
-      .list-group-item a:hover {
-        color: #0056b3;
-        text-decoration: underline;
-      }
-
-      .text-muted {
-        color: var(--text-muted) !important;
-      }
-
-      .badge {
-        font-size: 0.85rem;
-        border-radius: 6px;
-      }
-
-      /* Кнопки */
-      .btn-success {
-        background-color: var(--success-color);
-        border: none;
-        transition: background-color 0.2s ease, transform 0.2s ease;
-      }
-
-      .btn-success:hover {
-        background-color: #218838;
-        transform: translateY(-1px);
-      }
-
-      .btn-primary {
-        background-color: var(--primary-color);
-        border: none;
-        transition: background-color 0.2s ease, transform 0.2s ease;
-      }
-
-      .btn-primary:hover {
-        background-color: #0056b3;
-        transform: translateY(-1px);
-      }
-
-      /* Alerts */
-      .alert {
-        font-size: 0.95rem;
-        border-radius: 8px;
-      }
-
-      .alert-info {
-        background-color: #e8f2ff;
-        border-color: #b6daff;
-        color: var(--primary-color);
-      }
-
-      .alert-warning {
-        background-color: #fff8e5;
-        border-color: #ffe49c;
-        color: #b38300;
-      }
-
-      /* Классы для анимации */
-      .hover-scale {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
-      .hover-scale:hover {
-        transform: scale(1.02);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-      }
-
-      .hover-lift {
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-      }
-      .hover-lift:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-      }
-
-      /* Стили для стрелок карусели */
-      .carousel-control-prev,
-      .carousel-control-next {
-        filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg)
-          brightness(100%) contrast(100%);
-        opacity: 0.8;
-        transition: opacity 0.2s ease;
-      }
-
-      .carousel-control-prev-icon,
-      .carousel-control-next-icon {
-        background-color: #3333;
-        border: 2px solid #ffffff;
-        border-radius: 50%;
-        padding: 10px;
-        width: 30px;
-        height: 30px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      }
-
-      .carousel-control-prev-icon::before,
-      .carousel-control-next-icon::before {
-        filter: brightness(0) invert(1);
-      }
-
-      .carousel-control-prev:hover,
-      .carousel-control-next:hover {
-        opacity: 1;
-      }
-
-      .carousel-control-prev {
-        left: -50px;
-      }
-
-      .carousel-control-next {
-        right: -50px;
-      }
-
-      /* Адаптивность для мобильных устройств */
-      @media (max-width: 768px) {
-        .carousel-control-prev {
-          left: -20px;
-        }
-        .carousel-control-next {
-          right: -20px;
-        }
-      }
-    </style>
-
-    <!-- Favicon -->
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="16x16"
-      href="{% static 'img/logo.png' %}"
-    />
-  </head>
-  <body>
-    <nav id="home" class="navbar navbar-expand-lg bg-white sticky-top">
-      <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'home' %}">StudyEng</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNavDropdown"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" href="{% url 'home' %}">Главная</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/#comments">Отзывы</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/#tarifff">Тарифы</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                id="coursesDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Курсы
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
-                {% if courses %} {% for course in courses %}
-                <li>
-                  <a
-                    class="dropdown-item"
-                    href="{% url 'course_detail' course.id %}"
-                    >{{ course.name }}</a
-                  >
-                </li>
-                {% endfor %} {% else %}
-                <li>
-                  <a class="dropdown-item disabled">Курсы не загружены</a>
-                </li>
-                {% endif %}
-              </ul>
-            </li>
-          </ul>
-
-          <ul class="navbar-nav ms-auto">
-            {% if user.is_authenticated %}
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                id="profileDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <i class="bi bi-person-circle me-1"></i> Профиль
-              </a>
-              <ul
-                class="dropdown-menu dropdown-menu-end"
-                aria-labelledby="profileDropdown"
-              >
-                <li>
-                  <a class="dropdown-item disabled">
-                    📞 {{ user.first_name }}</a
-                  >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="{% url 'profile' %}"
-                    >📚 Мои курсы</a
-                  >
-                </li>
-                <li>
-                  <hr class="dropdown-divider" />
-                </li>
-                <li>
-                  <a
-                    class="dropdown-item text-danger"
-                    href="{% url 'logout' %}"
-                  >
-                    🚪 Выйти</a
-                  >
-                </li>
-              </ul>
-            </li>
-            {% else %}
-            <li class="nav-item">
-              <a class="btn-outline-primary ms-auto" href="{% url 'login' %}">
-                <i class="bi bi-box-arrow-in-right me-1"></i> Войти
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-        </div>
+        <ul class="navbar-nav ms-auto">
+          {% if user.is_authenticated %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-1"></i> Профиль
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+              <li><a class="dropdown-item disabled">📞 {{ user.first_name }}</a></li>
+              <li><a class="dropdown-item" href="{% url 'profile' %}">📚 Мои курсы</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">🚪 Выйти</a></li>
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item"><a class="btn-outline-primary ms-auto" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right me-1"></i> Войти</a></li>
+          {% endif %}
+        </ul>
       </div>
-    </nav>
+    </div>
+  </nav>
 
-    <main class="container py-4">{% block content %}{% endblock %}</main>
+  <main class="container py-4">{% block content %}{% endblock %}</main>
 
-    <footer class="bg-dark text-light text-center py-2 mt-4">
-      <p class="mb-0">&copy; 2025 StudyEng. Все права защищены.</p>
-    </footer>
+  <footer class="bg-dark text-light text-center py-2 mt-4">
+    <p class="mb-0">&copy; 2025 StudyEng. Все права защищены.</p>
+  </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
