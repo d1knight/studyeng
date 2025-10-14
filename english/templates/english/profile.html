@@ -1,152 +1,266 @@
-{% extends "english/base.html" %}
-
-{% block content %}
+{% extends "english/base.html" %} {% block content %}
 
 <div class="container my-5">
-  <div class="card shadow-sm border-0 rounded-4 mx-auto" style="max-width: 700px;">
+  <div
+    class="card shadow-sm border-0 rounded-4 mx-auto"
+    style="max-width: 700px"
+  >
     <div class="card-body p-4">
       <h2 class="fw-bold text-center mb-4 text-dark">Мой профиль</h2>
 
       <!-- Аватар и информация о пользователе -->
       <div class="text-center mb-4">
-        <div class="bg-primary text-white d-inline-flex justify-content-center align-items-center rounded-circle shadow-sm" 
-             style="width: 80px; height: 80px; font-size: 2rem;">
-          {{ user.first_name|default:user.full_name|default:user.phone_number|first|upper }}
+        <div
+          class="bg-primary text-white d-inline-flex justify-content-center align-items-center rounded-circle shadow-sm"
+          style="width: 80px; height: 80px; font-size: 2rem"
+        >
+          {{
+          user.first_name|default:user.full_name|default:user.phone_number|first|upper
+          }}
         </div>
-        <h5 class="mt-3 mb-0 fw-semibold">{{ user.first_name }} {{ user.last_name }}</h5>
+        <h5 class="mt-3 mb-0 fw-semibold">
+          {{ user.first_name }} {{ user.last_name }}
+        </h5>
         <p class="text-muted mb-2">{{ user.email }}</p>
-        <p class="text-muted"><strong>Телефон:</strong> {{ user.phone_number }}</p>
+        <p class="text-muted">
+          <strong>Телефон:</strong> {{ user.phone_number }}
+        </p>
       </div>
 
-      <hr class="my-4">
+      <hr class="my-4" />
 
       <!-- Мои курсы -->
       <h4 class="fw-semibold mb-3">Мои курсы</h4>
       {% if courses_data %}
-        <div class="list-group mb-4">
-          {% for course_data in courses_data %}
-            <div class="list-group-item mb-2 d-flex justify-content-between align-items-center">
-              <div>
-                <h6 class="mb-1 fw-bold">{{ course_data.course.name }}</h6>
-                <p class="mb-1 text-muted">{{ course_data.course.description|truncatewords:20 }}</p>
-                <small class="text-muted">
-                  Тариф: {{ course_data.tariff.name|default:"Не указан" }} |
-                  Прогресс: {{ course_data.progress }}%
-                </small>
-              </div>
-              <a href="{% url 'course_detail' course_data.course.id %}" class="btn btn-sm btn-primary">Перейти к курсу</a>
-            </div>
-          {% endfor %}
+      <div class="list-group mb-4">
+        {% for course_data in courses_data %}
+        <div
+          class="list-group-item mb-2 d-flex justify-content-between align-items-center"
+        >
+          <div>
+            <h6 class="mb-1 fw-bold">{{ course_data.course.name }}</h6>
+            <p class="mb-1 text-muted">
+              {{ course_data.course.description|truncatewords:20 }}
+            </p>
+            <small class="text-muted">
+              Тариф: {{ course_data.tariff.name|default:"Не указан" }} |
+              Прогресс: {{ course_data.progress }}%
+            </small>
+          </div>
+          <a
+            href="{% url 'course_detail' course_data.course.id %}"
+            class="btn btn-sm btn-primary"
+            >Перейти к курсу</a
+          >
         </div>
+        {% endfor %}
+      </div>
       {% else %}
-        <p class="text-muted">У вас пока нет курсов. <a href="/#home">Выберите курс</a></p>
+      <p class="text-muted">
+        У вас пока нет курсов. <a href="/#home">Выберите курс</a>
+      </p>
       {% endif %}
 
-      <hr class="my-4">
+      <hr class="my-4" />
 
       <!-- Форма добавления комментария -->
       <h4 class="fw-semibold mb-3">Оставьте комментарий</h4>
       <form method="post" class="mb-4">
-        {% csrf_token %}
-        {{ comment_form.as_p }}
-        <button type="submit" name="add_comment" class="btn btn-success">Отправить</button>
+        {% csrf_token %} {{ comment_form.as_p }}
+        <button type="submit" name="add_comment" class="btn btn-success">
+          Отправить
+        </button>
       </form>
 
       <!-- Список комментариев -->
       <h5 class="mb-3">Комментарии:</h5>
       {% if comments %}
-        <div class="list-group">
-          {% for comment in comments %}
-            <div class="list-group-item mb-2 d-flex justify-content-between align-items-start" id="comment-{{ comment.id }}">
-              <div class="flex-grow-1">
-                <strong>{{ comment.user.first_name }} {{ comment.user.last_name }}:</strong>
-                <p class="mb-1 comment-text">{{ comment.text }}</p>
-                <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
-              </div>
+      <div class="list-group">
+        {% for comment in comments %}
+        <div
+          class="list-group-item mb-2 d-flex justify-content-between align-items-start"
+          id="comment-{{ comment.id }}"
+        >
+          <div class="flex-grow-1">
+            <strong
+              >{{ comment.user.first_name }} {{ comment.user.last_name
+              }}:</strong
+            >
+            <p class="mb-1 comment-text">{{ comment.text }}</p>
+            <small class="text-muted"
+              >{{ comment.created_at|date:"d.m.Y H:i" }}</small
+            >
+          </div>
 
-              {% if comment.user == user %}
-                <div class="ms-3 d-flex flex-column gap-1">
-                  <!-- Кнопка редактирования -->
-                  <button class="btn btn-sm btn-warning edit-btn" data-id="{{ comment.id }}">Редактировать</button>
+          {% if comment.user == user %}
+          <div class="ms-3 d-flex flex-column gap-1">
+            <!-- Кнопка редактирования -->
+            <button
+              class="btn btn-sm btn-warning edit-btn"
+              data-id="{{ comment.id }}"
+            >
+              Редактировать
+            </button>
 
-                  <!-- Кнопка удаления с модальным окном -->
-                  <button type="button" class="btn btn-sm btn-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal{{ comment.id }}">
-                    Удалить
-                  </button>
+            <!-- Кнопка удаления с модальным окном -->
+            <button
+              type="button"
+              class="btn btn-sm btn-danger delete-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal{{ comment.id }}"
+            >
+              Удалить
+            </button>
 
-                  <!-- Модальное окно удаления -->
-                  <div class="modal fade" id="deleteModal{{ comment.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ comment.id }}" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="deleteModalLabel{{ comment.id }}">Подтвердите удаление</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          Вы действительно хотите удалить этот комментарий?
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                          <button type="button" class="btn btn-danger confirm-delete" data-id="{{ comment.id }}">Удалить</button>
-                        </div>
-                      </div>
-                    </div>
+            <!-- Модальное окно удаления -->
+            <div
+              class="modal fade"
+              id="deleteModal{{ comment.id }}"
+              tabindex="-1"
+              aria-labelledby="deleteModalLabel{{ comment.id }}"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5
+                      class="modal-title"
+                      id="deleteModalLabel{{ comment.id }}"
+                    >
+                      Подтвердите удаление
+                    </h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
                   </div>
-                  <!-- Конец модального окна -->
+                  <div class="modal-body">
+                    Вы действительно хотите удалить этот комментарий?
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-bs-dismiss="modal"
+                    >
+                      Отмена
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger confirm-delete"
+                      data-id="{{ comment.id }}"
+                    >
+                      Удалить
+                    </button>
+                  </div>
                 </div>
-              {% endif %}
+              </div>
             </div>
-          {% endfor %}
+            <!-- Конец модального окна -->
+          </div>
+          {% endif %}
         </div>
+        {% endfor %}
+      </div>
       {% else %}
-        <p class="text-muted">Комментариев пока нет.</p>
+      <p class="text-muted">Комментариев пока нет.</p>
       {% endif %}
-
     </div>
   </div>
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+  document.addEventListener("DOMContentLoaded", function () {
+    const csrfToken = document.querySelector(
+      "[name=csrfmiddlewaretoken]"
+    ).value;
 
-  // --- Делегирование для редактирования ---
-  document.addEventListener("click", function(e) {
-    if(e.target && e.target.classList.contains("edit-btn")) {
-      const btn = e.target;
-      const commentId = btn.dataset.id;
-      const commentDiv = document.getElementById("comment-" + commentId);
-      const textEl = commentDiv.querySelector(".comment-text");
-      const originalText = textEl.textContent;
+    // --- Делегирование для редактирования ---
+    document.addEventListener("click", function (e) {
+      if (e.target && e.target.classList.contains("edit-btn")) {
+        const btn = e.target;
+        const commentId = btn.dataset.id;
+        const commentDiv = document.getElementById("comment-" + commentId);
+        const textEl = commentDiv.querySelector(".comment-text");
+        const originalText = textEl.textContent;
 
-      if(commentDiv.querySelector("input")) return; // уже редактируется
+        if (commentDiv.querySelector("input")) return; // уже редактируется
 
-      const input = document.createElement("input");
-      input.type = "text";
-      input.value = originalText;
-      input.classList.add("form-control", "mb-2");
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = originalText;
+        input.classList.add("form-control", "mb-2");
 
-      const saveBtn = document.createElement("button");
-      saveBtn.textContent = "Сохранить";
-      saveBtn.classList.add("btn", "btn-primary", "btn-sm", "mb-1");
+        const saveBtn = document.createElement("button");
+        saveBtn.textContent = "Сохранить";
+        saveBtn.classList.add("btn", "btn-primary", "btn-sm", "mb-1");
 
-      const cancelBtn = document.createElement("button");
-      cancelBtn.textContent = "Отмена";
-      cancelBtn.classList.add("btn", "btn-secondary", "btn-sm", "mb-1", "ms-1");
+        const cancelBtn = document.createElement("button");
+        cancelBtn.textContent = "Отмена";
+        cancelBtn.classList.add(
+          "btn",
+          "btn-secondary",
+          "btn-sm",
+          "mb-1",
+          "ms-1"
+        );
 
-      // скрываем старый текст и кнопки
-      textEl.style.display = "none";
-      btn.style.display = "none";
+        // скрываем старый текст и кнопки
+        textEl.style.display = "none";
+        btn.style.display = "none";
 
-      const deleteBtn = commentDiv.querySelector(".delete-btn");
-      if(deleteBtn) deleteBtn.style.display = "none";
+        const deleteBtn = commentDiv.querySelector(".delete-btn");
+        if (deleteBtn) deleteBtn.style.display = "none";
 
-      commentDiv.querySelector(".flex-grow-1").appendChild(input);
-      commentDiv.querySelector(".flex-grow-1").appendChild(saveBtn);
-      commentDiv.querySelector(".flex-grow-1").appendChild(cancelBtn);
+        commentDiv.querySelector(".flex-grow-1").appendChild(input);
+        commentDiv.querySelector(".flex-grow-1").appendChild(saveBtn);
+        commentDiv.querySelector(".flex-grow-1").appendChild(cancelBtn);
 
-      saveBtn.addEventListener("click", function() {
-        const newText = input.value;
+        saveBtn.addEventListener("click", function () {
+          const newText = input.value;
+
+          fetch("", {
+            method: "POST",
+            headers: {
+              "X-Requested-With": "XMLHttpRequest",
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `edit_comment=1&comment_id=${commentId}&text=${encodeURIComponent(
+              newText
+            )}&csrfmiddlewaretoken=${csrfToken}`,
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                textEl.textContent = data.comment.text;
+                textEl.style.display = "";
+                input.remove();
+                saveBtn.remove();
+                cancelBtn.remove();
+                btn.style.display = "";
+                if (deleteBtn) deleteBtn.style.display = "";
+              }
+            });
+        });
+
+        cancelBtn.addEventListener("click", function () {
+          textEl.style.display = "";
+          input.remove();
+          saveBtn.remove();
+          cancelBtn.remove();
+          btn.style.display = "";
+          if (deleteBtn) deleteBtn.style.display = "";
+        });
+      }
+
+      // --- Делегирование для удаления ---
+      if (e.target && e.target.classList.contains("confirm-delete")) {
+        const commentId = e.target.dataset.id;
+        const commentDiv = document.getElementById("comment-" + commentId);
+        const modalEl = document.getElementById("deleteModal" + commentId);
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
 
         fetch("", {
           method: "POST",
@@ -154,57 +268,18 @@ document.addEventListener("DOMContentLoaded", function() {
             "X-Requested-With": "XMLHttpRequest",
             "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: `edit_comment=1&comment_id=${commentId}&text=${encodeURIComponent(newText)}&csrfmiddlewaretoken=${csrfToken}`
+          body: `delete_comment=1&comment_id=${commentId}&csrfmiddlewaretoken=${csrfToken}`,
         })
-        .then(res => res.json())
-        .then(data => {
-          if(data.success) {
-            textEl.textContent = data.comment.text;
-            textEl.style.display = "";
-            input.remove();
-            saveBtn.remove();
-            cancelBtn.remove();
-            btn.style.display = "";
-            if(deleteBtn) deleteBtn.style.display = "";
-          }
-        });
-      });
-
-      cancelBtn.addEventListener("click", function() {
-        textEl.style.display = "";
-        input.remove();
-        saveBtn.remove();
-        cancelBtn.remove();
-        btn.style.display = "";
-        if(deleteBtn) deleteBtn.style.display = "";
-      });
-    }
-
-    // --- Делегирование для удаления ---
-    if(e.target && e.target.classList.contains("confirm-delete")) {
-      const commentId = e.target.dataset.id;
-      const commentDiv = document.getElementById("comment-" + commentId);
-      const modalEl = document.getElementById("deleteModal" + commentId);
-      const modalInstance = bootstrap.Modal.getInstance(modalEl);
-
-      fetch("", {
-        method: "POST",
-        headers: {
-          "X-Requested-With": "XMLHttpRequest",
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: `delete_comment=1&comment_id=${commentId}&csrfmiddlewaretoken=${csrfToken}`
-      })
-      .then(res => res.json())
-      .then(data => {
-        if(data.success) {
-          if(modalInstance) modalInstance.hide();
-          commentDiv.remove();
-        }
-      });
-    }
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              if (modalInstance) modalInstance.hide();
+              commentDiv.remove();
+            }
+          });
+      }
+    });
   });
-});
 </script>
 
 {% endblock content %}
