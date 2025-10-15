@@ -148,25 +148,42 @@ h1, h2, h3 {
 /* Стили для стрелок карусели */
 .carousel-control-prev,
 .carousel-control-next {
-  filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%);
   opacity: 0.8;
   transition: opacity 0.2s ease;
+  width: 5%; /* Уменьшен для лучшей адаптивности */
 }
 
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
-  background-color: #3333; /* Черный фон для контраста */
-  border: 2px solid #ffffff; /* Белая обводка для выделения */
+  background-image: none; /* Убираем стандартные SVG */
+  background-color: #ffffff; /* Белый фон для контраста с bg-light */
+  border: 2px solid var(--success-color); /* Зеленая обводка из вашей темы */
   border-radius: 50%;
-  padding: 10px;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
+  position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Тень для глубины */
 }
 
 .carousel-control-prev-icon::before,
 .carousel-control-next-icon::before {
-  filter: brightness(0) invert(1); /* Инверсия цвета иконок в черный */
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 12px;
+  height: 12px;
+  border-top: 3px solid var(--text-dark); /* Черный цвет текста из темы */
+  border-right: 3px solid var(--text-dark);
+}
+
+.carousel-control-prev-icon::before {
+  transform: translate(-50%, -50%) rotate(-135deg);
+}
+
+.carousel-control-next-icon::before {
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .carousel-control-prev:hover,
@@ -175,19 +192,19 @@ h1, h2, h3 {
 }
 
 .carousel-control-prev {
-  left: -50px;
+  left: -60px;
 }
 
 .carousel-control-next {
-  right: -50px;
+  right: -60px;
 }
 
 /* Адаптивность для мобильных устройств */
 @media (max-width: 768px) {
   .carousel-control-prev {
-    left: -20px;
+    left: -30px;
   }
   .carousel-control-next {
-    right: -20px;
+    right: -30px;
   }
 }
