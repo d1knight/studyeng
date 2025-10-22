@@ -258,12 +258,14 @@ def generate_code(request: HttpRequest):
 
     phone_number = data.get("phone_number")
     tg_id = data.get("tg_id")
+    first_name = data.get("first_name")
+    last_name = data.get("last_name")
 
     if not phone_number or not tg_id:
         return JsonResponse({"error": "phone_number and tg_id are required"}, status=HTTPStatus.BAD_REQUEST)
 
     user, created = User.objects.get_or_create(
-        phone_number=phone_number, defaults={'tg_id': tg_id}
+        phone_number=phone_number, defaults={'tg_id': tg_id, "first_name": first_name, "last_name": last_name}
     )
     
     if created:

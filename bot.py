@@ -11,10 +11,12 @@ BACKEND_URL = "http://127.0.0.1:8000/api/v1/bot/generate-code/"
 TOKEN = '7787604557:AAFfGkZc_Gau65wVpm1u5wd9W0s6GAbjKA8'
 API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
-async def get_otp_code(tg_id, phone_number):
+async def get_otp_code(tg_id, phone_number, first_name, last_name):
     data = {
         "tg_id": tg_id,
-        "phone_number": phone_number
+        "phone_number": phone_number,
+        "first_name": first_name,
+        "last_name": last_name
     }
     async with aiohttp.ClientSession() as session:
         async with session.post(BACKEND_URL, json=data) as response:
@@ -55,13 +57,15 @@ async def main():
                 chat_id = message.get("chat", {}).get("id")
                 text = message.get("text")
                 contact = message.get("contact")
+                first_name = message.get("from", {}).get("first_name")
+                last_name = message.get("from", {}).get("last_name")
 
                 if text == "/start":
                     await send_message(session, chat_id, "Привет! Для получения подтверждающего кода нажмите кнопку снизу👇", phone_keyboard())
 
                 elif contact:
                     phone_number = contact.get("phone_number")
-                    response_data = await get_otp_code(chat_id, phone_number)
+                    response_data = await get_otp_code(chat_id, phone_number, first_name, last_name)
                     if response_data and response_data.get("code"):
                         code = response_data.get("code")
                         await send_message(session, chat_id, f"✅ Подтвеждающий код: `{code}`")
