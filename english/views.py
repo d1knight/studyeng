@@ -14,6 +14,7 @@ import random
 from django.contrib import messages
 from types import SimpleNamespace
 from datetime import datetime
+from django.db import IntegrityError
 
 def main_page(request):
     courses = Course.objects.all()
@@ -246,6 +247,7 @@ def reg(request: HttpRequest):
     return render(request, 'english/reg.html')
 
 
+
 @csrf_exempt
 def generate_code(request: HttpRequest):
     if request.method != "POST":
@@ -264,17 +266,21 @@ def generate_code(request: HttpRequest):
     if not phone_number or not tg_id:
         return JsonResponse({"error": "phone_number and tg_id are required"}, status=HTTPStatus.BAD_REQUEST)
 
-    user, created = User.objects.get_or_create(
-        phone_number=phone_number, defaults={'tg_id': tg_id, "first_name": first_name, "last_name": last_name}
-    )
-    
-    if created:
-        user.set_unusable_password()
+    user = User.objects.filter(tg_id=tg_id).first()
+    if user:
+        user.phone_number = phone_number
+        user.first_name = first_name
+        user.last_name = last_name
         user.save()
-    elif user.tg_id != tg_id:
-        user.tg_id = tg_id
-        user.save()
-    
+    else:
+        user, created = User.objects.get_or_create(
+            phone_number=phone_number,
+            defaults={'tg_id': tg_id, 'first_name': first_name, 'last_name': last_name},
+        )
+        if created:
+            user.set_unusable_password()
+            user.save()
+
     otp_code = generate_unique_otp()
     cache.set(f"code_{otp_code}", {'phone_number': phone_number}, timeout=60)
 
