@@ -53,7 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255, verbose_name='Фамилия')
     phone_number = models.CharField(max_length=255, unique=True, verbose_name='Номер телефона')
     tg_id = models.IntegerField(unique=True, verbose_name='Telegram ID')
-
+    
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False, verbose_name="Доступ в админку")
     is_superuser = models.BooleanField(default=False, verbose_name="Суперпользователь")
