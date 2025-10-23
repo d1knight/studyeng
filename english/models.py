@@ -58,7 +58,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False, verbose_name="Доступ в админку")
     is_superuser = models.BooleanField(default=False, verbose_name="Суперпользователь")
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-
     objects = UserManager()
 
     USERNAME_FIELD = 'phone_number'
