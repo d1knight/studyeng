@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpRequest, JsonResponse
 from .forms import CommentForm
 from .models import *
 from django.core.cache import cache
+from django.core.files.base import ContentFile
 from http import HTTPStatus
 from .utils import generate_unique_otp
 from django.views.decorators.csrf import csrf_exempt
@@ -251,30 +252,64 @@ def generate_code(request: HttpRequest):
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=HTTPStatus.METHOD_NOT_ALLOWED)
 
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=HTTPStatus.BAD_REQUEST)
+    # --- 1️⃣ Проверяем тип контента ---
+    if request.content_type.startswith("multipart/form-data"):
+        phone_number = request.POST.get("phone_number")
+        tg_id = request.POST.get("tg_id")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        avatar = request.FILES.get("avatar")
+    else:
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON"}, status=HTTPStatus.BAD_REQUEST)
+        phone_number = data.get("phone_number")
+        tg_id = data.get("tg_id")
+        first_name = data.get("first_name")
+        last_name = data.get("last_name")
+        avatar = None
 
-    phone_number = data.get("phone_number")
-    tg_id = data.get("tg_id")
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
-
+    # --- 2️⃣ Проверяем обязательные поля ---
     if not phone_number or not tg_id:
         return JsonResponse({"error": "phone_number and tg_id are required"}, status=HTTPStatus.BAD_REQUEST)
 
+    # --- 3️⃣ Получаем или создаём пользователя ---
     user, created = User.objects.get_or_create(
-        phone_number=phone_number, defaults={'tg_id': tg_id, "first_name": first_name, "last_name": last_name}
+        phone_number=phone_number,
+        defaults={
+            'tg_id': tg_id,
+            'first_name': first_name,
+            'last_name': last_name
+        }
     )
-    
+
+    # --- 4️⃣ Обновляем данные, если нужно ---
+    updated = False
+
+    if not created:
+        if user.tg_id != tg_id:
+            user.tg_id = tg_id
+            updated = True
+        if first_name and user.first_name != first_name:
+            user.first_name = first_name
+            updated = True
+        if last_name and user.last_name != last_name:
+            user.last_name = last_name
+            updated = True
+
+    # --- 5️⃣ Сохраняем аватар ---
+    if avatar:
+        user.avatar.save(f"{tg_id}.jpg", avatar, save=False)
+        updated = True
+
+    # --- 6️⃣ Сохраняем изменения ---
     if created:
         user.set_unusable_password()
+    if created or updated:
         user.save()
-    elif user.tg_id != tg_id:
-        user.tg_id = tg_id
-        user.save()
-    
+
+    # --- 7️⃣ Генерируем и кэшируем OTP ---
     otp_code = generate_unique_otp()
     cache.set(f"code_{otp_code}", {'phone_number': phone_number}, timeout=60)
 
@@ -305,6 +340,14 @@ def profile(request):
             'progress': round(progress, 1),
             'tariff': payments.filter(tariff__course=course).first().tariff if payments.filter(tariff__course=course).exists() else None
         })
+
+
+    # 🔹 Обработка загрузки аватара
+    if request.method == "POST" and request.FILES.get("avatar"):
+        request.user.avatar = request.FILES["avatar"]
+        request.user.save()
+        return redirect("profile")
+
 
     # Обработка формы добавления комментария
     if request.method == "POST" and not request.headers.get("x-requested-with") == "XMLHttpRequest":
