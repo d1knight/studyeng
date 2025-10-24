@@ -1,6 +1,4 @@
-{% extends 'english/base.html' %} 
-{% load static %}
-{% block content %}
+{% extends 'english/base.html' %} {% load static %} {% block content %}
 
 <!-- Hero -->
 <section id="home" class="py-5">
@@ -18,16 +16,18 @@
         <strong>МФТИ</strong> и зарубежных университетах. Все материалы и
         программы разработаны мной лично.
       </p>
-      <a href="#tariff" class="btn btn-success btn-lg px-4 py-2 rounded-3 shadow-sm">
+      <a
+        href="#tariff"
+        class="btn btn-success btn-lg px-4 py-2 rounded-3 shadow-sm"
+      >
         🚀 Записаться на курс
       </a>
     </div>
     <div class="col-md-6 text-center mt-4 mt-md-0">
       <img
-        src="{% static 'images/teacher.jpg' %}"
+        src="https://cdn.cpdonline.co.uk/wp-content/uploads/2023/02/24155222/Teacher-Teaching-Online.jpg"
         class="rounded-4 img-fluid shadow-lg"
-        alt="Преподаватель английского языка Байрам"
-        loading="lazy"
+        alt="Преподаватель"
       />
     </div>
   </div>
@@ -46,10 +46,9 @@
     <div class="col-md-4">
       <div class="card h-100 shadow-sm border-0 hover-scale">
         <img
-          src="{% static 'images/testing.jpg' %}"
+          src="https://antaltalent.ru/wp-content/uploads/2023/01/tpk_prev.jpg"
           class="card-img-top rounded-top-3"
-          alt="Бесплатное тестирование уровня знаний"
-          loading="lazy"
+          alt="Тестирование"
         />
         <div class="card-body">
           <h5 class="card-title fw-semibold">Бесплатное тестирование уровня</h5>
@@ -64,10 +63,9 @@
     <div class="col-md-4">
       <div class="card h-100 shadow-sm border-0 hover-scale">
         <img
-          src="{% static 'images/feedback.jpg' %}"
+          src="https://www.unicraft.org/wp-content/uploads/2021/02/cropped-colleagues-generating-business-ideas_1098-19137.jpg"
           class="card-img-top rounded-top-3"
-          alt="Обратная связь от преподавателя"
-          loading="lazy"
+          alt="Обратная связь"
         />
         <div class="card-body">
           <h5 class="card-title fw-semibold">
@@ -84,10 +82,9 @@
     <div class="col-md-4">
       <div class="card h-100 shadow-sm border-0 hover-scale">
         <img
-          src="{% static 'images/schedule.jpg' %}"
+          src="https://shablon.klev.club/uploads/posts/2024-09/shablon-klev-club-zl8b-p-shabloni-kalendar-na-mesyats-bez-dat-1.jpg"
           class="card-img-top rounded-top-3"
-          alt="Гибкий график занятий"
-          loading="lazy"
+          alt="График занятий"
         />
         <div class="card-body">
           <h5 class="card-title fw-semibold">Удобный график</h5>
@@ -130,7 +127,8 @@
                 <a
                   href="{% url 'buy_tariff' tariff.id %}"
                   class="btn btn-outline-success btn-sm ms-2"
-                >Купить</a>
+                  >Купить</a
+                >
               </div>
             </li>
             {% endfor %}
@@ -139,7 +137,8 @@
           <a
             href="{% url 'course_detail' course.id %}"
             class="btn btn-primary mt-auto w-100"
-          >Подробнее о курсе</a>
+            >Подробнее о курсе</a
+          >
         </div>
       </div>
     </div>
@@ -155,7 +154,11 @@
   </div>
 
   {% if comments %}
-  <div id="carouselComments" class="carousel slide text-center" data-bs-ride="carousel">
+  <div
+    id="carouselComments"
+    class="carousel slide text-center"
+    data-bs-ride="carousel"
+  >
     <div class="carousel-inner">
       {% for comment in comments %}
       <div
@@ -164,28 +167,28 @@
       >
         <!-- Отображение аватара пользователя -->
         {% if comment.user.avatar %}
-          <img
-            src="{{ comment.user.avatar.url }}"
-            class="d-block mx-auto rounded-circle shadow"
-            alt="Аватар пользователя {{ comment.user.first_name }} {{ comment.user.last_name }}"
-            width="140"
-            height="140"
-            style="object-fit: cover;"
-            loading="lazy"
-          />
+        <img
+          src="{{ comment.user.avatar.url }}"
+          class="d-block mx-auto rounded-circle shadow"
+          alt="Аватар пользователя {{ comment.user.first_name }} {{ comment.user.last_name }}"
+          width="140"
+          height="140"
+          style="object-fit: cover"
+          loading="lazy"
+        />
         {% else %}
-          <!-- Дефолтный аватар -->
-          <img
-            src="https://ui-avatars.com/api/?name={{ comment.user.first_name }}+{{ comment.user.last_name }}&size=140&background=0D8ABC&color=fff&bold=true"
-            class="d-block mx-auto rounded-circle shadow"
-            alt="Аватар пользователя {{ comment.user.first_name }} {{ comment.user.last_name }}"
-            width="140"
-            height="140"
-            style="object-fit: cover;"
-            loading="lazy"
-          />
+        <!-- Дефолтный аватар -->
+        <img
+          src="https://ui-avatars.com/api/?name={{ comment.user.first_name }}+{{ comment.user.last_name }}&size=140&background=0D8ABC&color=fff&bold=true"
+          class="d-block mx-auto rounded-circle shadow"
+          alt="Аватар пользователя {{ comment.user.first_name }} {{ comment.user.last_name }}"
+          width="140"
+          height="140"
+          style="object-fit: cover"
+          loading="lazy"
+        />
         {% endif %}
-        
+
         <div class="mt-3">
           <h5 class="fw-semibold text-dark">
             {{ comment.user.first_name }} {{ comment.user.last_name }}
@@ -197,40 +200,76 @@
     </div>
 
     <!-- Кнопки управления каруселью -->
-    <button 
-      class="carousel-control-prev" 
-      type="button" 
-      data-bs-target="#carouselComments" 
-      data-bs-slide="prev" 
-      style="opacity: 0.9; width: 5%; left: -60px;"
+    <button
+      class="carousel-control-prev"
+      type="button"
+      data-bs-target="#carouselComments"
+      data-bs-slide="prev"
+      style="opacity: 0.9; width: 5%; left: -60px"
       aria-label="Предыдущий отзыв"
     >
-      <span 
-        class="carousel-control-prev-icon" 
-        aria-hidden="true" 
-        style="background-image: none; width: 40px; height: 40px; background-color: #ffffff; border: 2px solid #28a745; border-radius: 50%; position: relative;"
+      <span
+        class="carousel-control-prev-icon"
+        aria-hidden="true"
+        style="
+          background-image: none;
+          width: 40px;
+          height: 40px;
+          background-color: #ffffff;
+          border: 2px solid #28a745;
+          border-radius: 50%;
+          position: relative;
+        "
       >
-        <span 
-          style="content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-135deg); width: 12px; height: 12px; border-top: 3px solid #000000; border-right: 3px solid #000000;"
+        <span
+          style="
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-135deg);
+            width: 12px;
+            height: 12px;
+            border-top: 3px solid #000000;
+            border-right: 3px solid #000000;
+          "
         ></span>
       </span>
       <span class="visually-hidden">Previous</span>
     </button>
-    <button 
-      class="carousel-control-next" 
-      type="button" 
-      data-bs-target="#carouselComments" 
-      data-bs-slide="next" 
-      style="opacity: 0.9; width: 5%; right: -60px;"
+    <button
+      class="carousel-control-next"
+      type="button"
+      data-bs-target="#carouselComments"
+      data-bs-slide="next"
+      style="opacity: 0.9; width: 5%; right: -60px"
       aria-label="Следующий отзыв"
     >
-      <span 
-        class="carousel-control-next-icon" 
-        aria-hidden="true" 
-        style="background-image: none; width: 40px; height: 40px; background-color: #ffffff; border: 2px solid #28a745; border-radius: 50%; position: relative;"
+      <span
+        class="carousel-control-next-icon"
+        aria-hidden="true"
+        style="
+          background-image: none;
+          width: 40px;
+          height: 40px;
+          background-color: #ffffff;
+          border: 2px solid #28a745;
+          border-radius: 50%;
+          position: relative;
+        "
       >
-        <span 
-          style="content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); width: 12px; height: 12px; border-top: 3px solid #000000; border-right: 3px solid #000000;"
+        <span
+          style="
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            border-top: 3px solid #000000;
+            border-right: 3px solid #000000;
+          "
         ></span>
       </span>
       <span class="visually-hidden">Next</span>
@@ -252,21 +291,24 @@
   <div class="text-center text-muted">
     <p>Пока нет комментариев. Будьте первым!</p>
     {% if not user.is_authenticated %}
-    <a href="{% url 'login' %}" class="btn btn-primary">Войдите, чтобы оставить отзыв</a>
+    <a href="{% url 'login' %}" class="btn btn-primary"
+      >Войдите, чтобы оставить отзыв</a
+    >
     {% endif %}
   </div>
   {% endif %}
 
   <!-- Форма добавления комментария (только для авторизованных) -->
   {% if user.is_authenticated %}
-  <div class="container mt-5" style="max-width: 600px;">
+  <div class="container mt-5" style="max-width: 600px">
     <div class="card shadow-sm">
       <div class="card-body">
         <h5 class="card-title mb-3">Оставьте свой отзыв</h5>
         <form id="commentForm">
-          {% csrf_token %}
-          {{ comment_form.as_p }}
-          <button type="submit" class="btn btn-success w-100">Отправить отзыв</button>
+          {% csrf_token %} {{ comment_form.as_p }}
+          <button type="submit" class="btn btn-success w-100">
+            Отправить отзыв
+          </button>
         </form>
         <div id="commentMessage" class="mt-3"></div>
       </div>
@@ -275,7 +317,8 @@
   {% else %}
   <div class="text-center mt-4">
     <p class="text-muted">
-      <a href="{% url 'login' %}" class="btn btn-primary">Войдите</a>, чтобы оставить отзыв
+      <a href="{% url 'login' %}" class="btn btn-primary">Войдите</a>, чтобы
+      оставить отзыв
     </p>
   </div>
   {% endif %}
@@ -284,77 +327,92 @@
 <!-- AJAX для комментариев -->
 {% if user.is_authenticated %}
 <script>
-  document.getElementById("commentForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const form = e.target;
-    const data = new FormData(form);
-    const messageDiv = document.getElementById("commentMessage");
+  document
+    .getElementById("commentForm")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const messageDiv = document.getElementById("commentMessage");
 
-    try {
-      const response = await fetch("{% url 'home' %}", {
-        method: "POST",
-        headers: { "X-Requested-With": "XMLHttpRequest" },
-        body: data,
-      });
-      const result = await response.json();
+      try {
+        const response = await fetch("{% url 'home' %}", {
+          method: "POST",
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+          body: data,
+        });
+        const result = await response.json();
 
-      if (result.success && result.user && result.text) {
-        messageDiv.innerHTML = '<div class="alert alert-success">Комментарий добавлен!</div>';
+        if (result.success && result.user && result.text) {
+          messageDiv.innerHTML =
+            '<div class="alert alert-success">Комментарий добавлен!</div>';
 
-        // Добавляем новый комментарий в карусель
-        const carouselInner = document.querySelector("#carouselComments .carousel-inner");
-        const newItem = document.createElement("div");
-        newItem.className = "carousel-item";
+          // Добавляем новый комментарий в карусель
+          const carouselInner = document.querySelector(
+            "#carouselComments .carousel-inner"
+          );
+          const newItem = document.createElement("div");
+          newItem.className = "carousel-item";
 
-        // Определяем какой аватар использовать
-        let avatarHTML = '';
-        if (result.avatar_url) {
-          avatarHTML = `<img src="${result.avatar_url}" 
+          // Определяем какой аватар использовать
+          let avatarHTML = "";
+          if (result.avatar_url) {
+            avatarHTML = `<img src="${result.avatar_url}" 
                            class="d-block mx-auto rounded-circle shadow" 
                            width="140" height="140" 
                            style="object-fit: cover;" 
                            alt="Аватар пользователя ${result.user}"
                            loading="lazy">`;
-        } else {
-          const userName = encodeURIComponent(result.user);
-          avatarHTML = `<img src="https://ui-avatars.com/api/?name=${userName}&size=140&background=0D8ABC&color=fff&bold=true" 
+          } else {
+            const userName = encodeURIComponent(result.user);
+            avatarHTML = `<img src="https://ui-avatars.com/api/?name=${userName}&size=140&background=0D8ABC&color=fff&bold=true" 
                            class="d-block mx-auto rounded-circle shadow" 
                            width="140" height="140" 
                            style="object-fit: cover;" 
                            alt="Аватар пользователя ${result.user}"
                            loading="lazy">`;
-        }
+          }
 
-        newItem.innerHTML = `
+          newItem.innerHTML = `
           ${avatarHTML}
           <div class="mt-3">
             <h5 class="fw-semibold text-dark">${result.user}</h5>
             <p class="text-muted">${result.text}</p>
           </div>
         `;
-        carouselInner.appendChild(newItem);
+          carouselInner.appendChild(newItem);
 
-        // Обновляем индикаторы
-        const indicators = document.querySelector(".carousel-indicators");
-        const newIndicator = document.createElement("button");
-        newIndicator.type = "button";
-        newIndicator.setAttribute("data-bs-target", "#carouselComments");
-        newIndicator.setAttribute("data-bs-slide-to", carouselInner.children.length - 1);
-        newIndicator.className = "carousel-indicator";
-        indicators.appendChild(newIndicator);
+          // Обновляем индикаторы
+          const indicators = document.querySelector(".carousel-indicators");
+          const newIndicator = document.createElement("button");
+          newIndicator.type = "button";
+          newIndicator.setAttribute("data-bs-target", "#carouselComments");
+          newIndicator.setAttribute(
+            "data-bs-slide-to",
+            carouselInner.children.length - 1
+          );
+          newIndicator.className = "carousel-indicator";
+          indicators.appendChild(newIndicator);
 
-        form.reset();
+          form.reset();
 
-        // Скрываем сообщение через 3 секунды
-        setTimeout(() => { messageDiv.innerHTML = ''; }, 3000);
-      } else {
-        messageDiv.innerHTML = `<div class="alert alert-danger">${result.error || "Произошла ошибка при добавлении комментария."}</div>`;
+          // Скрываем сообщение через 3 секунды
+          setTimeout(() => {
+            messageDiv.innerHTML = "";
+          }, 3000);
+        } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger">${
+            result.error || "Произошла ошибка при добавлении комментария."
+          }</div>`;
+        }
+      } catch (error) {
+        messageDiv.innerHTML =
+          '<div class="alert alert-danger">Ошибка сети. Пожалуйста, попробуйте позже.</div>';
+        setTimeout(() => {
+          messageDiv.innerHTML = "";
+        }, 3000);
       }
-    } catch (error) {
-      messageDiv.innerHTML = '<div class="alert alert-danger">Ошибка сети. Пожалуйста, попробуйте позже.</div>';
-      setTimeout(() => { messageDiv.innerHTML = ''; }, 3000);
-    }
-  });
+    });
 </script>
 {% endif %}
 
