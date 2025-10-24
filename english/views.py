@@ -312,6 +312,13 @@ def profile(request):
             'tariff': payments.filter(tariff__course=course).first().tariff if payments.filter(tariff__course=course).exists() else None
         })
 
+    # Обработка загрузки аватара
+    if request.method == "POST" and 'avatar' in request.FILES:
+        avatar_file = request.FILES['avatar']
+        request.user.avatar = avatar_file
+        request.user.save()
+        return redirect('profile')
+
     # Обработка формы добавления комментария
     if request.method == "POST" and not request.headers.get("x-requested-with") == "XMLHttpRequest":
         if "add_comment" in request.POST:
@@ -353,7 +360,6 @@ def profile(request):
         'courses_data': courses_data,
     }
     return render(request, 'english/profile.html', context)
-
 
 def logout_view(request):
     logout(request)

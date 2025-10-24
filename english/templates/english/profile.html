@@ -8,33 +8,39 @@
 
       <!-- 🔹 Аватар и информация о пользователе -->
       <div class="text-center mb-4">
-        {% if user.avatar %}
-        <!-- Если пользователь загрузил аватар -->
-        <img src="{{ user.avatar.url }}" alt="Avatar" class="rounded-circle shadow-sm"
-             style="width: 100px; height: 100px; object-fit: cover;" />
-        {% elif user.tg_photo_url %}
-        <!-- Если есть фото из Telegram -->
-        <img src="{{ user.tg_photo_url }}" alt="Telegram Avatar" class="rounded-circle shadow-sm"
-             style="width: 100px; height: 100px; object-fit: cover;" />
-        {% else %}
-        <!-- Если фото нет — показываем инициалы -->
-        <div class="bg-primary text-white d-inline-flex justify-content-center align-items-center rounded-circle shadow-sm"
-             style="width: 100px; height: 100px; font-size: 2rem;">
-          {{ user.first_name|default:user.full_name|default:user.phone_number|first|upper }}
+        <div id="avatar-preview">
+          {% if user.avatar %}
+          <!-- Если пользователь загрузил аватар -->
+          <img src="{{ user.avatar.url }}" alt="Avatar" class="rounded-circle shadow-sm"
+               style="width: 100px; height: 100px; object-fit: cover;" id="current-avatar" />
+          {% elif user.tg_photo_url %}
+          <!-- Если есть фото из Telegram -->
+          <img src="{{ user.tg_photo_url }}" alt="Telegram Avatar" class="rounded-circle shadow-sm"
+               style="width: 100px; height: 100px; object-fit: cover;" id="current-avatar" />
+          {% else %}
+          <!-- Если фото нет — показываем инициалы -->
+          <div class="bg-primary text-white d-inline-flex justify-content-center align-items-center rounded-circle shadow-sm"
+               style="width: 100px; height: 100px; font-size: 2rem;" id="current-avatar">
+            {{ user.first_name|default:user.full_name|default:user.phone_number|first|upper }}
+          </div>
+          {% endif %}
         </div>
-        {% endif %}
 
         <h5 class="mt-3 mb-0 fw-semibold">{{ user.first_name }} {{ user.last_name }}</h5>
+        {% if user.email %}
         <p class="text-muted mb-2">{{ user.email }}</p>
+        {% endif %}
         <p class="text-muted"><strong>Телефон:</strong> {{ user.phone_number }}</p>
 
         <!-- 🔹 Форма смены аватара -->
-        <form method="post" enctype="multipart/form-data" class="mt-3">
+        <form method="post" enctype="multipart/form-data" class="mt-3" id="avatar-form">
           {% csrf_token %}
           <div class="input-group" style="max-width: 300px; margin: 0 auto;">
-            <input type="file" name="avatar" class="form-control form-control-sm" accept="image/*" required>
+            <input type="file" name="avatar" class="form-control form-control-sm" 
+                   accept="image/*" id="avatar-input">
             <button type="submit" class="btn btn-outline-primary btn-sm">Изменить</button>
           </div>
+          <small class="text-muted d-block mt-1">Форматы: JPG, PNG, GIF (макс. 5 МБ)</small>
         </form>
       </div>
 
@@ -129,6 +135,42 @@
   document.addEventListener("DOMContentLoaded", function () {
     const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
+    // 🔹 Предпросмотр аватара перед загрузкой
+    const avatarInput = document.getElementById("avatar-input");
+    if (avatarInput) {
+      avatarInput.addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          // Проверка размера (5 МБ)
+          if (file.size > 5 * 1024 * 1024) {
+            alert("Файл слишком большой! Максимум: 5 МБ");
+            e.target.value = "";
+            return;
+          }
+
+          // Предпросмотр
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const currentAvatar = document.getElementById("current-avatar");
+            if (currentAvatar.tagName === "IMG") {
+              currentAvatar.src = event.target.result;
+            } else {
+              // Заменяем div на img
+              const img = document.createElement("img");
+              img.src = event.target.result;
+              img.alt = "Avatar Preview";
+              img.className = "rounded-circle shadow-sm";
+              img.style.cssText = "width: 100px; height: 100px; object-fit: cover;";
+              img.id = "current-avatar";
+              currentAvatar.replaceWith(img);
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // 🔹 Редактирование и удаление комментариев
     document.addEventListener("click", function (e) {
       if (e.target && e.target.classList.contains("edit-btn")) {
         const btn = e.target;
