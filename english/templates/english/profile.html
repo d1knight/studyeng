@@ -13,16 +13,11 @@
           <!-- Если пользователь загрузил аватар -->
           <img src="{{ user.avatar.url }}" alt="Avatar" class="rounded-circle shadow-sm"
                style="width: 100px; height: 100px; object-fit: cover;" id="current-avatar" />
-          {% elif user.tg_photo_url %}
-          <!-- Если есть фото из Telegram -->
-          <img src="{{ user.tg_photo_url }}" alt="Telegram Avatar" class="rounded-circle shadow-sm"
-               style="width: 100px; height: 100px; object-fit: cover;" id="current-avatar" />
           {% else %}
-          <!-- Если фото нет — показываем инициалы -->
-          <div class="bg-primary text-white d-inline-flex justify-content-center align-items-center rounded-circle shadow-sm"
-               style="width: 100px; height: 100px; font-size: 2rem;" id="current-avatar">
-            {{ user.first_name|default:user.full_name|default:user.phone_number|first|upper }}
-          </div>
+          <!-- Дефолтный аватар -->
+          <img src="https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&size=100&background=0D8ABC&color=fff&bold=true" 
+               alt="Avatar" class="rounded-circle shadow-sm"
+               style="width: 100px; height: 100px; object-fit: cover;" id="current-avatar" />
           {% endif %}
         </div>
 
@@ -152,18 +147,7 @@
           const reader = new FileReader();
           reader.onload = function(event) {
             const currentAvatar = document.getElementById("current-avatar");
-            if (currentAvatar.tagName === "IMG") {
-              currentAvatar.src = event.target.result;
-            } else {
-              // Заменяем div на img
-              const img = document.createElement("img");
-              img.src = event.target.result;
-              img.alt = "Avatar Preview";
-              img.className = "rounded-circle shadow-sm";
-              img.style.cssText = "width: 100px; height: 100px; object-fit: cover;";
-              img.id = "current-avatar";
-              currentAvatar.replaceWith(img);
-            }
+            currentAvatar.src = event.target.result;
           };
           reader.readAsDataURL(file);
         }

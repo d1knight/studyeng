@@ -1,4 +1,5 @@
-{% extends 'english/base.html' %} {% block content %}
+{% extends 'english/base.html' %} 
+{% block content %}
 
 <!-- Hero -->
 <section id="home" class="py-5">
@@ -16,7 +17,7 @@
         <strong>МФТИ</strong> и зарубежных университетах. Все материалы и
         программы разработаны мной лично.
       </p>
-      <a
+      
         href="#tarifff"
         class="btn btn-success btn-lg px-4 py-2 rounded-3 shadow-sm"
       >
@@ -124,7 +125,7 @@
               <span>{{ tarif.name }}</span>
               <div>
                 <span class="fw-bold text-success">{{ tarif.price }} сум</span>
-                <a
+                
                   href="{% url 'buy_tariff' tarif.id %}"
                   class="btn btn-outline-success btn-sm ms-2"
                   >Купить</a
@@ -134,7 +135,7 @@
             {% endfor %}
           </ul>
 
-          <a
+          
             href="{% url 'course_detail' course.id %}"
             class="btn btn-primary mt-auto w-100"
             >Подробнее о курсе</a
@@ -153,6 +154,7 @@
     <p class="text-muted">Реальные истории успеха от наших студентов</p>
   </div>
 
+  {% if comments %}
   <div id="carouselComments" class="carousel slide text-center" data-bs-ride="carousel">
     <div class="carousel-inner">
       {% for comment in comments %}
@@ -160,13 +162,28 @@
         class="carousel-item {% if forloop.first %}active{% endif %}"
         data-bs-interval="5000"
       >
-        <img
-          src="https://picsum.photos/200/200?random={{ forloop.counter }}"
-          class="d-block mx-auto rounded-circle shadow"
-          alt="avatar"
-          width="140"
-          height="140"
-        />
+        <!-- 🔹 Отображение аватара пользователя -->
+        {% if comment.user.avatar %}
+          <img
+            src="{{ comment.user.avatar.url }}"
+            class="d-block mx-auto rounded-circle shadow"
+            alt="{{ comment.user.first_name }}"
+            width="140"
+            height="140"
+            style="object-fit: cover;"
+          />
+        {% else %}
+          <!-- Дефолтный аватар -->
+          <img
+            src="https://ui-avatars.com/api/?name={{ comment.user.first_name }}+{{ comment.user.last_name }}&size=140&background=0D8ABC&color=fff&bold=true"
+            class="d-block mx-auto rounded-circle shadow"
+            alt="{{ comment.user.first_name }}"
+            width="140"
+            height="140"
+            style="object-fit: cover;"
+          />
+        {% endif %}
+        
         <div class="mt-3">
           <h5 class="fw-semibold text-dark">
             {{ comment.user.first_name }} {{ comment.user.last_name }}
@@ -177,7 +194,7 @@
       {% endfor %}
     </div>
 
-    <!-- Кнопки управления каруселью с инлайн-стилями -->
+    <!-- Кнопки управления каруселью -->
     <button 
       class="carousel-control-prev" 
       type="button" 
@@ -228,6 +245,34 @@
       {% endfor %}
     </div>
   </div>
+  {% else %}
+  <div class="text-center text-muted">
+    <p>Пока нет комментариев. Будьте первым!</p>
+  </div>
+  {% endif %}
+
+  <!-- 🔹 Форма добавления комментария (только для авторизованных) -->
+  {% if user.is_authenticated %}
+  <div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Оставьте свой отзыв</h5>
+        <form id="commentForm">
+          {% csrf_token %}
+          {{ comment_form.as_p }}
+          <button type="submit" class="btn btn-success w-100">Отправить отзыв</button>
+        </form>
+        <div id="commentMessage" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center mt-4">
+    <p class="text-muted">
+      <a href="{% url 'login' %}" class="btn btn-primary">Войдите</a>, чтобы оставить отзыв
+    </p>
+  </div>
+  {% endif %}
 </section>
 
 <!-- AJAX для комментариев -->
@@ -259,12 +304,28 @@
         );
         const newItem = document.createElement("div");
         newItem.className = "carousel-item";
+        
+        // Определяем какой аватар использовать
+        let avatarHTML = '';
+        if (result.avatar_url) {
+          // Если есть загруженный аватар
+          avatarHTML = `<img src="${result.avatar_url}" 
+                           class="d-block mx-auto rounded-circle shadow" 
+                           width="140" height="140" 
+                           style="object-fit: cover;"
+                           alt="${result.user}">`;
+        } else {
+          // Дефолтный аватар через UI Avatars API
+          const userName = encodeURIComponent(result.user);
+          avatarHTML = `<img src="https://ui-avatars.com/api/?name=${userName}&size=140&background=0D8ABC&color=fff&bold=true" 
+                           class="d-block mx-auto rounded-circle shadow" 
+                           width="140" height="140" 
+                           style="object-fit: cover;"
+                           alt="${result.user}">`;
+        }
+        
         newItem.innerHTML = `
-            <img src="https://picsum.photos/200/200?random=${Math.floor(
-              Math.random() * 1000
-            )}" 
-                 class="d-block mx-auto rounded-circle shadow" width="140" height="140" 
-                 alt="${result.user}">
+            ${avatarHTML}
             <div class="mt-3">
                 <h5 class="fw-semibold text-dark">${result.user}</h5>
                 <p class="text-muted">${result.text}</p>
@@ -280,10 +341,14 @@
         newIndicator.setAttribute("data-bs-slide-to", carouselInner.children.length - 1);
         newIndicator.style.width = "10px";
         newIndicator.style.height = "10px";
-        if (carouselInner.children.length === 1) newIndicator.className = "active";
         indicators.appendChild(newIndicator);
 
         form.reset();
+        
+        // Скрываем сообщение через 3 секунды
+        setTimeout(() => {
+          messageDiv.innerHTML = '';
+        }, 3000);
       } else {
         messageDiv.innerHTML =
           '<div class="alert alert-danger">' + result.error + "</div>";
@@ -291,5 +356,5 @@
     });
 </script>
 {% endif %}
-<!-- AJAX для комментариев -->
+
 {% endblock content %}

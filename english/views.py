@@ -16,13 +16,22 @@ from types import SimpleNamespace
 from datetime import datetime
 from django.db import IntegrityError
 
+
 def main_page(request):
     courses = Course.objects.all()
     tariffs = CourseTariff.objects.all()
     comment_form = CommentForm()
 
+    # Обработка POST запроса (добавление комментария - только для авторизованных)
     if request.method == "POST":
         if not request.user.is_authenticated:
+            # Для AJAX запросов
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": False, 
+                    "error": "Войдите, чтобы оставить комментарий."
+                })
+            # Для обычных запросов
             messages.error(request, "Войдите, чтобы оставить комментарий.")
         else:
             comment_form = CommentForm(request.POST)
@@ -30,9 +39,27 @@ def main_page(request):
                 comment = comment_form.save(commit=False)
                 comment.user = request.user
                 comment.save()
+                
+                # Обработка AJAX запроса
+                if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                    avatar_url = None
+                    
+                    # Проверяем ТОЛЬКО загруженный аватар
+                    if request.user.avatar:
+                        avatar_url = request.user.avatar.url
+                    
+                    return JsonResponse({
+                        "success": True,
+                        "user": request.user.full_name,
+                        "text": comment.text,
+                        "avatar_url": avatar_url  # None если нет загруженного аватара
+                    })
+                
+                # Обычный POST запрос
                 messages.success(request, "Комментарий добавлен!")
                 comment_form = CommentForm()
 
+    # Комментарии видны ВСЕМ
     comments = Comment.objects.all().order_by('-created_at')
 
     context = {
@@ -42,7 +69,6 @@ def main_page(request):
         'comment_form': comment_form,
     }
     return render(request, 'english/index.html', context)
-
 
 def course_detail(request, course_id):
     try:
