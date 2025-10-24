@@ -132,7 +132,7 @@ document.getElementById("exerciseForm").addEventListener("submit", async functio
         } else {
           // Неправильный ответ: зачёркнутый красный + правильный зелёный
           replacement = document.createElement('span');
-          replacement.innerHTML = `<s style="color: red;">${userAnswer}</s> <span style="color: green; font-weight: bold;">${correctText} ✅</span>`;
+          replacement.innerHTML = `<s style="color: red; font-weight: bold;">${userAnswer}</s> <span style="color: green; font-weight: bold;">${correctText} ✅</span>`;
         }
         
         input.replaceWith(replacement);
