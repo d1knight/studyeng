@@ -76,19 +76,6 @@
             {% endfor %}
             <button type="submit" class="btn btn-success w-100 py-2 mt-3 rounded-30">Проверить</button>
           </form>
-
-          <!-- Modal -->
-          <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-              <div class="modal-content rounded-15">
-                <div class="modal-header bg-success text-white rounded-top-15">
-                  <h5 class="modal-title fw-bold" id="resultModalLabel">Результаты</h5>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4" id="resultsBody"></div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -107,58 +94,59 @@ document.getElementById("exerciseForm").addEventListener("submit", async functio
   });
   let data = await response.json();
 
-  let resultsHtml = "";
-  let exerciseResults = {};
-  let totalExercises = 0;
-  let checkedQuestions = 0;
-
+  // Заменяем input-поля на результаты проверки
   Object.keys(data.results).forEach(qid => {
-    let exerciseId = data.user_answers[qid].exercise_id;
-    if (!exerciseResults[exerciseId]) {
-      exerciseResults[exerciseId] = { correct: 0, totalChecked: 0, details: [] };
-    }
     let isCorrect = data.results[qid];
-    let userAnswer = Object.values(data.user_answers[qid].answer || {}).join(", ") || "—";
-    let correctAnswer = Object.values(data.correct_answers[qid] || {}).join(", ");
-    if (userAnswer !== "—" && userAnswer.trim() !== "") {
-      exerciseResults[exerciseId].totalChecked += 1;
-      if (isCorrect) exerciseResults[exerciseId].correct += 1;
-      exerciseResults[exerciseId].details.push({ qid, isCorrect, userAnswer, correctAnswer });
-    }
-  });
+    let userAnswers = data.user_answers[qid].answer || {};
+    let correctAnswers = data.correct_answers[qid] || {};
 
-  totalExercises = Object.keys(exerciseResults).length;
-  checkedQuestions = Object.values(exerciseResults).reduce((sum, r) => sum + r.totalChecked, 0);
+    // Обрабатываем каждый blank отдельно
+    Object.keys(userAnswers).forEach(blankKey => {
+      let userAnswer = userAnswers[blankKey].trim();
+      let correctAnswer = correctAnswers[blankKey];
+      
+      // Формируем массив правильных ответов
+      let correctList = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
+      let correctText = correctList.join(' / ');
 
-  Object.keys(exerciseResults).forEach(exerciseId => {
-    let result = exerciseResults[exerciseId];
-    let exerciseNumber = Object.keys(exerciseResults).indexOf(exerciseId) + 1;
-    if (result.totalChecked > 0) {
-      resultsHtml += `<h5 class="mt-4 mb-3 text-primary fw-bold">Упражнение ${exerciseNumber}</h5>`;
-      result.details.forEach((item, idx) => {
-        if (item.isCorrect) {
-          resultsHtml += `
-            <div class="alert alert-success p-2 mb-2 rounded-15">
-              <b class="fw-bold">Вопрос ${idx + 1}:</b> ✅ Ваш ответ: <u>${item.userAnswer}</u>
-            </div>`;
+      // Проверяем правильность конкретного blank
+      let isBlankCorrect = false;
+      if (Array.isArray(correctAnswer)) {
+        isBlankCorrect = correctAnswer.some(ans => ans.toLowerCase().trim() === userAnswer.toLowerCase());
+      } else {
+        isBlankCorrect = correctAnswer.toLowerCase().trim() === userAnswer.toLowerCase();
+      }
+
+      // Находим input по name
+      let input = document.querySelector(`input[name="q_${qid}_${blankKey}"]`);
+      
+      if (input) {
+        let replacement;
+        
+        if (isBlankCorrect) {
+          // Правильный ответ: зелёный текст с галочкой (БЕЗ зачёркивания)
+          replacement = document.createElement('span');
+          replacement.style.color = 'green';
+          replacement.style.fontWeight = 'bold';
+          replacement.innerHTML = `${userAnswer} ✅`;
         } else {
-          resultsHtml += `
-            <div class="alert alert-danger p-2 mb-2 rounded-15">
-              <b class="fw-bold">Вопрос ${idx + 1}:</b> ❌ Ваш ответ: <s>${item.userAnswer}</s> → Правильный: <u>${item.correctAnswer}</u>
-            </div>`;
+          // Неправильный ответ: зачёркнутый красный + правильный зелёный
+          replacement = document.createElement('span');
+          replacement.innerHTML = `<s style="color: red;">${userAnswer}</s> <span style="color: green; font-weight: bold;">${correctText} ✅</span>`;
         }
-      });
-    }
+        
+        input.replaceWith(replacement);
+      }
+    });
   });
 
-  resultsHtml = `<p class="fw-bold text-dark mb-3">Проверено вопросов: ${checkedQuestions}</p>` + resultsHtml;
-  const modalBody = document.getElementById("resultsBody");
-  modalBody.innerHTML = resultsHtml;
-
-  const modal = document.getElementById("resultModal");
-  const bootstrapModal = new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false });
-  if (checkedQuestions > 0 && !modal.classList.contains('show')) {
-    bootstrapModal.show();
+  // Отключаем кнопку "Проверить" после проверки
+  let submitBtn = document.querySelector('#exerciseForm button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Проверено';
+    submitBtn.classList.remove('btn-success');
+    submitBtn.classList.add('btn-secondary');
   }
 });
 </script>

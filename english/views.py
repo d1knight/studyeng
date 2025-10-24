@@ -194,11 +194,7 @@ def topic_detail(request, topic_id):
     # Извлечение упражнений с явной сортировкой
     exercises = Exercise.objects.filter(topic=topic).prefetch_related("questions").order_by('order_index')
     
-    # Отладочный вывод
-    print(f"Topic ID: {topic_id}, Exercises found: {exercises.count()}")
-    for exercise in exercises:
-        print(f"Exercise ID: {exercise.id}, Order Index: {exercise.order_index}, Instruction: {exercise.instruction or 'No instruction'}")
-
+   
     # Очистка кэша для данной темы
     from django.core.cache import cache
     cache_key = f"exercises_for_topic_{topic_id}"
