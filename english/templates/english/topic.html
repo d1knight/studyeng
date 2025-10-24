@@ -20,23 +20,6 @@
     <div class="tab-pane fade show active" id="theory">
       <div class="card border-0 shadow-sm rounded-15">
         <div class="card-body p-4">
-          {% if topic.video_path %}
-            <div class="mb-4">
-              <h5 class="mb-3 text-secondary fw-bold">Видео-урок</h5>
-              {% if topic.video_path|slice:":23" == "https://www.youtube.com" %}
-                <div class="ratio ratio-16x9">
-                  <iframe src="https://www.youtube.com/embed/{{ topic.video_path|slice:"32:" }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-15"></iframe>
-                </div>
-              {% else %}
-                <div class="ratio ratio-16x9">
-                  <video controls class="rounded-15">
-                    <source src="{{ topic.video_path|default:''|add:MEDIA_URL }}" type="video/mp4">
-                    Ваш браузер не поддерживает воспроизведение видео.
-                  </video>
-                </div>
-              {% endif %}
-            </div>
-          {% endif %}
           <div class="mt-4">
             {{ topic.content|safe }}
           </div>
@@ -74,8 +57,17 @@
             {% empty %}
               <p class="text-muted">Упражнений пока нет.</p>
             {% endfor %}
-            <button type="submit" class="btn btn-success w-100 py-2 mt-3 rounded-30">Проверить</button>
+            
+            <!-- Добавляем отступ снизу, чтобы контент не перекрывался кнопкой -->
+            <div style="height: 80px;"></div>
           </form>
+          
+          <!-- Фиксированная кнопка проверки -->
+          <div id="stickyButtonContainer" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 400px;">
+            <button type="submit" form="exerciseForm" class="btn btn-success w-100 py-3 rounded-30 shadow-lg">
+              <strong>Проверить</strong>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -141,18 +133,32 @@ document.getElementById("exerciseForm").addEventListener("submit", async functio
   });
 
   // Отключаем кнопку "Проверить" после проверки
-  let submitBtn = document.querySelector('#exerciseForm button[type="submit"]');
+  let submitBtn = document.querySelector('#stickyButtonContainer button[type="submit"]');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Проверено';
+    submitBtn.textContent = 'Проверено ✓';
     submitBtn.classList.remove('btn-success');
     submitBtn.classList.add('btn-secondary');
   }
+  
+  // Прокручиваем к первому неправильному ответу
+  let firstError = document.querySelector('s[style*="color: red"]');
+  if (firstError) {
+    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 });
 </script>
+
 <style>
   .host-bincmiainjofjnhchmcalkanjebghoen {
     display: none !important;
+  }
+  
+  /* Убираем фиксированную кнопку на маленьких экранах если нужно */
+  @media (max-width: 576px) {
+    #stickyButtonContainer {
+      width: 95%;
+    }
   }
 </style>
 {% endblock %}

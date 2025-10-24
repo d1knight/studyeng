@@ -252,6 +252,7 @@ def topic_detail(request, topic_id):
         "exercises": exercises,
     })
 
+
 def reg(request: HttpRequest):
     if request.method == 'POST':
         code = request.POST.get('code')
