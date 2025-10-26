@@ -6,7 +6,7 @@ import certifi
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
-BACKEND_URL = "http://127.0.0.1:8000/api/v1/bot/generate-code/"
+BACKEND_URL = "https://studyeng.uz/api/v1/bot/generate-code/"
 
 TOKEN = '7787604557:AAFfGkZc_Gau65wVpm1u5wd9W0s6GAbjKA8'
 API_URL = f"https://api.telegram.org/bot{TOKEN}"
