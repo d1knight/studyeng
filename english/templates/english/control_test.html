@@ -1,95 +1,200 @@
 {% extends 'english/base.html' %}
 
 {% block content %}
-    <h1>Контрольная работа: {{ chapter.name }}</h1>
+<div class="container my-5">
+    <div class="text-center mb-4">
+        <h1 class="fw-bold text-primary mb-2">Контрольная работа</h1>
+        <h3 class="text-muted">{{ chapter.name }}</h3>
+        <p class="text-secondary">Для открытия следующей главы необходимо набрать минимум 80%</p>
+    </div>
 
-    <form method="post" action="" enctype="multipart/form-data" id="controlForm">
-        {% csrf_token %}
-        {% for question in questions %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Вопрос</h5>
-                    <p class="card-text">{{ question.rendered_text|safe }}</p>
-                </div>
-            </div>
-        {% endfor %}
+    <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-4">
+            <form method="post" id="controlForm">
+                {% csrf_token %}
+                {% for question in questions %}
+                    <div class="card mb-3 border-0 shadow-sm rounded-3">
+                        <div class="card-body p-3">
+                            <h6 class="text-primary fw-bold mb-2">Вопрос {{ forloop.counter }}</h6>
+                            <div class="question-text">
+                                {{ question.rendered_text|safe }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
 
-        <button type="submit" class="btn btn-primary">Отправить ответы</button>
-    </form>
+                <!-- Добавляем отступ снизу для фиксированной кнопки -->
+                <div style="height: 80px;"></div>
+            </form>
 
-    <!-- Модальное окно для результата -->
-    <div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="resultModalLabel">Результат контрольной работы</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <h6>Общий результат:</h6>
-                    <p>Ваш процент: <strong><span id="scoreResult"></span>%</strong></p>
-                    <p id="statusResult"></p>
-
-                    <h6>Статистика:</h6>
-                    <p>Правильных ответов: <span id="correctCount"></span></p>
-                    <p>Неправильных ответов: <span id="incorrectCount"></span></p>
-                    <p>Всего вопросов: <span id="totalQuestions"></span></p>
-
-                    {% if chapter.order_index < course.chapters|length %}
-                        <h6>Следующий шаг:</h6>
-                        <p>Следующая глава: <a id="nextChapterLink" href="#">Глава {{ chapter.order_index|add:1 }}</a></p>
-                    {% endif %}
-
-                    <p id="recommendation"></p>
-                </div>
-                <div class="modal-footer">
-                    <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">Перейти к списку глав</a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                </div>
+            <!-- Фиксированная кнопка -->
+            <div id="stickyButtonContainer" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 400px;">
+                <button type="submit" form="controlForm" class="btn btn-success w-100 py-3 rounded-pill shadow-lg">
+                    <strong>Отправить ответы</strong>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        document.getElementById('controlForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            var formData = new FormData(this);
-            fetch('', {
-                method: 'POST',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                // Общие данные
-                const totalQuestions = Object.keys(data.results).length;
-                const correctCount = Object.values(data.results).filter(r => r).length;
-                const incorrectCount = totalQuestions - correctCount;
-                document.getElementById('scoreResult').textContent = data.score.toFixed(2);
-                document.getElementById('correctCount').textContent = correctCount;
-                document.getElementById('incorrectCount').textContent = incorrectCount;
-                document.getElementById('totalQuestions').textContent = totalQuestions;
+<!-- Модальное окно для результата -->
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-3 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary" id="resultModalLabel">Результат контрольной работы</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-4 pt-2">
+                <!-- Общий результат -->
+                <div class="text-center mb-4">
+                    <div class="display-4 fw-bold mb-2" id="scoreDisplay" style="color: #28a745;">0%</div>
+                    <p class="lead mb-0" id="statusResult"></p>
+                </div>
 
-                // Статус
-                if (data.score >= 80) {
-                    document.getElementById('statusResult').innerHTML = 'Поздравляем! Вы успешно прошли контрольную.';
-                    if (document.getElementById('nextChapterLink') && data.next_chapter_id) {
-                        document.getElementById('nextChapterLink').href = `/courses/${data.next_chapter_id}/`;
-                    }
-                    document.getElementById('recommendation').textContent = 'Перейдите к следующей главе для продолжения обучения.';
+                <!-- Статистика -->
+                <div class="row g-3 mb-4">
+                    <div class="col-4 text-center">
+                        <div class="card border-0 bg-light rounded-3 p-3">
+                            <div class="h3 mb-0 text-success" id="correctCount">0</div>
+                            <small class="text-muted">Правильно</small>
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="card border-0 bg-light rounded-3 p-3">
+                            <div class="h3 mb-0 text-danger" id="incorrectCount">0</div>
+                            <small class="text-muted">Неправильно</small>
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="card border-0 bg-light rounded-3 p-3">
+                            <div class="h3 mb-0 text-primary" id="totalQuestions">0</div>
+                            <small class="text-muted">Всего</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Рекомендация -->
+                <div class="alert rounded-3 border-0" id="recommendationAlert">
+                    <p class="mb-0" id="recommendation"></p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <a href="{% url 'course_detail' course.id %}" class="btn btn-primary rounded-pill px-4">Перейти к списку глав</a>
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('controlForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Отключаем кнопку во время отправки
+    let submitBtn = document.querySelector('#stickyButtonContainer button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Обработка...';
+    
+    var formData = new FormData(this);
+    fetch('', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        
+        // Заменяем input-поля на результаты (как в topic.html)
+        Object.keys(data.results).forEach(qid => {
+            let userAnswers = data.user_answers[qid].answer || {};
+            let correctAnswers = data.correct_answers[qid] || {};
+
+            Object.keys(userAnswers).forEach(blankKey => {
+                let userAnswer = userAnswers[blankKey].trim();
+                let correctAnswer = correctAnswers[blankKey];
+                
+                let correctList = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
+                let correctText = correctList.join(' / ');
+
+                let isBlankCorrect = false;
+                if (Array.isArray(correctAnswer)) {
+                    isBlankCorrect = correctAnswer.some(ans => ans.toLowerCase().trim() === userAnswer.toLowerCase());
                 } else {
-                    document.getElementById('statusResult').innerHTML = 'К сожалению, вы не прошли контрольную.';
-                    document.getElementById('recommendation').textContent = 'Рекомендуем повторить материал и попробовать снова.';
+                    isBlankCorrect = correctAnswer.toLowerCase().trim() === userAnswer.toLowerCase();
                 }
 
-                // Показ модального окна
-                var myModal = new bootstrap.Modal(document.getElementById('resultModal'));
-                myModal.show();
-            })
-            .catch(error => console.error('Error:', error));
+                let input = document.querySelector(`input[name="q_${qid}_${blankKey}"]`);
+                
+                if (input) {
+                    let replacement;
+                    
+                    if (isBlankCorrect) {
+                        replacement = document.createElement('span');
+                        replacement.style.color = 'green';
+                        replacement.style.fontWeight = 'bold';
+                        replacement.innerHTML = `${userAnswer} ✅`;
+                    } else {
+                        replacement = document.createElement('span');
+                        replacement.innerHTML = `<s style="color: red; font-weight: bold;">${userAnswer}</s> <span style="color: green; font-weight: bold;">${correctText} ✅</span>`;
+                    }
+                    
+                    input.replaceWith(replacement);
+                }
+            });
         });
-    </script>
+        
+        // Общие данные
+        const totalQuestions = Object.keys(data.results).length;
+        const correctCount = Object.values(data.results).filter(r => r).length;
+        const incorrectCount = totalQuestions - correctCount;
+        const score = data.score;
+        
+        document.getElementById('scoreDisplay').textContent = score.toFixed(0) + '%';
+        document.getElementById('correctCount').textContent = correctCount;
+        document.getElementById('incorrectCount').textContent = incorrectCount;
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+
+        // Статус и рекомендации
+        const recommendationAlert = document.getElementById('recommendationAlert');
+        if (score >= 80) {
+            document.getElementById('scoreDisplay').style.color = '#28a745';
+            document.getElementById('statusResult').innerHTML = '🎉 Поздравляем! Вы успешно прошли контрольную работу!';
+            document.getElementById('recommendation').textContent = 'Следующая глава открыта. Продолжайте обучение!';
+            recommendationAlert.className = 'alert rounded-3 border-0 alert-success';
+        } else {
+            document.getElementById('scoreDisplay').style.color = '#dc3545';
+            document.getElementById('statusResult').innerHTML = '😔 К сожалению, вы не прошли контрольную работу.';
+            document.getElementById('recommendation').textContent = 'Рекомендуем повторить материал и попробовать снова. Для открытия следующей главы необходимо набрать минимум 80%.';
+            recommendationAlert.className = 'alert rounded-3 border-0 alert-warning';
+        }
+
+        // Показ модального окна
+        var myModal = new bootstrap.Modal(document.getElementById('resultModal'));
+        myModal.show();
+        
+        // Обновляем кнопку
+        submitBtn.textContent = 'Тест завершён ✓';
+        submitBtn.classList.remove('btn-success');
+        submitBtn.classList.add('btn-secondary');
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при отправке ответов. Попробуйте снова.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<strong>Отправить ответы</strong>';
+    });
+});
+</script>
+
+<style>
+    @media (max-width: 576px) {
+        #stickyButtonContainer {
+            width: 95%;
+        }
+    }
+</style>
 {% endblock content %}

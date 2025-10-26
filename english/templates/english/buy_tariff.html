@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="container my-5">
-
   <!-- === Блок текущего тарифа === -->
   <div class="card shadow-sm border-0 rounded-4 mx-auto p-3" style="max-width: 600px;">
     <div class="card-body p-4">
@@ -10,9 +9,14 @@
       <h4 class="text-center text-primary mb-4">{{ tariff.name }}</h4>
 
       <div class="text-center mb-4">
-        <p class="fs-5">
-          Стоимость: <span class="fw-bold text-success">{{ tariff.price|floatformat:0 }} сум</span>
-        </p>
+        {% if tariff.is_free %}
+          <h3 class="text-success fw-bold">Бесплатно</h3>
+          <p class="text-muted">Никаких платежей не требуется</p>
+        {% else %}
+          <p class="fs-5">
+            Стоимость: <span class="fw-bold text-success">{{ tariff.price|floatformat:0 }} сум</span>
+          </p>
+        {% endif %}
       </div>
 
       {% if messages %}
@@ -27,7 +31,7 @@
       {% if not user_authenticated %}
         <div class="alert alert-info text-center py-2 px-3 rounded-3 mb-4 shadow-sm">
           <i class="bi bi-person-circle me-2"></i>
-          Авторизуйтесь, чтобы купить тариф.
+          Авторизуйтесь, чтобы {{ tariff.is_free|yesno:"активировать,купить" }} тариф.
         </div>
         <div class="text-center">
           <a href="{% url 'login' %}" class="btn btn-outline-primary rounded-3 px-4">
@@ -35,25 +39,74 @@
           </a>
         </div>
       {% else %}
-        <form method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="receipt" class="form-label fw-semibold text-secondary">Загрузите скриншот чека</label>
-            <input
-              type="file"
-              name="receipt"
-              id="receipt"
-              class="form-control form-control-lg rounded-3 shadow-sm"
-              accept="image/*"
-              required
-            >
-            <div class="invalid-feedback">Пожалуйста, выберите файл.</div>
+        {% if tariff.is_free %}
+          <!-- Форма для бесплатного тарифа -->
+          <div class="alert alert-success rounded-3 mb-4">
+            <h5 class="fw-bold mb-3">
+              <i class="bi bi-gift me-2"></i>Бесплатный доступ
+            </h5>
+            <p class="mb-0">Нажмите кнопку ниже, чтобы активировать бесплатный тариф и получить доступ к платным главам курса.</p>
+          </div>
+          
+          <form method="post" class="text-center">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-lg w-100 py-3 rounded-3 shadow-sm">
+              <i class="bi bi-check-circle me-2"></i>Активировать бесплатный тариф
+            </button>
+          </form>
+        {% else %}
+          <!-- Форма для платного тарифа -->
+          <div class="alert alert-warning rounded-3 mb-4">
+            <h5 class="fw-bold mb-3">
+              <i class="bi bi-exclamation-triangle me-2"></i>Инструкция по оплате:
+            </h5>
+            <ol class="mb-0">
+              <li>Переведите {{ tariff.price|floatformat:0 }} сум на указанные реквизиты</li>
+              <li>Сделайте скриншот чека/подтверждения</li>
+              <li>Загрузите скриншот в форме ниже</li>
+              <li>Администратор проверит платеж и активирует тариф</li>
+            </ol>
           </div>
 
-          <button type="submit" class="custom-btn-success w-100 py-2 fs-5 rounded-3 shadow-sm mt-3">
-            <i class="bi bi-upload me-2"></i> Отправить чек
-          </button>
-        </form>
+          <div class="card bg-light border-0 rounded-3 p-3 mb-4">
+            <h6 class="fw-bold mb-2 text-center">Реквизиты для оплаты</h6>
+            <div class="text-center">
+              <p class="mb-1"><strong>Карта:</strong> 8600 0000 0000 0000</p>
+              <p class="mb-1"><strong>Получатель:</strong> Имя Фамилия</p>
+              <p class="mb-0"><strong>Сумма:</strong> {{ tariff.price|floatformat:0 }} сум</p>
+            </div>
+          </div>
+
+          <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="receipt" class="form-label fw-semibold text-secondary">
+                <i class="bi bi-upload me-2"></i>Загрузите скриншот чека
+              </label>
+              <input
+                type="file"
+                name="receipt"
+                id="receipt"
+                class="form-control form-control-lg rounded-3 shadow-sm"
+                accept="image/*"
+                required
+              >
+              <small class="text-muted">Принимаются форматы: JPG, PNG, WebP</small>
+              <div class="invalid-feedback">Пожалуйста, выберите файл.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-3 shadow-sm">
+              <i class="bi bi-send me-2"></i>Отправить на проверку
+            </button>
+          </form>
+
+          <div class="alert alert-info rounded-3 mt-3 mb-0">
+            <p class="mb-0 text-center small">
+              <i class="bi bi-clock me-2"></i>
+              <strong>Время проверки:</strong> обычно до 24 часов
+            </p>
+          </div>
+        {% endif %}
       {% endif %}
     </div>
   </div>
@@ -76,12 +129,20 @@
           <div class="card border-0 rounded-4 shadow-sm h-100 tariff-card" style="transition: all 0.3s ease;">
             <div class="card-body text-center p-4">
               <h5 class="fw-bold text-primary mb-2">{{ t.name }}</h5>
-              <p class="fs-5 text-success fw-semibold mb-3">{{ t.price|floatformat:0 }} сум</p>
+              {% if t.is_free %}
+                <p class="fs-5 text-success fw-semibold mb-3">Бесплатно</p>
+              {% else %}
+                <p class="fs-5 text-success fw-semibold mb-3">{{ t.price|floatformat:0 }} сум</p>
+              {% endif %}
               <p class="text-muted small mb-4">{{ t.description|truncatechars:80 }}</p>
 
               {% if user_authenticated %}
                 <a href="{% url 'buy_tariff' t.id %}" class="btn btn-outline-primary w-100 rounded-3 shadow-sm">
-                  💳 Купить тариф
+                  {% if t.is_free %}
+                    ✓ Активировать
+                  {% else %}
+                    💳 Купить тариф
+                  {% endif %}
                 </a>
               {% else %}
                 <a href="{% url 'login' %}" class="btn btn-outline-secondary w-100 rounded-3 shadow-sm">
@@ -95,9 +156,15 @@
     </div>
   {% endif %}
 
+  <!-- Кнопка назад -->
+  <div class="text-center mt-4">
+    <a href="{% url 'course_detail' tariff.course.id %}" class="btn btn-outline-secondary rounded-3 px-4">
+      <i class="bi bi-arrow-left me-2"></i>Вернуться к курсу
+    </a>
+  </div>
 </div>
 
-<!-- === Мини-анимация карточек тарифов === -->
+<!-- === Стили === -->
 <style>
   .tariff-card:hover {
     transform: translateY(-5px);
@@ -105,8 +172,8 @@
   }
 </style>
 
+<!-- === Валидация формы === -->
 <script>
-  // Валидация формы Bootstrap
   (function () {
     'use strict';
     var forms = document.querySelectorAll('.needs-validation');

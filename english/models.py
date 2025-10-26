@@ -114,7 +114,10 @@ class CourseTariff(models.Model):
         max_digits=9,
         decimal_places=2,
         verbose_name='Цена',
-        validators=[MinValueValidator(Decimal('0.01'))]
+        validators=[MinValueValidator(Decimal('0.00'))],
+        null=True,
+        blank=True,
+        help_text='Оставьте пустым или 0 для бесплатного тарифа'
     )
 
     class Meta:
@@ -122,6 +125,9 @@ class CourseTariff(models.Model):
         verbose_name = 'Тариф курса'
         verbose_name_plural = 'Тарифы курсов'
         unique_together = ['course', 'name']
+    
+    def is_free(self):
+        return self.price is None or self.price == 0
 
     def __str__(self):
         return f"{self.course.name} - {self.name} ({self.price} сум.)"
@@ -134,6 +140,11 @@ class Chapter(models.Model):
         verbose_name='Порядковый номер',
         validators=[MinValueValidator(1)]
     )
+    is_paid = models.BooleanField(
+    default=False,
+    verbose_name='Платная глава',
+    help_text='Если отмечено, глава доступна только с оплаченным тарифом'
+)
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
@@ -145,6 +156,7 @@ class Chapter(models.Model):
         verbose_name='Проходной балл',
         validators=[MinValueValidator(0), MaxValueValidator(100)]
     )
+    
 
     class Meta:
         db_table = 'chapter'
@@ -428,7 +440,13 @@ class Payment(models.Model):
         validators=[MinValueValidator(Decimal('0.01'))]
     )
     create_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    receipt = models.ImageField(upload_to='receipts/', verbose_name='Скриншот чека')
+    receipt = models.ImageField(
+        upload_to='receipts/',
+        verbose_name='Скриншот чека',
+        blank=True,
+        null=True
+    )
+
     status = models.CharField(
         max_length=255,
         choices=PAYMENT_STATUSES,

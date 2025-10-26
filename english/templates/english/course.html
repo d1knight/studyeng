@@ -20,6 +20,15 @@
           >
             <span class="me-2 text-primary">Глава {{ chapter.order_index }}:</span>
             {{ chapter.name }}
+            
+            <!-- Значок платная/бесплатная глава -->
+            {% if chapter.is_paid %}
+              <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">💳 Платная</span>
+            {% else %}
+              <span class="badge bg-success ms-2" style="font-size: 0.7rem;">✓ Бесплатная</span>
+            {% endif %}
+            
+            <!-- Статус открытия -->
             {% if user_chapter %}
               {% if user_chapter.is_open %}
                 <i class="bi bi-unlock ms-2 text-success"></i>
@@ -27,7 +36,7 @@
                 <i class="bi bi-lock ms-2 text-danger"></i>
               {% endif %}
               {% if user_chapter.completion_score %}
-                <span class="badge bg-success ms-2">{{ user_chapter.completion_score|floatformat:0 }}%</span>
+                <span class="badge bg-info ms-2">{{ user_chapter.completion_score|floatformat:0 }}%</span>
               {% endif %}
             {% endif %}
           </button>
@@ -62,7 +71,7 @@
                           <span class="badge bg-success ms-2" style="font-size: 0.7rem;">✓ Доступно</span>
                         {% else %}
                           <span class="text-muted ms-1">{{ topic.name }}</span>
-                          <span class="badge bg-light text-danger border ms-2">🔒 Закрыто</span>
+                          <span class="badge bg-light text-danger border ms-2" style="font-size: 0.7rem;">🔒 Закрыто</span>
                         {% endif %}
                       </div>
                     </div>
@@ -71,8 +80,14 @@
               {% endfor %}
             </ul>
 
-            <!-- Уведомление для закрытых глав -->
-            {% if user_chapter and not user_chapter.is_open and user.is_authenticated %}
+            <!-- Уведомления для закрытых глав -->
+            {% if chapter.requires_payment and user.is_authenticated %}
+              <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
+                <i class="bi bi-credit-card me-2"></i>
+                <strong>Это платная глава.</strong> Купите тариф для доступа к материалам.
+                <a href="{% url 'buy_tariff' course.tariffs.first.id %}" class="alert-link">Купить тариф</a>
+              </div>
+            {% elif user_chapter and not user_chapter.is_open and user.is_authenticated %}
               <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
                 <i class="bi bi-info-circle me-2"></i>
                 Эта глава откроется после успешного прохождения контрольной работы предыдущей главы (80%+).
@@ -80,7 +95,7 @@
             {% elif not user.is_authenticated and chapter.order_index > 1 %}
               <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
                 <i class="bi bi-lock me-2"></i>
-                Авторизуйтесь, чтобы открыть эту главу.
+                Авторизуйтесь{% if chapter.is_paid %} и купите тариф{% endif %}, чтобы открыть эту главу.
               </div>
             {% endif %}
 
@@ -90,6 +105,11 @@
                 <a href="{% url 'control_test' chapter.id %}" class="btn btn-success px-4 py-2 rounded-3 shadow-sm">
                   ✅ Пройти контрольную работу
                 </a>
+              {% elif chapter.requires_payment and user.is_authenticated %}
+                <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
+                  <i class="bi bi-lock me-2"></i>
+                  Купите тариф, чтобы пройти контрольную работу этой платной главы.
+                </div>
               {% elif user.is_authenticated and not user_chapter.is_open %}
                 <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
                   <i class="bi bi-lock me-2"></i>
@@ -98,7 +118,7 @@
               {% elif not user.is_authenticated %}
                 <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
                   <i class="bi bi-person-circle me-2"></i>
-                  Авторизуйтесь, чтобы пройти контрольную работу.
+                  Авторизуйтесь{% if chapter.is_paid %} и купите тариф{% endif %}, чтобы пройти контрольную работу.
                 </div>
               {% endif %}
             </div>
@@ -115,7 +135,11 @@
       {% if course.tariffs.all %}
         {% with first_tariff=course.tariffs.all.0 %}
           <a href="{% url 'buy_tariff' first_tariff.id %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
-            💳 Купить тариф для этого курса
+            {% if first_tariff.is_free %}
+              ✓ Активировать бесплатный тариф
+            {% else %}
+              💳 Купить тариф для этого курса
+            {% endif %}
           </a>
         {% endwith %}
       {% endif %}
