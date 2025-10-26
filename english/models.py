@@ -49,8 +49,8 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """Модель пользователя"""
     id = models.BigAutoField(primary_key=True)
-    first_name = models.CharField(max_length=255, verbose_name='Имя')
-    last_name = models.CharField(max_length=255, verbose_name='Фамилия')
+    first_name = models.CharField(max_length=255, verbose_name='Имя',null=True, blank=True)
+    last_name = models.CharField(max_length=255, verbose_name='Фамилия',null=True, blank=True)
     phone_number = models.CharField(max_length=255, unique=True, verbose_name='Номер телефона')
     tg_id = models.IntegerField(unique=True, verbose_name='Telegram ID')
     avatar = models.ImageField(upload_to='avatars/',blank=True, null=True, verbose_name='Аватар')
