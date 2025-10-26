@@ -80,7 +80,7 @@
             {% elif not user.is_authenticated and chapter.order_index > 1 %}
               <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
                 <i class="bi bi-lock me-2"></i>
-                Авторизуйтесь и купите тариф, чтобы открыть эту главу.
+                Авторизуйтесь, чтобы открыть эту главу.
               </div>
             {% endif %}
 
@@ -90,12 +90,7 @@
                 <a href="{% url 'control_test' chapter.id %}" class="btn btn-success px-4 py-2 rounded-3 shadow-sm">
                   ✅ Пройти контрольную работу
                 </a>
-              {% elif user.is_authenticated and not user_has_tariff %}
-                <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
-                  <i class="bi bi-lock me-2"></i>
-                  Купите тариф, чтобы пройти контрольную работу.
-                </div>
-              {% elif user.is_authenticated and user_has_tariff and not user_chapter.is_open %}
+              {% elif user.is_authenticated and not user_chapter.is_open %}
                 <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
                   <i class="bi bi-lock me-2"></i>
                   Контрольная работа будет доступна после открытия главы.
@@ -103,7 +98,7 @@
               {% elif not user.is_authenticated %}
                 <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
                   <i class="bi bi-person-circle me-2"></i>
-                  Авторизуйтесь и купите тариф, чтобы пройти контрольную работу.
+                  Авторизуйтесь, чтобы пройти контрольную работу.
                 </div>
               {% endif %}
             </div>
@@ -144,5 +139,3 @@
   }
 </style>
 {% endblock content %}
-
-

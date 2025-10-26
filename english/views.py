@@ -142,8 +142,8 @@ def course_detail(request, course_id):
                 topic.is_accessible = is_chapter_open
                 chapter.topics_list.append(topic)
 
-            # Контрольная работа доступна только авторизованным с тарифом
-            chapter.control_test_accessible = bool(is_chapter_open and user and has_paid_access)
+            # Контрольная работа доступна всем авторизованным с открытой главой
+            chapter.control_test_accessible = bool(is_chapter_open and user)
 
             chapter_user_chapters.append((chapter, curr_user_chapter))
 
@@ -194,7 +194,6 @@ def topic_detail(request, topic_id):
     # Извлечение упражнений с явной сортировкой
     exercises = Exercise.objects.filter(topic=topic).prefetch_related("questions").order_by('order_index')
     
-   
     # Очистка кэша для данной темы
     from django.core.cache import cache
     cache_key = f"exercises_for_topic_{topic_id}"
@@ -250,6 +249,7 @@ def topic_detail(request, topic_id):
     return render(request, "english/topic.html", {
         "topic": topic,
         "exercises": exercises,
+        "courses": Course.objects.all(),
     })
 
 
@@ -451,18 +451,13 @@ def exercise_view(request, pk):
 
 @login_required
 def control_test(request, chapter_id):
-    """Контрольная работа — доступ только авторизованным с тарифом"""
+    """Контрольная работа — доступ только авторизованным пользователям"""
     chapter = get_object_or_404(Chapter, id=chapter_id)
     
-    # Проверка доступа
-    has_paid = request.user.payments.filter(tariff__course=chapter.course, status="paid").exists()
-    if not has_paid:
-        messages.error(request, "Требуется оплатить тариф для прохождения контрольной работы.")
-        return redirect('course_detail', course_id=chapter.course.id)
-    
+    # Проверка доступа - только авторизация и открытая глава
     user_chapter = request.user.user_chapters.filter(chapter=chapter).first()
     if not user_chapter or not user_chapter.is_open:
-        messages.error(request, "Эта глава пока закрыта.")
+        messages.error(request, "Эта глава пока закрыта. Завершите предыдущую главу с результатом 80% или выше.")
         return redirect('course_detail', course_id=chapter.course.id)
     
     exercises = Exercise.objects.filter(topic__chapter=chapter).prefetch_related('questions')
@@ -554,5 +549,6 @@ def control_test(request, chapter_id):
         "chapter": chapter,
         "questions": selected_questions,
         "course": chapter.course,
+        "courses": Course.objects.all(),
     }
     return render(request, "english/control_test.html", context)
