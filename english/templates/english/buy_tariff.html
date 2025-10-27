@@ -2,6 +2,23 @@
 
 {% block content %}
 <div class="container my-5">
+  <!-- Breadcrumbs -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded-3">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}" class="text-decoration-none">
+          <i class="bi bi-house-door me-1"></i>Главная
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'course_detail' tariff.course.id %}" class="text-decoration-none">
+          {{ tariff.course.name }}
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ tariff.name }}</li>
+    </ol>
+  </nav>
+
   <!-- === Блок текущего тарифа === -->
   <div class="card shadow-sm border-0 rounded-4 mx-auto p-3" style="max-width: 600px;">
     <div class="card-body p-4">

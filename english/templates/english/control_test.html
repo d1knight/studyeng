@@ -2,6 +2,23 @@
 
 {% block content %}
 <div class="container my-5">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-light p-3 rounded-3">
+            <li class="breadcrumb-item">
+                <a href="{% url 'home' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door me-1"></i>Главная
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'course_detail' course.id %}" class="text-decoration-none">
+                    {{ course.name }}
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ chapter.name }}</li>
+        </ol>
+    </nav>
+
     <div class="text-center mb-4">
         <h1 class="fw-bold text-primary mb-2">Контрольная работа</h1>
         <h3 class="text-muted">{{ chapter.name }}</h3>

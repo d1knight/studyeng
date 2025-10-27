@@ -2,6 +2,18 @@
 
 {% block content %}
 <div class="container my-5">
+  <!-- Breadcrumbs -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded-3">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}" class="text-decoration-none">
+          <i class="bi bi-house-door me-1"></i>Главная
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ course.name }}</li>
+    </ol>
+  </nav>
+
   <h1 class="fw-bold mb-3 text-dark">{{ course.name }}</h1>
   <p class="text-muted mb-4">{{ course.description }}</p>
 
