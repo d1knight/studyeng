@@ -185,6 +185,8 @@ class Topic(models.Model):
     )
     name = models.CharField(max_length=255, verbose_name='Название темы')
     content = RichTextUploadingField(verbose_name="Содержание")
+    video = models.FileField(upload_to='videos/', verbose_name='Видеоурок', blank=True, null=True)
+
 
     class Meta:
         db_table = 'topic'
