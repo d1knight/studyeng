@@ -1,8 +1,20 @@
-{% extends "english/base.html" %}
-{% block content %}
+{% extends "english/base.html" %} {% block content %}
 
 <div class="container my-5">
-  <div class="card shadow-sm border-0 rounded-4 mx-auto" style="max-width: 700px">
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb bg-light p-3 rounded-3 shadow-sm">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}" class="text-decoration-none text-primary"
+          >Главная</a
+        >
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Мой профиль</li>
+    </ol>
+  </nav>
+  <div
+    class="card shadow-sm border-0 rounded-4 mx-auto"
+    style="max-width: 700px"
+  >
     <div class="card-body p-4">
       <h2 class="fw-bold text-center mb-4 text-dark">Мой профиль</h2>
 
@@ -11,31 +23,58 @@
         <div id="avatar-preview">
           {% if user.avatar %}
           <!-- Если пользователь загрузил аватар -->
-          <img src="{{ user.avatar.url }}" alt="Avatar" class="rounded-circle shadow-sm"
-               style="width: 100px; height: 100px; object-fit: cover;" id="current-avatar" />
+          <img
+            src="{{ user.avatar.url }}"
+            alt="Avatar"
+            class="rounded-circle shadow-sm"
+            style="width: 100px; height: 100px; object-fit: cover"
+            id="current-avatar"
+          />
           {% else %}
           <!-- Дефолтный аватар -->
-          <img src="https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&size=100&background=0D8ABC&color=fff&bold=true" 
-               alt="Avatar" class="rounded-circle shadow-sm"
-               style="width: 100px; height: 100px; object-fit: cover;" id="current-avatar" />
+          <img
+            src="https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&size=100&background=0D8ABC&color=fff&bold=true"
+            alt="Avatar"
+            class="rounded-circle shadow-sm"
+            style="width: 100px; height: 100px; object-fit: cover"
+            id="current-avatar"
+          />
           {% endif %}
         </div>
 
-        <h5 class="mt-3 mb-0 fw-semibold">{{ user.first_name }} {{ user.last_name }}</h5>
+        <h5 class="mt-3 mb-0 fw-semibold">
+          {{ user.first_name }} {{ user.last_name }}
+        </h5>
         {% if user.email %}
         <p class="text-muted mb-2">{{ user.email }}</p>
         {% endif %}
-        <p class="text-muted"><strong>Телефон:</strong> {{ user.phone_number }}</p>
+        <p class="text-muted">
+          <strong>Телефон:</strong> {{ user.phone_number }}
+        </p>
 
         <!-- 🔹 Форма смены аватара -->
-        <form method="post" enctype="multipart/form-data" class="mt-3" id="avatar-form">
+        <form
+          method="post"
+          enctype="multipart/form-data"
+          class="mt-3"
+          id="avatar-form"
+        >
           {% csrf_token %}
-          <div class="input-group" style="max-width: 300px; margin: 0 auto;">
-            <input type="file" name="avatar" class="form-control form-control-sm" 
-                   accept="image/*" id="avatar-input">
-            <button type="submit" class="btn btn-outline-primary btn-sm">Изменить</button>
+          <div class="input-group" style="max-width: 300px; margin: 0 auto">
+            <input
+              type="file"
+              name="avatar"
+              class="form-control form-control-sm"
+              accept="image/*"
+              id="avatar-input"
+            />
+            <button type="submit" class="btn btn-outline-primary btn-sm">
+              Изменить
+            </button>
           </div>
-          <small class="text-muted d-block mt-1">Форматы: JPG, PNG, GIF (макс. 5 МБ)</small>
+          <small class="text-muted d-block mt-1"
+            >Форматы: JPG, PNG, GIF (макс. 5 МБ)</small
+          >
         </form>
       </div>
 
@@ -46,16 +85,23 @@
       {% if courses_data %}
       <div class="list-group mb-4">
         {% for course_data in courses_data %}
-        <div class="list-group-item mb-2 d-flex justify-content-between align-items-center">
+        <div
+          class="list-group-item mb-2 d-flex justify-content-between align-items-center"
+        >
           <div>
             <h6 class="mb-1 fw-bold">{{ course_data.course.name }}</h6>
-            <p class="mb-1 text-muted">{{ course_data.course.description|truncatewords:20 }}</p>
+            <p class="mb-1 text-muted">
+              {{ course_data.course.description|truncatewords:20 }}
+            </p>
             <small class="text-muted">
               Тариф: {{ course_data.tariff.name|default:"Не указан" }} |
               Прогресс: {{ course_data.progress }}%
             </small>
           </div>
-          <a href="{% url 'course_detail' course_data.course.id %}" class="btn btn-sm btn-primary">
+          <a
+            href="{% url 'course_detail' course_data.course.id %}"
+            class="btn btn-sm btn-primary"
+          >
             Перейти к курсу
           </a>
         </div>
@@ -72,9 +118,10 @@
       <!-- 🔹 Форма добавления комментария -->
       <h4 class="fw-semibold mb-3">Оставьте комментарий</h4>
       <form method="post" class="mb-4">
-        {% csrf_token %}
-        {{ comment_form.as_p }}
-        <button type="submit" name="add_comment" class="btn btn-success">Отправить</button>
+        {% csrf_token %} {{ comment_form.as_p }}
+        <button type="submit" name="add_comment" class="btn btn-success">
+          Отправить
+        </button>
       </form>
 
       <!-- 🔹 Список комментариев -->
@@ -82,34 +129,80 @@
       {% if comments %}
       <div class="list-group">
         {% for comment in comments %}
-        <div class="list-group-item mb-2 d-flex justify-content-between align-items-start" id="comment-{{ comment.id }}">
+        <div
+          class="list-group-item mb-2 d-flex justify-content-between align-items-start"
+          id="comment-{{ comment.id }}"
+        >
           <div class="flex-grow-1">
-            <strong>{{ comment.user.first_name }} {{ comment.user.last_name }}:</strong>
+            <strong
+              >{{ comment.user.first_name }} {{ comment.user.last_name
+              }}:</strong
+            >
             <p class="mb-1 comment-text">{{ comment.text }}</p>
-            <small class="text-muted">{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+            <small class="text-muted"
+              >{{ comment.created_at|date:"d.m.Y H:i" }}</small
+            >
           </div>
 
           {% if comment.user == user %}
           <div class="ms-3 d-flex flex-column gap-1">
-            <button class="btn btn-sm btn-warning edit-btn" data-id="{{ comment.id }}">Редактировать</button>
-            <button type="button" class="btn btn-sm btn-danger delete-btn"
-                    data-bs-toggle="modal" data-bs-target="#deleteModal{{ comment.id }}">
+            <button
+              class="btn btn-sm btn-warning edit-btn"
+              data-id="{{ comment.id }}"
+            >
+              Редактировать
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm btn-danger delete-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#deleteModal{{ comment.id }}"
+            >
               Удалить
             </button>
 
             <!-- Модалка подтверждения -->
-            <div class="modal fade" id="deleteModal{{ comment.id }}" tabindex="-1"
-                 aria-labelledby="deleteModalLabel{{ comment.id }}" aria-hidden="true">
+            <div
+              class="modal fade"
+              id="deleteModal{{ comment.id }}"
+              tabindex="-1"
+              aria-labelledby="deleteModalLabel{{ comment.id }}"
+              aria-hidden="true"
+            >
               <div class="modal-dialog">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel{{ comment.id }}">Подтвердите удаление</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5
+                      class="modal-title"
+                      id="deleteModalLabel{{ comment.id }}"
+                    >
+                      Подтвердите удаление
+                    </h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
                   </div>
-                  <div class="modal-body">Вы действительно хотите удалить этот комментарий?</div>
+                  <div class="modal-body">
+                    Вы действительно хотите удалить этот комментарий?
+                  </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-danger confirm-delete" data-id="{{ comment.id }}">Удалить</button>
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-bs-dismiss="modal"
+                    >
+                      Отмена
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger confirm-delete"
+                      data-id="{{ comment.id }}"
+                    >
+                      Удалить
+                    </button>
                   </div>
                 </div>
               </div>
@@ -128,12 +221,14 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+    const csrfToken = document.querySelector(
+      "[name=csrfmiddlewaretoken]"
+    ).value;
 
     // 🔹 Предпросмотр аватара перед загрузкой
     const avatarInput = document.getElementById("avatar-input");
     if (avatarInput) {
-      avatarInput.addEventListener("change", function(e) {
+      avatarInput.addEventListener("change", function (e) {
         const file = e.target.files[0];
         if (file) {
           // Проверка размера (5 МБ)
@@ -145,7 +240,7 @@
 
           // Предпросмотр
           const reader = new FileReader();
-          reader.onload = function(event) {
+          reader.onload = function (event) {
             const currentAvatar = document.getElementById("current-avatar");
             currentAvatar.src = event.target.result;
           };
@@ -176,7 +271,13 @@
 
         const cancelBtn = document.createElement("button");
         cancelBtn.textContent = "Отмена";
-        cancelBtn.classList.add("btn", "btn-secondary", "btn-sm", "mb-1", "ms-1");
+        cancelBtn.classList.add(
+          "btn",
+          "btn-secondary",
+          "btn-sm",
+          "mb-1",
+          "ms-1"
+        );
 
         textEl.style.display = "none";
         btn.style.display = "none";
@@ -197,7 +298,9 @@
               "X-Requested-With": "XMLHttpRequest",
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: `edit_comment=1&comment_id=${commentId}&text=${encodeURIComponent(newText)}&csrfmiddlewaretoken=${csrfToken}`,
+            body: `edit_comment=1&comment_id=${commentId}&text=${encodeURIComponent(
+              newText
+            )}&csrfmiddlewaretoken=${csrfToken}`,
           })
             .then((res) => res.json())
             .then((data) => {

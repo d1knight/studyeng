@@ -20,16 +20,23 @@
 
   <h1 class="mb-4 text-center display-5 fw-bold text-primary">{{ topic.name }}</h1>
 
+
+{% if tariff %}
   <!-- Информация о платной версии -->
   <div class="alert alert-info text-center shadow-sm rounded-15 mb-5" style="background: #e7f3ff;">
-    <h5 class="fw-bold mb-2">🔥 IELTS Boost Pro</h5>
-    <p class="mb-2">
-      Получите доступ ко всем темам, дополнительным заданиям и персональной проверке.
+    <h5 class="fw-bold mb-2">🔥 {{ tariff.name }}</h5>
+    <p class="mb-3">
+      При покупке тарифа вы получаете доступ в <strong>закрытый Telegram-канал</strong>,  
+      где вас ждут <strong>подробные видеоматериалы</strong>, дополнительные <strong>упражнения</strong>  
+      и понятные объяснения — всё разложено по полочкам и помогает легко освоить материал.
     </p>
-    <a href="https://t.me/Uralmirzaevich" target="_blank" class="btn btn-primary px-4 py-2 fw-bold rounded-15 shadow-sm">
-      Связаться с @Uralmirzaevich
+    <a href="https://t.me/Uralmirzaevich" target="_blank"
+       class="btn btn-primary px-4 py-2 fw-bold rounded-15 shadow-sm">
+      💬 Связаться с учителем
     </a>
   </div>
+{% endif %}
+
 
   <ul class="nav nav-tabs nav-justified mb-4" style="background-color: #e9ecef; border-radius: 15px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);">
     <li class="nav-item">
@@ -86,14 +93,17 @@
               <p class="text-muted">Упражнений пока нет.</p>
             {% endfor %}
             
-            <!-- Добавляем отступ снизу -->
             <div style="height: 80px;"></div>
           </form>
           
-          <!-- Фиксированная кнопка проверки -->
-          <div id="stickyButtonContainer" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 400px;">
-            <button type="submit" form="exerciseForm" class="btn btn-success w-100 py-3 rounded-30 shadow-lg">
+          <!-- Фиксированные кнопки -->
+          <div id="stickyButtonContainer" 
+               style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 420px; display: flex; gap: 10px;">
+            <button type="submit" form="exerciseForm" class="btn btn-success flex-grow-1 py-3 rounded-30 shadow-lg">
               <strong>Проверить</strong>
+            </button>
+            <button id="resetButton" type="button" class="btn btn-outline-secondary flex-grow-1 py-3 rounded-30 shadow-lg" style="display: none;">
+              🔁 Сделать заново
             </button>
           </div>
         </div>
@@ -145,11 +155,21 @@ document.getElementById("exerciseForm").addEventListener("submit", async functio
   });
 
   let submitBtn = document.querySelector('#stickyButtonContainer button[type="submit"]');
+  let resetBtn = document.getElementById("resetButton");
+
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Проверено ✓';
     submitBtn.classList.remove('btn-success');
     submitBtn.classList.add('btn-secondary');
+  }
+
+  // Показать кнопку "Сделать заново"
+  if (resetBtn) {
+    resetBtn.style.display = "block";
+    resetBtn.addEventListener("click", () => {
+      location.reload();
+    });
   }
 
   let firstError = document.querySelector('s[style*="color: red"]');
@@ -163,15 +183,19 @@ document.getElementById("exerciseForm").addEventListener("submit", async functio
   .host-bincmiainjofjnhchmcalkanjebghoen {
     display: none !important;
   }
-  
+
   @media (max-width: 576px) {
     #stickyButtonContainer {
       width: 95%;
+      flex-direction: column;
     }
   }
 
   .alert a.btn:hover {
     background-color: #0056b3;
   }
+
+  .rounded-15 { border-radius: 15px; }
+  .rounded-30 { border-radius: 30px; }
 </style>
 {% endblock %}

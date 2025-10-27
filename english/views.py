@@ -329,6 +329,7 @@ def topic_detail(request, topic_id):
         "topic": topic,
         "exercises": exercises,
         "courses": Course.objects.all(),
+        "tariff": chapter.course.tariffs.filter(is_free=False).first(),
     })
 
 
@@ -393,6 +394,7 @@ def generate_code(request: HttpRequest):
 def profile(request):
     # Получаем комментарии пользователя
     comments = Comment.objects.filter(user=request.user).order_by('-created_at')
+    courses = Course.objects.all()
 
     # Получаем оплаченные тарифы и связанные курсы
     payments = Payment.objects.filter(user=request.user, status="paid")
@@ -460,6 +462,7 @@ def profile(request):
         'comment_form': form,
         'comments': comments,
         'courses_data': courses_data,
+        'courses':courses,
     }
     return render(request, 'english/profile.html', context)
 
