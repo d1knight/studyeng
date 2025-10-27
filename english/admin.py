@@ -89,10 +89,21 @@ class ChapterAdmin(admin.ModelAdmin):
 # ===================== Topic =====================
 @admin.register(Topic)
 class TopicAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name', 'chapter', 'order_index']
+    list_display = ['id', 'name', 'chapter', 'order_index', 'video_preview']
     list_filter = ['chapter']
     search_fields = ['name', 'chapter__name']
+    fields = ['chapter', 'order_index', 'is_public', 'name', 'content', 'video']
     inlines = [ExerciseInline]
+
+    def video_preview(self, obj):
+        if obj.video:
+            return mark_safe(
+                f'<video width="220" controls>'
+                f'<source src="{obj.video.url}" type="video/mp4">'
+                f'</video>'
+            )
+        return "—"
+    video_preview.short_description = "Видео"
 
 # ===================== Exercise =====================
 @admin.register(Exercise)
