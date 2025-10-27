@@ -4,9 +4,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>StudyEng</title>
+    <title>StudyEng | {% block title %}{% endblock %}</title>
 
-    <!-- Bootstrap CSS (всегда первым) -->
+    <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -18,7 +18,7 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
 
-    <!-- Твои стили — всегда после Bootstrap -->
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="{% static 'css/english.css' %}" />
 
     <!-- Favicon -->
@@ -28,11 +28,70 @@
       sizes="16x16"
       href="{% static 'img/logo.png' %}"
     />
+
+    <style>
+      /* Navigation Styles */
+      .navbar-nav .nav-link {
+        color: #2d3748;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+
+      .navbar-nav .nav-link.active,
+      .navbar-nav .nav-link:hover {
+        color: #667eea;
+      }
+
+      .dropdown-menu .dropdown-item {
+        color: #2d3748;
+        font-weight: 500;
+      }
+
+      .dropdown-menu .dropdown-item.active,
+      .dropdown-menu .dropdown-item:hover {
+        color: #667eea;
+        background: #f7fafc;
+      }
+
+      .dropdown-menu .dropdown-item.disabled {
+        color: #a0aec0;
+      }
+
+      /* Logout link in profile dropdown */
+      .dropdown-menu .dropdown-item.logout {
+        color: #c53030;
+      }
+
+      .dropdown-menu .dropdown-item.logout:hover,
+      .dropdown-menu .dropdown-item.logout.active {
+        color: #c53030;
+        background: #f8d7da;
+      }
+
+      /* Login Button */
+      .login-btn {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+        color: #fff;
+        font-weight: 600;
+        padding: 10px 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .login-btn:hover {
+        background: linear-gradient(135deg, #ff8e53 0%, #ff6b6b 100%);
+        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        color: #fff;
+      }
+    </style>
   </head>
   <body>
-    <nav id="home" class="navbar navbar-expand-lg bg-white sticky-top">
+    <nav class="navbar navbar-expand-lg bg-white sticky-top shadow-sm">
       <div class="container">
-        <a class="navbar-brand fw-bold" href="{% url 'home' %}">StudyEng</a>
+        <a class="navbar-brand fw-bold" href="{% url 'home' %}" style="color: #156fff; font-size: 24px;">
+          StudyEng
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -44,7 +103,7 @@
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" href="{% url 'home' %}">Главная</a>
+              <a class="nav-link" href="{% url 'home' %}">Главная</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/#comments">Отзывы</a>
@@ -63,16 +122,19 @@
               >
                 Курсы
               </a>
-              <ul class="dropdown-menu" aria-labelledby="coursesDropdown">
-                {% if courses %} {% for course in courses %}
+              <ul class="dropdown-menu" aria-labelledby="coursesDropdown" style="border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                {% if courses %}
+                {% for course in courses %}
                 <li>
                   <a
                     class="dropdown-item"
                     href="{% url 'course_detail' course.id %}"
-                    >{{ course.name }}</a
                   >
+                    {{ course.name }}
+                  </a>
                 </li>
-                {% endfor %} {% else %}
+                {% endfor %}
+                {% else %}
                 <li>
                   <a class="dropdown-item disabled">Курсы не загружены</a>
                 </li>
@@ -85,45 +147,44 @@
             {% if user.is_authenticated %}
             <li class="nav-item dropdown">
               <a
-                class="nav-link dropdown-toggle"
+                class="nav-link dropdown-toggle d-flex align-items-center"
                 href="#"
                 id="profileDropdown"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                <i class="bi bi-person-circle me-1"></i> Профиль
+                <i class="bi bi-person-circle me-1"></i> {{ user.first_name }}
               </a>
               <ul
                 class="dropdown-menu dropdown-menu-end"
                 aria-labelledby="profileDropdown"
+                style="border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
               >
                 <li>
                   <a class="dropdown-item disabled">
-                    📞 {{ user.first_name }}</a
-                  >
+                    📞 {{ user.phone_number }}
+                  </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="{% url 'profile' %}"
-                    >📚 Мои курсы</a
-                  >
+                  <a class="dropdown-item" href="{% url 'profile' %}">
+                    📚 Мои курсы
+                  </a>
                 </li>
-                <li>
-                  <hr class="dropdown-divider" />
-                </li>
+                <li><hr class="dropdown-divider" /></li>
                 <li>
                   <a
-                    class="dropdown-item text-danger"
+                    class="dropdown-item logout"
                     href="{% url 'logout' %}"
                   >
-                    🚪 Выйти</a
-                  >
+                    🚪 Выйти
+                  </a>
                 </li>
               </ul>
             </li>
             {% else %}
             <li class="nav-item">
-              <a class="btn-outline-primary ms-auto" href="{% url 'login' %}">
+              <a class="login-btn ms-auto" href="{% url 'login' %}">
                 <i class="bi bi-box-arrow-in-right me-1"></i> Войти
               </a>
             </li>
@@ -133,12 +194,82 @@
       </div>
     </nav>
 
-    <main class="container py-4">{% block content %}{% endblock %}</main>
+    <main class="container py-5">
+      {% block content %}{% endblock %}
+    </main>
 
-    <footer class="bg-dark text-light text-center py-2 mt-4">
+    <footer class="text-center py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff;">
       <p class="mb-0">&copy; 2025 StudyEng. Все права защищены.</p>
     </footer>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Navigation Active State Script -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+        const navLinks = document.querySelectorAll(".navbar-nav .nav-link, .dropdown-menu .dropdown-item");
+
+        // Удаляем класс active у всех ссылок
+        navLinks.forEach(link => link.classList.remove("active"));
+
+        // Находим наиболее подходящую ссылку
+        let bestMatch = null;
+        let bestMatchLength = 0;
+
+        navLinks.forEach(link => {
+          const href = link.getAttribute("href");
+
+          // Проверяем точное совпадение пути
+          if (href === currentPath) {
+            if (href.length > bestMatchLength) {
+              bestMatch = link;
+              bestMatchLength = href.length;
+            }
+          }
+          // Проверяем якорные ссылки для главной страницы
+          else if (href.includes("#") && currentPath === "/" && currentHash === href.split("#")[1]) {
+            if (href.length > bestMatchLength) {
+              bestMatch = link;
+              bestMatchLength = href.length;
+            }
+          }
+          // Проверяем курсы (точное совпадение с course_detail)
+          else if (href.includes("course/") && currentPath.includes("course/") && href === currentPath) {
+            if (href.length > bestMatchLength) {
+              bestMatch = link;
+              bestMatchLength = href.length;
+            }
+          }
+          // Проверяем профиль и logout
+          else if (
+            (href === "{% url 'profile' %}" && currentPath === "/profile/") ||
+            (href === "{% url 'logout' %}" && currentPath === "/logout/")
+          ) {
+            if (href.length > bestMatchLength) {
+              bestMatch = link;
+              bestMatchLength = href.length;
+            }
+          }
+        });
+
+        // Подсвечиваем только лучшую подходящую ссылку
+        if (bestMatch) {
+          bestMatch.classList.add("active");
+        }
+      });
+
+      // Обрабатываем клики по ссылкам для немедленной подсветки
+      document.querySelectorAll(".navbar-nav .nav-link, .dropdown-menu .dropdown-item").forEach(link => {
+        link.addEventListener("click", function(event) {
+          // Удаляем active у всех ссылок
+          document.querySelectorAll(".navbar-nav .nav-link, .dropdown-menu .dropdown-item").forEach(l => l.classList.remove("active"));
+          // Добавляем active к кликнутой ссылке
+          this.classList.add("active");
+        });
+      });
+    </script>
   </body>
 </html>

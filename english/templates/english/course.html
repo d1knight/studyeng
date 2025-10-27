@@ -1,180 +1,319 @@
 {% extends 'english/base.html' %}
-
+{% load static %}
+{% block title %}{{ course.name }}{% endblock %}
 {% block content %}
+<style>
+  /* Header Section */
+  .course-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+  }
+
+  .course-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .course-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  .course-header p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .breadcrumb-item.active {
+    color: #718096;
+  }
+
+  /* Accordion */
+  .accordion-item {
+    border: none;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .accordion-item:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  }
+
+  .accordion-button {
+    background: #fff;
+    color: #2d3748;
+    font-weight: 600;
+    border-radius: 16px;
+    padding: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .accordion-button:not(.collapsed) {
+    background: #f7fafc;
+    color: #667eea;
+    box-shadow: none;
+  }
+
+  .accordion-button:focus {
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border: none;
+  }
+
+  .accordion-button .badge {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 12px;
+  }
+
+  .accordion-body {
+    padding: 24px;
+    background: #fff;
+    border-radius: 0 0 16px 16px;
+  }
+
+  /* Topics List */
+  .topic-item {
+    padding: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+  }
+
+  .topic-item:last-child {
+    border-bottom: none;
+  }
+
+  .topic-item:hover {
+    background: #f7fafc;
+    border-radius: 12px;
+  }
+
+  .topic-item a {
+    color: #2d3748;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .topic-item a:hover {
+    color: #667eea;
+  }
+
+  .topic-item .badge {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 12px;
+  }
+
+  /* Alerts */
+  .alert {
+    border-radius: 12px;
+    font-size: 14px;
+    padding: 16px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* Promo Block */
+  .promo-block {
+    background: #f7fafc;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  .promo-block p {
+    font-size: 16px;
+    color: #2d3748;
+    margin-bottom: 24px;
+  }
+
+  .promo-block .course-btn {
+    padding: 12px 32px;
+    margin: 0 8px;
+  }
+</style>
+
 <div class="container my-5">
   <!-- Breadcrumbs -->
   <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb bg-light p-3 rounded-3">
+    <ol class="breadcrumb">
       <li class="breadcrumb-item">
-        <a href="{% url 'home' %}" class="text-decoration-none">
-          <i class="bi bi-house-door me-1"></i>Главная
+        <a href="{% url 'home' %}">
+          🏠 Главная
         </a>
       </li>
       <li class="breadcrumb-item active" aria-current="page">{{ course.name }}</li>
     </ol>
   </nav>
 
-  <h1 class="fw-bold mb-3 text-dark">{{ course.name }}</h1>
-  <p class="text-muted mb-4">{{ course.description }}</p>
+  <!-- Course Header -->
+  <div class="card shadow-sm border-0" style="border-radius: 20px; overflow: hidden;">
+    <div class="course-header">
+      <h1>{{ course.name }}</h1>
+      <p>{{ course.description }}</p>
+    </div>
 
-  <div class="accordion" id="accordionExample">
-    {% for chapter, user_chapter in chapter_user_chapters %}
-      <div class="accordion-item border-0 rounded-3 mb-3 shadow-sm {% if user_chapter and not user_chapter.is_open %}opacity-75{% endif %}">
-        <h2 class="accordion-header">
-          <button
-            class="accordion-button collapsed fw-semibold {% if user_chapter and not user_chapter.is_open %}bg-light text-muted{% else %}bg-white text-dark{% endif %}"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#collapse-{{ chapter.id }}"
-            aria-expanded="false"
-            aria-controls="collapse-{{ chapter.id }}"
-            style="transition: all 0.25s ease;"
-          >
-            <span class="me-2 text-primary">Глава {{ chapter.order_index }}:</span>
-            {{ chapter.name }}
-            
-            {% if chapter.is_paid %}
-              <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">💳 Платная</span>
-            {% else %}
-              <span class="badge bg-success ms-2" style="font-size: 0.7rem;">✓ Бесплатная</span>
-            {% endif %}
-            
-            {% if user_chapter %}
-              {% if user_chapter.is_open %}
-                <i class="bi bi-unlock ms-2 text-success"></i>
+    <!-- Accordion -->
+    <div class="card-body p-4">
+      <div class="accordion" id="accordionExample">
+        {% for chapter, user_chapter in chapter_user_chapters %}
+        <div class="accordion-item {% if user_chapter and not user_chapter.is_open %}opacity-75{% endif %}">
+          <h2 class="accordion-header">
+            <button
+              class="accordion-button collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#collapse-{{ chapter.id }}"
+              aria-expanded="false"
+              aria-controls="collapse-{{ chapter.id }}"
+            >
+              <span class="me-2 text-primary">Глава {{ chapter.order_index }}:</span>
+              {{ chapter.name }}
+              {% if chapter.is_paid %}
+                <span class="badge bg-warning text-dark ms-2">💳 Платная</span>
               {% else %}
-                <i class="bi bi-lock ms-2 text-danger"></i>
+                <span class="badge bg-success ms-2">✓ Бесплатная</span>
               {% endif %}
-              {% if user_chapter.completion_score %}
-                <span class="badge bg-info ms-2">{{ user_chapter.completion_score|floatformat:0 }}%</span>
+              {% if user_chapter %}
+                {% if user_chapter.is_open %}
+                  <i class="bi bi-unlock ms-2 text-success"></i>
+                {% else %}
+                  <i class="bi bi-lock ms-2 text-danger"></i>
+                {% endif %}
+                {% if user_chapter.completion_score %}
+                  <span class="badge bg-info ms-2">{{ user_chapter.completion_score|floatformat:0 }}%</span>
+                {% endif %}
               {% endif %}
-            {% endif %}
-          </button>
-        </h2>
-
-        <div id="collapse-{{ chapter.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
-          <div class="accordion-body bg-white rounded-bottom-3">
-
-            <!-- Список тем -->
-            <ul class="list-group list-group-flush">
-              {% for topic in chapter.topics_list %}
-                <li
-                  class="list-group-item d-flex align-items-center justify-content-between border-0 border-bottom"
-                  style="transition: background-color 0.2s ease;"
-                  onmouseover="this.style.backgroundColor='#f8f9fa'"
-                  onmouseout="this.style.backgroundColor='transparent'"
-                >
-                  <div class="w-100">
-                    <div class="d-flex align-items-center justify-content-between">
-                      <div>
-                        <span class="fw-semibold text-primary">{{ topic.order_index }}.</span>
-                        {% if topic.is_accessible %}
-                          <a
-                            href="{% url 'topic' topic.id %}"
-                            class="text-decoration-none fw-semibold ms-1 text-dark"
-                            style="transition: color 0.2s ease;"
-                            onmouseover="this.style.color='#007bff'"
-                            onmouseout="this.style.color='#212529'"
-                          >
-                            {{ topic.name }}
-                          </a>
-                          <span class="badge bg-success ms-2" style="font-size: 0.7rem;">✓ Доступно</span>
-                        {% else %}
-                          <span class="text-muted ms-1">{{ topic.name }}</span>
-                          <span class="badge bg-light text-danger border ms-2" style="font-size: 0.7rem;">🔒 Закрыто</span>
-                        {% endif %}
-                      </div>
-                    </div>
+            </button>
+          </h2>
+          <div id="collapse-{{ chapter.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+              <!-- Topics List -->
+              <ul class="list-group list-group-flush">
+                {% for topic in chapter.topics_list %}
+                <li class="topic-item d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="fw-semibold text-primary">{{ topic.order_index }}.</span>
+                    {% if topic.is_accessible %}
+                      <a href="{% url 'topic' topic.id %}" class="ms-2">{{ topic.name }}</a>
+                      <span class="badge bg-success ms-2">✓ Доступно</span>
+                    {% else %}
+                      <span class="text-muted ms-2">{{ topic.name }}</span>
+                      <span class="badge bg-light text-danger border ms-2">🔒 Закрыто</span>
+                    {% endif %}
                   </div>
                 </li>
-              {% endfor %}
-            </ul>
+                {% endfor %}
+              </ul>
 
-            {% if chapter.requires_payment and user.is_authenticated %}
-              <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
-                <i class="bi bi-credit-card me-2"></i>
-                <strong>Это платная глава.</strong> Купите тариф для доступа к материалам.
-                <a href="{% url 'buy_tariff' course.tariffs.first.id %}" class="alert-link">Купить тариф</a>
-              </div>
-            {% elif user_chapter and not user_chapter.is_open and user.is_authenticated %}
-              <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
-                <i class="bi bi-info-circle me-2"></i>
-                Эта глава откроется после успешного прохождения контрольной работы предыдущей главы (80%+).
-              </div>
-            {% elif not user.is_authenticated and chapter.order_index > 1 %}
-              <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
-                <i class="bi bi-lock me-2"></i>
-                Авторизуйтесь{% if chapter.is_paid %} и купите тариф{% endif %}, чтобы открыть эту главу.
-              </div>
-            {% endif %}
-
-            <!-- Контрольная работа -->
-            <div class="mt-4">
-              {% if chapter.control_test_accessible %}
-                <a href="{% url 'control_test' chapter.id %}" class="btn btn-success px-4 py-2 rounded-3 shadow-sm">
-                  ✅ Пройти контрольную работу
-                </a>
-              {% elif chapter.requires_payment and user.is_authenticated %}
-                <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
-                  <i class="bi bi-lock me-2"></i>
-                  Купите тариф, чтобы пройти контрольную работу этой платной главы.
+              <!-- Alerts -->
+              {% if chapter.requires_payment and user.is_authenticated %}
+                <div class="alert alert-warning mt-3">
+                  <i class="bi bi-credit-card me-2"></i>
+                  <strong>Это платная глава.</strong> Купите тариф для доступа к материалам.
+                  <a href="{% url 'buy_tariff' course.tariffs.first.id %}" class="alert-link">Купить тариф</a>
                 </div>
-              {% elif user.is_authenticated and not user_chapter.is_open %}
-                <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
-                  <i class="bi bi-lock me-2"></i>
-                  Контрольная работа будет доступна после открытия главы.
+              {% elif user_chapter and not user_chapter.is_open and user.is_authenticated %}
+                <div class="alert alert-info mt-3">
+                  <i class="bi bi-info-circle me-2"></i>
+                  Эта глава откроется после успешного прохождения контрольной работы предыдущей главы (80%+).
                 </div>
-              {% elif not user.is_authenticated %}
-                <div class="alert alert-info mt-3 py-2 px-3 rounded-3">
-                  <i class="bi bi-person-circle me-2"></i>
-                  Авторизуйтесь{% if chapter.is_paid %} и купите тариф{% endif %}, чтобы пройти контрольную работу.
+              {% elif not user.is_authenticated and chapter.order_index > 1 %}
+                <div class="alert alert-warning mt-3">
+                  <i class="bi bi-lock me-2"></i>
+                  Авторизуйтесь{% if chapter.is_paid %} и купите тариф{% endif %}, чтобы открыть эту главу.
                 </div>
               {% endif %}
+
+              <!-- Control Test -->
+              <div class="mt-4">
+                {% if chapter.control_test_accessible %}
+                  <a href="{% url 'control_test' chapter.id %}" class="course-btn px-4 py-2">
+                    <i class="bi bi-check-circle me-2"></i>Пройти контрольную работу
+                  </a>
+                {% elif chapter.requires_payment and user.is_authenticated %}
+                  <div class="alert alert-warning mt-3">
+                    <i class="bi bi-lock me-2"></i>
+                    Купите тариф, чтобы пройти контрольную работу этой платной главы.
+                  </div>
+                {% elif user.is_authenticated and not user_chapter.is_open %}
+                  <div class="alert alert-info mt-3">
+                    <i class="bi bi-lock me-2"></i>
+                    Контрольная работа будет доступна после открытия главы.
+                  </div>
+                {% elif not user.is_authenticated %}
+                  <div class="alert alert-info mt-3">
+                    <i class="bi bi-person-circle me-2"></i>
+                    Авторизуйтесь{% if chapter.is_paid %} и купите тариф{% endif %}, чтобы пройти контрольную работу.
+                  </div>
+                {% endif %}
+              </div>
             </div>
-
           </div>
         </div>
+        {% endfor %}
       </div>
-    {% endfor %}
-  </div>
 
-  <!-- Кнопки и промо-блок только для платных курсов -->
-  {% if not user_has_tariff and course.tariffs.all %}
-    {% with first_tariff=course.tariffs.all.0 %}
-      {% if not first_tariff.is_free %}
-        <div class="text-center mt-5 p-4 bg-light rounded-3 shadow-sm">
-          <p class="mb-3 text-dark" style="font-size: 1.1rem;">
-            🌟 <strong>Хотите учиться эффективнее?</strong><br>
-            Получите доступ к нашему <strong>закрытому Telegram-каналу</strong> — вас ждут 
-            <em>видеоразборы, практические упражнения</em> и поддержка преподавателя, 
-            которые помогут вам быстрее и глубже понять материал!
-          </p>
-          <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
-            <a href="{% url 'buy_tariff' first_tariff.id %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
-              💳 Купить тариф
-            </a>
-            <a href="https://t.me/Uralmirzaevich" target="_blank" class="btn btn-outline-success btn-lg px-5 py-3 rounded-3 shadow-sm">
-              💬 Связаться с учителем
-            </a>
-          </div>
-        </div>
+      <!-- Promo Block -->
+      {% if not user_has_tariff and course.tariffs.all %}
+        {% with first_tariff=course.tariffs.all.0 %}
+          {% if not first_tariff.is_free %}
+            <div class="promo-block mt-5">
+              <p>
+                🌟 <strong>Хотите учиться эффективнее?</strong><br>
+                Получите доступ к нашему <strong>закрытому Telegram-каналу</strong> — вас ждут 
+                <em>видеоразборы, практические упражнения</em> и поддержка преподавателя!
+              </p>
+              <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+                <a href="{% url 'buy_tariff' first_tariff.id %}" class="course-btn">
+                  <i class="bi bi-credit-card me-2"></i>Купить тариф
+                </a>
+                <a href="https://t.me/Uralmirzaevich" target="_blank" class="course-btn">
+                  <i class="bi bi-telegram me-2"></i>Связаться с учителем
+                </a>
+              </div>
+            </div>
+          {% endif %}
+        {% endwith %}
       {% endif %}
-    {% endwith %}
-  {% endif %}
-
+    </div>
+  </div>
 </div>
-
-<style>
-  .accordion-button:not(.collapsed) {
-    background-color: #f8f9fa;
-    box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
-  }
-  .accordion-button:focus {
-    box-shadow: none;
-    border-color: rgba(0,0,0,.125);
-  }
-  .list-group-item:last-child {
-    border-bottom: none !important;
-  }
-</style>
-{% endblock content %}
+{% endblock %}

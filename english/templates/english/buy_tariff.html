@@ -1,17 +1,200 @@
 {% extends 'english/base.html' %}
-
+{% load static %}
+{% block title %}Тариф: {{ tariff.name }}{% endblock %}
 {% block content %}
+<style>
+  /* Header */
+  .tariff-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+  }
+
+  .tariff-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .tariff-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  .tariff-header h4 {
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 16px;
+  }
+
+  .tariff-header .price-info {
+    font-size: 24px;
+    font-weight: 600;
+    color: #28a745;
+    margin-bottom: 16px;
+  }
+
+  .tariff-header .price-info.free {
+    font-size: 28px;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .breadcrumb-item.active {
+    color: #718096;
+  }
+
+  /* Alerts */
+  .alert {
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 14px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .alert h5 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+  }
+
+  .alert ul {
+    font-size: 14px;
+    color: #718096;
+  }
+
+  /* Form */
+  .form-control {
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    padding: 12px;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  .form-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2d3748;
+  }
+
+  .invalid-feedback {
+    font-size: 12px;
+    color: #dc3545;
+  }
+
+  /* Tariff Cards */
+  .tariff-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+
+  .tariff-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  }
+
+  .tariff-card .card-body {
+    padding: 24px;
+  }
+
+  .tariff-card h5 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #667eea;
+  }
+
+  .tariff-card .price {
+    font-size: 20px;
+    font-weight: 600;
+    color: #28a745;
+  }
+
+  /* Divider */
+  .divider {
+    position: relative;
+    margin: 40px 0;
+  }
+
+  .divider hr {
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .divider span {
+    background: #fff;
+    padding: 0 16px;
+    font-size: 14px;
+    color: #718096;
+  }
+
+  /* Buttons */
+  .course-btn {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .btn-outline-secondary {
+    border-color: #e2e8f0;
+    color: #2d3748;
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .btn-outline-secondary:hover {
+    background: #f7fafc;
+    border-color: #667eea;
+    color: #667eea;
+  }
+</style>
+
 <div class="container my-5">
   <!-- Breadcrumbs -->
   <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb bg-light p-3 rounded-3">
+    <ol class="breadcrumb">
       <li class="breadcrumb-item">
-        <a href="{% url 'home' %}" class="text-decoration-none">
-          <i class="bi bi-house-door me-1"></i>Главная
+        <a href="{% url 'home' %}">
+          🏠 Главная
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{% url 'course_detail' tariff.course.id %}" class="text-decoration-none">
+        <a href="{% url 'course_detail' tariff.course.id %}">
           {{ tariff.course.name }}
         </a>
       </li>
@@ -19,40 +202,43 @@
     </ol>
   </nav>
 
-  <!-- === Блок текущего тарифа === -->
-  <div class="card shadow-sm border-0 rounded-4 mx-auto p-3" style="max-width: 600px;">
-    <div class="card-body p-4">
-      <h2 class="text-center mb-3 fw-bold text-dark">
+  <!-- Tariff Header and Form -->
+  <div class="card shadow-sm border-0" style="border-radius: 20px; overflow: hidden;">
+    <div class="tariff-header">
+      <h2>
         {% if tariff.is_free %}
           Бесплатный курс
         {% else %}
           Оплата тарифа
         {% endif %}
       </h2>
-      <h4 class="text-center text-primary mb-4">{{ tariff.name }}</h4>
-
-      <div class="text-center mb-4">
+      <h4>{{ tariff.name }}</h4>
+      <div class="price-info {% if tariff.is_free %}free{% endif %}">
         {% if tariff.is_free %}
-          <h3 class="text-success fw-bold">Бесплатно</h3>
-          <p class="text-muted">Никаких платежей не требуется</p>
+          Бесплатно
         {% else %}
-          <p class="fs-5">
-            Стоимость: <span class="fw-bold text-success">{{ tariff.price|floatformat:0 }} сум</span>
-          </p>
+          {{ tariff.price|floatformat:0 }} сум
         {% endif %}
       </div>
+      {% if not tariff.is_free %}
+        <p class="small">Оплатите тариф, чтобы получить полный доступ к курсу</p>
+      {% else %}
+        <p class="small">Никаких платежей не требуется</p>
+      {% endif %}
+    </div>
 
+    <div class="card-body p-4">
       {% if messages %}
         {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         {% endfor %}
       {% endif %}
 
-      {% if not user_authenticated %}
-        <div class="alert alert-info text-center py-2 px-3 rounded-3 mb-4 shadow-sm">
+      {% if not user.is_authenticated %}
+        <div class="alert alert-info text-center">
           <i class="bi bi-person-circle me-2"></i>
           {% if tariff.is_free %}
             Авторизуйтесь, чтобы начать обучение.
@@ -61,37 +247,36 @@
           {% endif %}
         </div>
         <div class="text-center">
-          <a href="{% url 'login' %}" class="btn btn-outline-primary rounded-3 px-4">
-            Войти в аккаунт
+          <a href="{% url 'login' %}" class="course-btn w-100">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Войти в аккаунт
           </a>
         </div>
       {% else %}
         {% if tariff.is_free %}
-          <!-- Информация для бесплатного курса -->
-          <div class="alert alert-success rounded-3 mb-4">
-            <h5 class="fw-bold mb-3">
+          <!-- Free Tariff Info -->
+          <div class="alert alert-success">
+            <h5>
               <i class="bi bi-gift me-2"></i>Бесплатный доступ
             </h5>
-            <p class="mb-3">Этот курс полностью бесплатный! Вы можете сразу начать обучение.</p>
-            <ul class="mb-0">
+            <p>Этот курс полностью бесплатный! Вы можете сразу начать обучение.</p>
+            <ul>
               <li>Все бесплатные главы доступны сразу</li>
               <li>Проходите главы последовательно</li>
               <li>Набирайте 80%+ в контрольных для открытия следующих глав</li>
             </ul>
           </div>
-          
           <div class="text-center">
-            <a href="{% url 'course_detail' tariff.course.id %}" class="btn btn-success btn-lg w-100 py-3 rounded-3 shadow-sm">
+            <a href="{% url 'course_detail' tariff.course.id %}" class="course-btn w-100">
               <i class="bi bi-play-circle me-2"></i>Начать обучение
             </a>
           </div>
         {% else %}
-          <!-- Форма для платного тарифа -->
-          <div class="alert alert-warning rounded-3 mb-4">
-            <h5 class="fw-bold mb-3">
+          <!-- Paid Tariff Form -->
+          <div class="alert alert-warning">
+            <h5>
               <i class="bi bi-exclamation-triangle me-2"></i>Инструкция по оплате:
             </h5>
-            <ol class="mb-0">
+            <ol>
               <li>Переведите {{ tariff.price|floatformat:0 }} сум на указанные реквизиты</li>
               <li>Сделайте скриншот чека/подтверждения</li>
               <li>Загрузите скриншот в форме ниже</li>
@@ -100,7 +285,7 @@
           </div>
 
           <div class="card bg-light border-0 rounded-3 p-3 mb-4">
-            <h6 class="fw-bold mb-2 text-center">Реквизиты для оплаты</h6>
+            <h6 class="fw-bold text-center">Реквизиты для оплаты</h6>
             <div class="text-center">
               <p class="mb-1"><strong>Карта:</strong> 8600 0000 0000 0000</p>
               <p class="mb-1"><strong>Получатель:</strong> Имя Фамилия</p>
@@ -111,28 +296,27 @@
           <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
             {% csrf_token %}
             <div class="mb-3">
-              <label for="receipt" class="form-label fw-semibold text-secondary">
+              <label for="receipt" class="form-label">
                 <i class="bi bi-upload me-2"></i>Загрузите скриншот чека
               </label>
               <input
                 type="file"
                 name="receipt"
                 id="receipt"
-                class="form-control form-control-lg rounded-3 shadow-sm"
+                class="form-control"
                 accept="image/*"
                 required
               >
               <small class="text-muted">Принимаются форматы: JPG, PNG, WebP</small>
               <div class="invalid-feedback">Пожалуйста, выберите файл.</div>
             </div>
-
-            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-3 shadow-sm">
+            <button type="submit" class="course-btn w-100">
               <i class="bi bi-send me-2"></i>Отправить на проверку
             </button>
           </form>
 
-          <div class="alert alert-info rounded-3 mt-3 mb-0">
-            <p class="mb-0 text-center small">
+          <div class="alert alert-info mt-3">
+            <p class="mb-0 text-center">
               <i class="bi bi-clock me-2"></i>
               <strong>Время проверки:</strong> обычно до 24 часов
             </p>
@@ -142,81 +326,67 @@
     </div>
   </div>
 
-  <!-- === Разделитель между тарифами === -->
+  <!-- Divider -->
   {% if other_tariffs %}
-    <div class="text-center my-5 position-relative">
-      <hr class="w-25 mx-auto opacity-50">
-      <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
-        или выберите другой тариф
-      </span>
-    </div>
+  <div class="divider text-center">
+    <hr>
+    <span class="position-absolute top-50 start-50 translate-middle">или выберите другой тариф</span>
+  </div>
   {% endif %}
 
-  <!-- === Другие тарифы === -->
+  <!-- Other Tariffs -->
   {% if other_tariffs %}
-    <div class="row justify-content-center g-4">
-      {% for t in other_tariffs %}
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card border-0 rounded-4 shadow-sm h-100 tariff-card" style="transition: all 0.3s ease;">
-            <div class="card-body text-center p-4">
-              <h5 class="fw-bold text-primary mb-2">{{ t.name }}</h5>
+  <div class="row g-4">
+    {% for t in other_tariffs %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="tariff-card h-100">
+        <div class="card-body text-center">
+          <h5>{{ t.name }}</h5>
+          <p class="price {% if t.is_free %}free{% endif %}">
+            {% if t.is_free %}Бесплатно{% else %}{{ t.price|floatformat:0 }} сум{% endif %}
+          </p>
+          <p class="text-muted">{{ t.description|truncatechars:80 }}</p>
+          {% if user.is_authenticated %}
+            <a href="{% url 'buy_tariff' t.id %}" class="course-btn w-100">
               {% if t.is_free %}
-                <p class="fs-5 text-success fw-semibold mb-3">Бесплатно</p>
+                <i class="bi bi-eye me-2"></i>Посмотреть
               {% else %}
-                <p class="fs-5 text-success fw-semibold mb-3">{{ t.price|floatformat:0 }} сум</p>
+                <i class="bi bi-cart me-2"></i>Купить тариф
               {% endif %}
-              <p class="text-muted small mb-4">{{ t.description|truncatechars:80 }}</p>
-
-              {% if user_authenticated %}
-                <a href="{% url 'buy_tariff' t.id %}" class="btn btn-outline-primary w-100 rounded-3 shadow-sm">
-                  {% if t.is_free %}
-                    👁️ Посмотреть
-                  {% else %}
-                    💳 Купить тариф
-                  {% endif %}
-                </a>
-              {% else %}
-                <a href="{% url 'login' %}" class="btn btn-outline-secondary w-100 rounded-3 shadow-sm">
-                  🔐 Авторизуйтесь
-                </a>
-              {% endif %}
-            </div>
-          </div>
+            </a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-secondary w-100">
+              <i class="bi bi-lock me-2"></i>Авторизуйтесь
+            </a>
+          {% endif %}
         </div>
-      {% endfor %}
+      </div>
     </div>
+    {% endfor %}
+  </div>
   {% endif %}
 
-  <!-- Кнопка назад -->
+  <!-- Back Button -->
   <div class="text-center mt-4">
-    <a href="{% url 'course_detail' tariff.course.id %}" class="btn btn-outline-secondary rounded-3 px-4">
+    <a href="{% url 'course_detail' tariff.course.id %}" class="btn btn-outline-secondary">
       <i class="bi bi-arrow-left me-2"></i>Вернуться к курсу
     </a>
   </div>
 </div>
 
-<!-- === Стили === -->
-<style>
-  .tariff-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-  }
-</style>
-
-<!-- === Валидация формы === -->
+<!-- Form Validation -->
 <script>
-  (function () {
-    'use strict';
-    var forms = document.querySelectorAll('.needs-validation');
-    Array.prototype.slice.call(forms).forEach(function (form) {
-      form.addEventListener('submit', function (event) {
-        if (!form.checkValidity()) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-      }, false);
-    });
-  })();
+document.addEventListener("DOMContentLoaded", function() {
+  const forms = document.querySelectorAll(".needs-validation");
+  forms.forEach(form => {
+    form.addEventListener("submit", function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add("was-validated");
+    }, false);
+  });
+});
 </script>
 {% endblock %}

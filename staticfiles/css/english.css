@@ -1,168 +1,197 @@
-/* === English course style (StudyEng unified look) === */
+/* === StudyEng Unified Style === */
 
-/* Общие цвета и акценты */
 :root {
-    --primary-color: #007bff;
-    --success-color: #28a745;
-    --text-dark: #2c3e50;
-    --text-muted: #6c757d;
-    --bg-light: #f8f9fa;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --text-dark: #2d3748;
+  --text-muted: #718096;
+  --text-light: #a0aec0;
+  --bg-light: #f7fafc;
+  --border-light: #e2e8f0;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Общие стили */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: var(--text-dark);
+  background-color: #fff;
 }
 
 /* Контейнеры */
 .container {
-    color: var(--text-dark);
+  max-width: 1200px;
 }
 
 /* Заголовки */
-h1, h2, h3 {
-    font-weight: 600;
-    color: var(--text-dark);
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--text-dark);
 }
 
-/* Accordion */
-.accordion-item {
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    background-color: #ffffff;
+h1 { font-size: 32px; }
+h2 { font-size: 28px; }
+h3 { font-size: 24px; }
+h4 { font-size: 22px; }
+h5 { font-size: 18px; }
+
+/* Навигация */
+.navbar {
+  border-radius: 0 0 12px 12px;
+  background-color: #fff;
+  transition: all 0.3s ease;
 }
 
-.accordion-item:hover {
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+.navbar-brand {
+  font-weight: 700;
+  color: var(--text-dark) !important;
 }
 
-.accordion-button {
-    background-color: #ffffff;
-    color: var(--text-dark);
-    font-weight: 500;
-    border-radius: 8px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+.nav-link {
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.accordion-button:hover {
-    background-color: var(--bg-light);
+.nav-link:hover {
+  color: #667eea !important;
 }
 
-.accordion-button:not(.collapsed) {
-    background-color: var(--bg-light);
-    color: var(--primary-color);
+.dropdown-menu {
+  border: none;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
 }
 
-.accordion-button.disabled {
-    background-color: #f1f1f1;
-    color: #adb5bd;
+.dropdown-item {
+  font-weight: 500;
+  color: var(--text-dark);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Темы внутри глав */
-.list-group-item {
-    border: none;
-    border-bottom: 1px solid #f1f1f1;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-}
-
-.list-group-item:last-child {
-    border-bottom: none;
-}
-
-.list-group-item a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.list-group-item a:hover {
-    color: #0056b3;
-    text-decoration: underline;
-}
-
-.text-muted {
-    color: var(--text-muted) !important;
-}
-
-.badge {
-    font-size: 0.85rem;
-    border-radius: 6px;
+.dropdown-item:hover {
+  background-color: var(--bg-light);
+  color: #667eea;
 }
 
 /* Кнопки */
-.btn-success {
-    background-color: var(--success-color);
-    border: none;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+.btn {
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-.btn-success:hover {
-    background-color: #218838;
-    transform: translateY(-1px);
+.course-btn {
+  background: var(--primary-gradient);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
-.btn-primary {
-    background-color: var(--primary-color);
-    border: none;
-    transition: background-color 0.2s ease, transform 0.2s ease;
+.course-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  color: #fff;
+  text-decoration: none;
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
-    transform: translateY(-1px);
+.btn-outline-primary {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-gradient);
+  color: #fff;
+}
+
+/* Карточки */
+.card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+}
+
+/* Аккордеон */
+.accordion-item {
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+}
+
+.accordion-item:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.accordion-button {
+  background-color: #fff;
+  color: var(--text-dark);
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.accordion-button:not(.collapsed) {
+  background: var(--bg-light);
+  color: #667eea;
+}
+
+.accordion-button:focus {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Список */
+.list-group-item {
+  border: none;
+  border-bottom: 1px solid var(--border-light);
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+
+.list-group-item a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.list-group-item a:hover {
+  color: #764ba2;
+  text-decoration: underline;
 }
 
 /* Alerts */
 .alert {
-    font-size: 0.95rem;
-    border-radius: 8px;
+  border-radius: 12px;
+  font-size: 14px;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-light);
+  color: var(--text-dark);
 }
 
-.alert-info {
-    background-color: #e8f2ff;
-    border-color: #b6daff;
-    color: var(--primary-color);
-}
-
-.alert-warning {
-    background-color: #fff8e5;
-    border-color: #ffe49c;
-    color: #b38300;
-}
-
-/* Классы для анимации */
-.hover-scale {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.hover-scale:hover {
-  transform: scale(1.02);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-}
-
-.hover-lift {
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.hover-lift:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-/* Стили для стрелок карусели */
+/* Карусель */
 .carousel-control-prev,
 .carousel-control-next {
+  width: 5%;
   opacity: 0.8;
-  transition: opacity 0.2s ease;
-  width: 5%; /* Уменьшен для лучшей адаптивности */
+  background: none;
 }
 
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
-  background-image: none; /* Убираем стандартные SVG */
-  background-color: #ffffff; /* Белый фон для контраста с bg-light */
-  border: 2px solid var(--success-color); /* Зеленая обводка из вашей темы */
+  background: #fff;
+  border: 2px solid #667eea;
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  position: relative;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Тень для глубины */
+  box-shadow: var(--shadow-sm);
 }
 
 .carousel-control-prev-icon::before,
@@ -174,7 +203,7 @@ h1, h2, h3 {
   transform: translate(-50%, -50%);
   width: 12px;
   height: 12px;
-  border-top: 3px solid var(--text-dark); /* Черный цвет текста из темы */
+  border-top: 3px solid var(--text-dark);
   border-right: 3px solid var(--text-dark);
 }
 
@@ -191,20 +220,37 @@ h1, h2, h3 {
   opacity: 1;
 }
 
-.carousel-control-prev {
-  left: -60px;
+/* Анимации */
+.hover-scale {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.carousel-control-next {
-  right: -60px;
+.hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-md);
 }
 
-/* Адаптивность для мобильных устройств */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
   .carousel-control-prev {
-    left: -30px;
+    left: -20px;
   }
   .carousel-control-next {
-    right: -30px;
+    right: -20px;
+  }
+  .navbar-nav {
+    text-align: center;
+  }
+  .dropdown-menu {
+    text-align: center;
   }
 }

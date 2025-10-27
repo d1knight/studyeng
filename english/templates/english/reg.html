@@ -1,18 +1,134 @@
 {% extends 'english/base.html' %}
-
+{% load static %}
+{% block title %}Вход через Telegram{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 70vh;">
-  <form class="card shadow-sm p-4" method="post" style="max-width: 400px; width: 100%;">
-    {% csrf_token %}
-    <h5 class="text-center mb-3">Введите код</h5>
-    <p>Telegram bot: <a href="tg://resolve?domain=studyeng_login_bot">@studyeng_login_bot</a></p>
-    <div>
-      <input type="number" name="code" class="form-control text-center" id="inputCode" placeholder="Код из Telegram" required>
+<style>
+  /* Container */
+  .auth-container {
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Card */
+  .auth-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    max-width: 400px;
+    width: 100%;
+    background: #fff;
+    transition: all 0.3s ease;
+  }
+
+  .auth-card:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  }
+
+  .auth-card .card-body {
+    padding: 32px;
+  }
+
+  /* Header */
+  .auth-card h5 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2d3748;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  /* Telegram Link */
+  .auth-card p {
+    font-size: 14px;
+    color: #718096;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .auth-card p a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .auth-card p a:hover {
+    color: #764ba2;
+  }
+
+  /* Form */
+  .form-control {
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  /* Error Message */
+  .error-message {
+    font-size: 12px;
+    color: #dc3545;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  /* Button */
+  .course-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+</style>
+
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="card-body">
+      <h5>Вход через Telegram</h5>
+      <p>Telegram bot: <a href="tg://resolve?domain=studyeng_login_bot" target="_blank">@studyeng_login_bot</a></p>
+      <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+          <input
+            type="number"
+            name="code"
+            class="form-control"
+            id="inputCode"
+            placeholder="Код из Telegram"
+            required
+          >
+          {% if error_message %}
+            <div class="error-message">{{ error_message }}</div>
+          {% endif %}
+        </div>
+        <button type="submit" class="course-btn w-100">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+        </button>
+      </form>
     </div>
-    {% if error_message %}
-      <div class="text-danger">{{error_message}}</div>
-    {% endif %}
-    <button type="submit" class="btn btn-primary w-100 mt-3 ">Войти</button>
-  </form>
+  </div>
 </div>
-{% endblock content %}
+
+<!-- Form Validation -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.querySelector(".needs-validation");
+  if (form) {
+    form.addEventListener("submit", function(event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add("was-validated");
+    }, false);
+  }
+});
+</script>
+{% endblock %}

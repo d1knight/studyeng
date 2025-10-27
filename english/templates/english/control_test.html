@@ -1,217 +1,440 @@
-{% extends 'english/base.html' %}
-
-{% block content %}
-<div class="container my-5">
-    <!-- Breadcrumbs -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb bg-light p-3 rounded-3">
-            <li class="breadcrumb-item">
-                <a href="{% url 'home' %}" class="text-decoration-none">
-                    <i class="bi bi-house-door me-1"></i>Главная
-                </a>
-            </li>
-            <li class="breadcrumb-item">
-                <a href="{% url 'course_detail' course.id %}" class="text-decoration-none">
-                    {{ course.name }}
-                </a>
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">{{ chapter.name }}</li>
-        </ol>
-    </nav>
-
-    <div class="text-center mb-4">
-        <h1 class="fw-bold text-primary mb-2">Контрольная работа</h1>
-        <h3 class="text-muted">{{ chapter.name }}</h3>
-        <p class="text-secondary">Для открытия следующей главы необходимо набрать минимум 80%</p>
-    </div>
-
-    <div class="card border-0 shadow-sm rounded-3">
-        <div class="card-body p-4">
-            <form method="post" id="controlForm">
-                {% csrf_token %}
-                {% for question in questions %}
-                    <div class="card mb-3 border-0 shadow-sm rounded-3">
-                        <div class="card-body p-3">
-                            <h6 class="text-primary fw-bold mb-2">Вопрос {{ forloop.counter }}</h6>
-                            <div class="question-text">
-                                {{ question.rendered_text|safe }}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-
-                <!-- Добавляем отступ снизу для фиксированной кнопки -->
-                <div style="height: 80px;"></div>
-            </form>
-
-            <!-- Фиксированная кнопка -->
-            <div id="stickyButtonContainer" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 400px;">
-                <button type="submit" form="controlForm" class="btn btn-success w-100 py-3 rounded-pill shadow-lg">
-                    <strong>Отправить ответы</strong>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Модальное окно для результата -->
-<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-3 border-0 shadow-lg">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-primary" id="resultModalLabel">Результат контрольной работы</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body px-4 pt-2">
-                <!-- Общий результат -->
-                <div class="text-center mb-4">
-                    <div class="display-4 fw-bold mb-2" id="scoreDisplay" style="color: #28a745;">0%</div>
-                    <p class="lead mb-0" id="statusResult"></p>
-                </div>
-
-                <!-- Статистика -->
-                <div class="row g-3 mb-4">
-                    <div class="col-4 text-center">
-                        <div class="card border-0 bg-light rounded-3 p-3">
-                            <div class="h3 mb-0 text-success" id="correctCount">0</div>
-                            <small class="text-muted">Правильно</small>
-                        </div>
-                    </div>
-                    <div class="col-4 text-center">
-                        <div class="card border-0 bg-light rounded-3 p-3">
-                            <div class="h3 mb-0 text-danger" id="incorrectCount">0</div>
-                            <small class="text-muted">Неправильно</small>
-                        </div>
-                    </div>
-                    <div class="col-4 text-center">
-                        <div class="card border-0 bg-light rounded-3 p-3">
-                            <div class="h3 mb-0 text-primary" id="totalQuestions">0</div>
-                            <small class="text-muted">Всего</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Рекомендация -->
-                <div class="alert rounded-3 border-0" id="recommendationAlert">
-                    <p class="mb-0" id="recommendation"></p>
-                </div>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <a href="{% url 'course_detail' course.id %}" class="btn btn-primary rounded-pill px-4">Перейти к списку глав</a>
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Закрыть</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-document.getElementById('controlForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Отключаем кнопку во время отправки
-    let submitBtn = document.querySelector('#stickyButtonContainer button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Обработка...';
-    
-    var formData = new FormData(this);
-    fetch('', {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        
-        // Заменяем input-поля на результаты (как в topic.html)
-        Object.keys(data.results).forEach(qid => {
-            let userAnswers = data.user_answers[qid].answer || {};
-            let correctAnswers = data.correct_answers[qid] || {};
-
-            Object.keys(userAnswers).forEach(blankKey => {
-                let userAnswer = userAnswers[blankKey].trim();
-                let correctAnswer = correctAnswers[blankKey];
-                
-                let correctList = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
-                let correctText = correctList.join(' / ');
-
-                let isBlankCorrect = false;
-                if (Array.isArray(correctAnswer)) {
-                    isBlankCorrect = correctAnswer.some(ans => ans.toLowerCase().trim() === userAnswer.toLowerCase());
-                } else {
-                    isBlankCorrect = correctAnswer.toLowerCase().trim() === userAnswer.toLowerCase();
-                }
-
-                let input = document.querySelector(`input[name="q_${qid}_${blankKey}"]`);
-                
-                if (input) {
-                    let replacement;
-                    
-                    if (isBlankCorrect) {
-                        replacement = document.createElement('span');
-                        replacement.style.color = 'green';
-                        replacement.style.fontWeight = 'bold';
-                        replacement.innerHTML = `${userAnswer} ✅`;
-                    } else {
-                        replacement = document.createElement('span');
-                        replacement.innerHTML = `<s style="color: red; font-weight: bold;">${userAnswer}</s> <span style="color: green; font-weight: bold;">${correctText} ✅</span>`;
-                    }
-                    
-                    input.replaceWith(replacement);
-                }
-            });
-        });
-        
-        // Общие данные
-        const totalQuestions = Object.keys(data.results).length;
-        const correctCount = Object.values(data.results).filter(r => r).length;
-        const incorrectCount = totalQuestions - correctCount;
-        const score = data.score;
-        
-        document.getElementById('scoreDisplay').textContent = score.toFixed(0) + '%';
-        document.getElementById('correctCount').textContent = correctCount;
-        document.getElementById('incorrectCount').textContent = incorrectCount;
-        document.getElementById('totalQuestions').textContent = totalQuestions;
-
-        // Статус и рекомендации
-        const recommendationAlert = document.getElementById('recommendationAlert');
-        if (score >= 80) {
-            document.getElementById('scoreDisplay').style.color = '#28a745';
-            document.getElementById('statusResult').innerHTML = '🎉 Поздравляем! Вы успешно прошли контрольную работу!';
-            document.getElementById('recommendation').textContent = 'Следующая глава открыта. Продолжайте обучение!';
-            recommendationAlert.className = 'alert rounded-3 border-0 alert-success';
-        } else {
-            document.getElementById('scoreDisplay').style.color = '#dc3545';
-            document.getElementById('statusResult').innerHTML = '😔 К сожалению, вы не прошли контрольную работу.';
-            document.getElementById('recommendation').textContent = 'Рекомендуем повторить материал и попробовать снова. Для открытия следующей главы необходимо набрать минимум 80%.';
-            recommendationAlert.className = 'alert rounded-3 border-0 alert-warning';
-        }
-
-        // Показ модального окна
-        var myModal = new bootstrap.Modal(document.getElementById('resultModal'));
-        myModal.show();
-        
-        // Обновляем кнопку
-        submitBtn.textContent = 'Тест завершён ✓';
-        submitBtn.classList.remove('btn-success');
-        submitBtn.classList.add('btn-secondary');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Произошла ошибка при отправке ответов. Попробуйте снова.');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<strong>Отправить ответы</strong>';
-    });
-});
-</script>
-
+{% extends 'english/base.html' %} {% load static %} {% block title %}Контрольная
+работа: {{ chapter.name }}{% endblock %} {% block content %}
 <style>
-    @media (max-width: 576px) {
-        #stickyButtonContainer {
-            width: 95%;
-        }
+  /* Header */
+  .test-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+  }
+
+  .test-header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 70%
+    );
+    animation: rotate 20s linear infinite;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(0deg);
     }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .test-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  .test-header h3 {
+    font-size: 20px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 16px;
+  }
+
+  .test-header p {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .breadcrumb-item.active {
+    color: #718096;
+  }
+
+  /* Questions */
+  .question-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+  }
+
+  .question-card:hover {
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  }
+
+  .question-card .card-body {
+    padding: 24px;
+  }
+
+  .question-card h6 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 16px;
+  }
+
+  .question-text {
+    font-size: 14px;
+    color: #2d3748;
+  }
+
+  /* Sticky Button */
+  .sticky-button {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    padding: 12px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .sticky-button .course-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .sticky-button .btn-secondary {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* Modal */
+  .modal-content {
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .modal-header {
+    border-bottom: none;
+    padding: 24px 24px 0;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2d3748;
+  }
+
+  .modal-body {
+    padding: 24px;
+  }
+
+  .modal-footer {
+    border-top: none;
+    padding: 0 24px 24px;
+  }
+
+  .score-display {
+    font-size: 48px;
+    font-weight: 700;
+  }
+
+  .stats-card {
+    border: none;
+    border-radius: 12px;
+    background: #f7fafc;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stats-card .h3 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .stats-card small {
+    font-size: 12px;
+    color: #718096;
+  }
+
+  .recommendation-alert {
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 14px;
+  }
+
+  /* Responsive */
+  @media (max-width: 576px) {
+    .sticky-button {
+      width: 95%;
+    }
+  }
 </style>
-{% endblock content %}
+
+<div class="container my-5">
+  <!-- Breadcrumbs -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home' %}">
+          🏠 Главная
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'course_detail' course.id %}"> {{ course.name }} </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        {{ chapter.name }}
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Test Header -->
+  <div
+    class="card shadow-sm border-0"
+    style="border-radius: 20px; overflow: hidden"
+  >
+    <div class="test-header">
+      <h1>Контрольная работа</h1>
+      <h3>{{ chapter.name }}</h3>
+      <p>Для открытия следующей главы необходимо набрать минимум 80%</p>
+    </div>
+
+    <!-- Questions -->
+    <div class="card-body p-4">
+      <form method="post" id="controlForm">
+        {% csrf_token %} {% for question in questions %}
+        <div class="question-card">
+          <div class="card-body">
+            <h6>Вопрос {{ forloop.counter }}</h6>
+            <div class="question-text">{{ question.rendered_text|safe }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </form>
+
+      <!-- Sticky Button -->
+      <div class="sticky-button">
+        <button type="submit" form="controlForm" class="course-btn w-100">
+          <i class="bi bi-check-circle me-2"></i>Отправить ответы
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="resultModal"
+  tabindex="-1"
+  aria-labelledby="resultModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="resultModalLabel">
+          Результат контрольной работы
+        </h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <!-- Score -->
+        <div class="text-center mb-4">
+          <div class="score-display" id="scoreDisplay">0%</div>
+          <p class="lead mb-0" id="statusResult"></p>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+          <div class="col-4">
+            <div class="stats-card">
+              <div class="h3 text-success" id="correctCount">0</div>
+              <small>Правильно</small>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="stats-card">
+              <div class="h3 text-danger" id="incorrectCount">0</div>
+              <small>Неправильно</small>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="stats-card">
+              <div class="h3 text-primary" id="totalQuestions">0</div>
+              <small>Всего</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recommendation -->
+        <div class="recommendation-alert" id="recommendationAlert">
+          <p id="recommendation"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="{% url 'course_detail' course.id %}" class="course-btn px-4"
+          >Перейти к списку глав</a
+        >
+        <button
+          type="button"
+          class="btn btn-outline-secondary rounded-pill px-4"
+          data-bs-dismiss="modal"
+        >
+          Закрыть
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AJAX -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("controlForm");
+    const submitBtn = document.querySelector(
+      ".sticky-button button[type='submit']"
+    );
+
+    if (form) {
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2"></span>Обработка...';
+
+        const formData = new FormData(form);
+        try {
+          const response = await fetch("{% url 'control_test' chapter.id %}", {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: formData,
+          });
+          const data = await response.json();
+
+          // Replace inputs with results
+          Object.keys(data.results).forEach((qid) => {
+            const userAnswers = data.user_answers[qid]?.answer || {};
+            const correctAnswers = data.correct_answers[qid] || {};
+
+            Object.keys(userAnswers).forEach((blankKey) => {
+              const userAnswer = userAnswers[blankKey].trim();
+              const correctAnswer = correctAnswers[blankKey];
+              const correctList = Array.isArray(correctAnswer)
+                ? correctAnswer
+                : [correctAnswer];
+              const correctText = correctList.join(" / ");
+              const isBlankCorrect = Array.isArray(correctAnswer)
+                ? correctAnswer.some(
+                    (ans) =>
+                      ans.toLowerCase().trim() === userAnswer.toLowerCase()
+                  )
+                : correctAnswer.toLowerCase().trim() ===
+                  userAnswer.toLowerCase();
+
+              const input = document.querySelector(
+                `input[name="q_${qid}_${blankKey}"]`
+              );
+              if (input) {
+                const replacement = document.createElement("span");
+                replacement.style.display = "inline-block";
+                replacement.style.padding = "4px 8px";
+                replacement.style.borderRadius = "8px";
+                if (isBlankCorrect) {
+                  replacement.style.color = "#28a745";
+                  replacement.style.background = "#e6f4ea";
+                  replacement.innerHTML = `${userAnswer} ✅`;
+                } else {
+                  replacement.style.background = "#f8d7da";
+                  replacement.innerHTML = `<s style="color: #dc3545;">${userAnswer}</s> <span style="color: #28a745;">${correctText} ✅</span>`;
+                }
+                input.replaceWith(replacement);
+              }
+            });
+          });
+
+          // Update modal
+          const totalQuestions = Object.keys(data.results).length;
+          const correctCount = Object.values(data.results).filter(
+            (r) => r
+          ).length;
+          const incorrectCount = totalQuestions - correctCount;
+          const score = data.score;
+
+          document.getElementById("scoreDisplay").textContent =
+            score.toFixed(0) + "%";
+          document.getElementById("correctCount").textContent = correctCount;
+          document.getElementById("incorrectCount").textContent =
+            incorrectCount;
+          document.getElementById("totalQuestions").textContent =
+            totalQuestions;
+
+          const recommendationAlert = document.getElementById(
+            "recommendationAlert"
+          );
+          if (score >= 80) {
+            document.getElementById("scoreDisplay").style.color = "#28a745";
+            document.getElementById("statusResult").innerHTML =
+              "🎉 Поздравляем! Вы успешно прошли контрольную работу!";
+            document.getElementById("recommendation").textContent =
+              "Следующая глава открыта. Продолжайте обучение!";
+            recommendationAlert.classList.add("alert-success");
+          } else {
+            document.getElementById("scoreDisplay").style.color = "#dc3545";
+            document.getElementById("statusResult").innerHTML =
+              "😔 К сожалению, вы не прошли контрольную работу.";
+            document.getElementById("recommendation").textContent =
+              "Рекомендуем повторить материал и попробовать снова. Для открытия следующей главы необходимо набрать минимум 80%.";
+            recommendationAlert.classList.add("alert-warning");
+          }
+
+          // Show modal
+          const myModal = new bootstrap.Modal(
+            document.getElementById("resultModal")
+          );
+          myModal.show();
+
+          // Update button
+          submitBtn.innerHTML =
+            '<i class="bi bi-check-circle me-2"></i>Тест завершён';
+          submitBtn.classList.remove("course-btn");
+          submitBtn.classList.add("btn-secondary");
+        } catch (error) {
+          console.error("Ошибка:", error);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML =
+            '<i class="bi bi-check-circle me-2"></i>Отправить ответы';
+          alert("Произошла ошибка при отправке ответов. Попробуйте снова.");
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

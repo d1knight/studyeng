@@ -1,16 +1,210 @@
 {% extends 'english/base.html' %}
+{% load static %}
+{% block title %}{{ topic.name }}{% endblock %}
 {% block content %}
-<div class="container mt-5">
+<style>
+  /* Header */
+  .topic-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+  }
+
+  .topic-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .topic-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  /* Breadcrumbs */
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .breadcrumb-item a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .breadcrumb-item.active {
+    color: #718096;
+  }
+
+  /* Tariff Alert */
+  .tariff-alert {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    text-align: center;
+  }
+
+  .tariff-alert h5 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 12px;
+  }
+
+  .tariff-alert p {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 20px;
+  }
+
+  /* Tabs */
+  .nav-tabs {
+    background: #f7fafc;
+    border: none;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .nav-tabs .nav-link {
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    color: #2d3748;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-tabs .nav-link.active {
+    background: #fff;
+    color: #667eea;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+  }
+
+  .nav-tabs .nav-link:hover {
+    color: #764ba2;
+  }
+
+  /* Tab Content */
+  .tab-content .card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .tab-content .card-body {
+    padding: 24px;
+  }
+
+  /* Exercises */
+  .exercise-card {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+  }
+
+  .exercise-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 16px 20px;
+    border-radius: 16px 16px 0 0;
+    cursor: pointer;
+  }
+
+  .exercise-header h6 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .exercise-body {
+    padding: 20px;
+  }
+
+  .exercise-body p {
+    font-size: 14px;
+    color: #718096;
+    margin-bottom: 16px;
+  }
+
+  /* Sticky Buttons */
+  .sticky-buttons {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .sticky-buttons .course-btn {
+    flex: 1;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .sticky-buttons .btn-outline-secondary {
+    flex: 1;
+    padding: 12px;
+    font-size: 14px;
+    border-color: #e2e8f0;
+    color: #2d3748;
+  }
+
+  .sticky-buttons .btn-outline-secondary:hover {
+    background: #f7fafc;
+    border-color: #667eea;
+    color: #667eea;
+  }
+
+  /* Responsive */
+  @media (max-width: 576px) {
+    .sticky-buttons {
+      flex-direction: column;
+      width: 95%;
+    }
+  }
+</style>
+
+<div class="container my-5">
   <!-- Breadcrumbs -->
   <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb bg-light p-3 rounded-3">
+    <ol class="breadcrumb">
       <li class="breadcrumb-item">
-        <a href="{% url 'home' %}" class="text-decoration-none">
-          <i class="bi bi-house-door me-1"></i>Главная
+        <a href="{% url 'home' %}">
+          🏠 Главная
         </a>
       </li>
       <li class="breadcrumb-item">
-        <a href="{% url 'course_detail' topic.chapter.course.id %}" class="text-decoration-none">
+        <a href="{% url 'course_detail' topic.chapter.course.id %}">
           {{ topic.chapter.course.name }}
         </a>
       </li>
@@ -18,93 +212,90 @@
     </ol>
   </nav>
 
-  <h1 class="mb-4 text-center display-5 fw-bold text-primary">{{ topic.name }}</h1>
-
-
-{% if tariff %}
-  <div class="alert alert-info text-center shadow-sm rounded-15 mb-5" style="background: #e7f3ff;">
-    <h5 class="fw-bold mb-2">🔥 {{ tariff.name }}</h5>
-    <p class="mb-3">
-      При покупке тарифа вы получите доступ в <strong>закрытый Telegram-канал</strong>,
-      где размещены <strong>подробные видеоматериалы</strong> и дополнительные
-      <strong>упражнения</strong> для лёгкого и структурированного освоения тем.
-    </p>
-    <a href="https://t.me/Uralmirzaevich" target="_blank"
-       class="btn btn-primary px-4 py-2 fw-bold rounded-15 shadow-sm">
-      💬 Связаться с учителем
-    </a>
-  </div>
-{% endif %}
-
-
-
-  <ul class="nav nav-tabs nav-justified mb-4" style="background-color: #e9ecef; border-radius: 15px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);">
-    <li class="nav-item">
-      <button class="nav-link active text-success" data-bs-toggle="tab" data-bs-target="#theory">
-        <span class="me-2">📘</span> Теория
-      </button>
-    </li>
-    <li class="nav-item">
-      <button class="nav-link text-primary" data-bs-toggle="tab" data-bs-target="#exercises">
-        <span class="me-2">✍️</span> Упражнения
-      </button>
-    </li>
-  </ul>
-
-  <div class="tab-content">
-    <div class="tab-pane fade show active" id="theory">
-      <div class="card border-0 shadow-sm rounded-15">
-        <div class="card-body p-4">
-          <div class="mt-4">
-            {{ topic.content|safe }}
-          </div>
-        </div>
-      </div>
+  <!-- Topic Header -->
+  <div class="card shadow-sm border-0" style="border-radius: 20px; overflow: hidden;">
+    <div class="topic-header">
+      <h1>{{ topic.name }}</h1>
     </div>
 
-    <div class="tab-pane fade" id="exercises">
-      <div class="card border-0 shadow-sm rounded-15">
-        <div class="card-body p-3">
-          <form id="exerciseForm" method="post">
-            {% csrf_token %}
-            {% for exercise in exercises %}
-              <div class="card mb-4 border-0 shadow-sm rounded-15">
-                <div class="card-header bg-primary text-white rounded-top-15 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#collapse-{{ exercise.id }}" aria-expanded="false" aria-controls="collapse-{{ exercise.id }}">
-                  <h6 class="mb-0 fw-bold">Упражнение {{ forloop.counter }}</h6>
-                  <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ exercise.id }}" aria-expanded="false" aria-controls="collapse-{{ exercise.id }}">
+    <div class="card-body p-4">
+      <!-- Tariff Alert -->
+      {% if tariff %}
+      <div class="tariff-alert mb-4">
+        <h5>🔥 {{ tariff.name }}</h5>
+        <p>При покупке тарифа вы получите доступ в <strong>закрытый Telegram-канал</strong>, где размещены <strong>подробные видеоматериалы</strong> и дополнительные <strong>упражнения</strong> для лёгкого и структурированного освоения тем.</p>
+        <a href="https://t.me/Uralmirzaevich" target="_blank" class="course-btn px-4 py-2">
+          <i class="bi bi-telegram me-2"></i>Связаться с учителем
+        </a>
+      </div>
+      {% endif %}
+
+      <!-- Tabs -->
+      <ul class="nav nav-tabs nav-justified mb-4">
+        <li class="nav-item">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#theory">
+            <i class="bi bi-book me-2"></i>Теория
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#exercises">
+            <i class="bi bi-pencil-square me-2"></i>Упражнения
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Theory Tab -->
+        <div class="tab-pane fade show active" id="theory">
+          <div class="card">
+            <div class="card-body">
+              {{ topic.content|safe }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercises Tab -->
+        <div class="tab-pane fade" id="exercises">
+          <div class="card">
+            <div class="card-body">
+              <form id="exerciseForm" method="post">
+                {% csrf_token %}
+                {% for exercise in exercises %}
+                <div class="exercise-card">
+                  <div class="exercise-header" data-bs-toggle="collapse" data-bs-target="#collapse-{{ exercise.id }}" aria-expanded="false" aria-controls="collapse-{{ exercise.id }}">
+                    <h6>Упражнение {{ forloop.counter }}</h6>
                     <i class="bi bi-chevron-down"></i>
-                  </button>
-                </div>
-                <div class="collapse" id="collapse-{{ exercise.id }}">
-                  <div class="card-body p-2">
-                    <p class="mb-2 text-muted">{{ exercise.instruction|default:"Нет инструкции" }}</p>
-                    {% for q in exercise.questions.all %}
-                      <div class="mb-1">
+                  </div>
+                  <div class="collapse" id="collapse-{{ exercise.id }}">
+                    <div class="exercise-body">
+                      <p>{{ exercise.instruction|default:"Нет инструкции" }}</p>
+                      {% for q in exercise.questions.all %}
+                      <div class="mb-3">
                         {{ q.render_with_inputs|safe }}
                       </div>
-                    {% endfor %}
-                    {% if exercise.questions.all|length == 0 %}
+                      {% endfor %}
+                      {% if exercise.questions.all|length == 0 %}
                       <p class="text-muted">Вопросы отсутствуют.</p>
-                    {% endif %}
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
+                {% empty %}
+                <p class="text-muted">Упражнений пока нет.</p>
+                {% endfor %}
+              </form>
+
+              <!-- Sticky Buttons -->
+              <div class="sticky-buttons">
+                <button type="submit" form="exerciseForm" class="course-btn">
+                  <i class="bi bi-check-circle me-2"></i>Проверить
+                </button>
+                <button id="resetButton" type="button" class="btn btn-outline-secondary" style="display: none;">
+                  <i class="bi bi-arrow-repeat me-2"></i>Сделать заново
+                </button>
               </div>
-            {% empty %}
-              <p class="text-muted">Упражнений пока нет.</p>
-            {% endfor %}
-            
-            <div style="height: 80px;"></div>
-          </form>
-          
-          <!-- Фиксированные кнопки -->
-          <div id="stickyButtonContainer" 
-               style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 420px; display: flex; gap: 10px;">
-            <button type="submit" form="exerciseForm" class="btn btn-success flex-grow-1 py-3 rounded-30 shadow-lg">
-              <strong>Проверить</strong>
-            </button>
-            <button id="resetButton" type="button" class="btn btn-outline-secondary flex-grow-1 py-3 rounded-30 shadow-lg" style="display: none;">
-              🔁 Сделать заново
-            </button>
+            </div>
           </div>
         </div>
       </div>
@@ -112,90 +303,80 @@
   </div>
 </div>
 
+<!-- AJAX для упражнений -->
 <script>
-document.getElementById("exerciseForm").addEventListener("submit", async function(e) {
-  e.preventDefault();
-  let formData = new FormData(this);
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("exerciseForm");
+  const submitBtn = document.querySelector('.sticky-buttons button[type="submit"]');
+  const resetBtn = document.getElementById("resetButton");
 
-  let response = await fetch("", {
-    method: "POST",
-    body: formData,
-    headers: { "X-Requested-With": "XMLHttpRequest" }
-  });
-  let data = await response.json();
+  if (form) {
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(form);
 
-  Object.keys(data.results).forEach(qid => {
-    let isCorrect = data.results[qid];
-    let userAnswers = data.user_answers[qid].answer || {};
-    let correctAnswers = data.correct_answers[qid] || {};
+      try {
+        const response = await fetch("", {
+          method: "POST",
+          body: formData,
+          headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+        const data = await response.json();
 
-    Object.keys(userAnswers).forEach(blankKey => {
-      let userAnswer = userAnswers[blankKey].trim();
-      let correctAnswer = correctAnswers[blankKey];
-      let correctList = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
-      let correctText = correctList.join(' / ');
-      let isBlankCorrect = Array.isArray(correctAnswer)
-        ? correctAnswer.some(ans => ans.toLowerCase().trim() === userAnswer.toLowerCase())
-        : correctAnswer.toLowerCase().trim() === userAnswer.toLowerCase();
+        Object.keys(data.results).forEach(qid => {
+          const isCorrect = data.results[qid];
+          const userAnswers = data.user_answers[qid]?.answer || {};
+          const correctAnswers = data.correct_answers[qid] || {};
 
-      let input = document.querySelector(`input[name="q_${qid}_${blankKey}"]`);
-      
-      if (input) {
-        let replacement = document.createElement('span');
-        if (isBlankCorrect) {
-          replacement.style.color = 'green';
-          replacement.style.fontWeight = 'bold';
-          replacement.innerHTML = `${userAnswer} ✅`;
-        } else {
-          replacement.innerHTML = `<s style="color: red; font-weight: bold;">${userAnswer}</s> <span style="color: green; font-weight: bold;">${correctText} ✅</span>`;
+          Object.keys(userAnswers).forEach(blankKey => {
+            const userAnswer = userAnswers[blankKey].trim();
+            const correctAnswer = correctAnswers[blankKey];
+            const correctList = Array.isArray(correctAnswer) ? correctAnswer : [correctAnswer];
+            const correctText = correctList.join(' / ');
+            const isBlankCorrect = Array.isArray(correctAnswer)
+              ? correctAnswer.some(ans => ans.toLowerCase().trim() === userAnswer.toLowerCase())
+              : correctAnswer.toLowerCase().trim() === userAnswer.toLowerCase();
+
+            const input = document.querySelector(`input[name="q_${qid}_${blankKey}"]`);
+            if (input) {
+              const replacement = document.createElement('span');
+              replacement.style.display = 'inline-block';
+              replacement.style.padding = '4px 8px';
+              replacement.style.borderRadius = '8px';
+              if (isBlankCorrect) {
+                replacement.style.color = '#28a745';
+                replacement.style.background = '#e6f4ea';
+                replacement.innerHTML = `${userAnswer} ✅`;
+              } else {
+                replacement.style.background = '#f8d7da';
+                replacement.innerHTML = `<s style="color: #dc3545;">${userAnswer}</s> <span style="color: #28a745;">${correctText} ✅</span>`;
+              }
+              input.replaceWith(replacement);
+            }
+          });
+        });
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="bi bi-check-circle me-2"></i>Проверено';
+          submitBtn.classList.remove('course-btn');
+          submitBtn.classList.add('btn-secondary');
         }
-        input.replaceWith(replacement);
+
+        if (resetBtn) {
+          resetBtn.style.display = 'block';
+          resetBtn.addEventListener("click", () => location.reload());
+        }
+
+        const firstError = document.querySelector('s[style*="color:"]');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } catch (error) {
+        console.error('Ошибка:', error);
       }
     });
-  });
-
-  let submitBtn = document.querySelector('#stickyButtonContainer button[type="submit"]');
-  let resetBtn = document.getElementById("resetButton");
-
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Проверено ✓';
-    submitBtn.classList.remove('btn-success');
-    submitBtn.classList.add('btn-secondary');
-  }
-
-  // Показать кнопку "Сделать заново"
-  if (resetBtn) {
-    resetBtn.style.display = "block";
-    resetBtn.addEventListener("click", () => {
-      location.reload();
-    });
-  }
-
-  let firstError = document.querySelector('s[style*="color: red"]');
-  if (firstError) {
-    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 });
 </script>
-
-<style>
-  .host-bincmiainjofjnhchmcalkanjebghoen {
-    display: none !important;
-  }
-
-  @media (max-width: 576px) {
-    #stickyButtonContainer {
-      width: 95%;
-      flex-direction: column;
-    }
-  }
-
-  .alert a.btn:hover {
-    background-color: #0056b3;
-  }
-
-  .rounded-15 { border-radius: 15px; }
-  .rounded-30 { border-radius: 30px; }
-</style>
 {% endblock %}

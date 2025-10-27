@@ -1,33 +1,250 @@
 {% extends 'english/base.html' %}
 {% load static %}
-
+{% block title %}Главная{% endblock %}
 {% block content %}
-<div class="container">
-  <!-- Hero Section -->
-  <section id="home" class="py-5">
+<style>
+  /* Hero Section - с изображением преподавателя */
+  .hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 40px 20px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .hero-content {
+    z-index: 2;
+    position: relative;
+  }
+
+  .hero-content h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #fff !important;
+    margin-bottom: 16px;
+  }
+
+  .hero-content p {
+    font-size: 18px;
+    color: rgba(255,255,255,0.95) !important;
+    margin-bottom: 24px;
+  }
+
+  .hero-badge {
+    background: rgba(255,255,255,0.2);
+    color: #fff !important;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+  }
+
+  .hero-achievements {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    color: #fff !important;
+  }
+
+  /* Learning Process Section - ВСЕ ИЗОБРАЖЕНИЯ СОХРАНЕНЫ */
+  .learning-process {
+    background: #f7fafc;
+    border-radius: 16px;
+    padding: 40px 20px;
+  }
+
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2d3748 !important;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+
+  .process-card {
+    border: none;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .process-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  }
+
+  .process-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .process-card-body {
+    padding: 24px;
+  }
+
+  .process-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    background: rgba(255,255,255,0.9);
+    color: #2d3748;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Tariffs Section */
+  .tariff-card {
+    border: none;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .tariff-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  }
+
+  .tariff-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 24px;
+  }
+
+  .tariff-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+    background: #fff;
+  }
+
+  .tariff-item:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  /* Comments Section */
+  .comments-section {
+    background: #f7fafc;
+    border-radius: 16px;
+    padding: 40px 20px;
+  }
+
+  .comment-carousel-item {
+    padding: 20px;
+  }
+
+  .comment-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 20px;
+    margin: 0 auto 20px;
+  }
+
+  .comment-form {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .comment-form textarea {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .comment-form textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+
+  /* Карусель */
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    background: #fff;
+    border: 2px solid #667eea;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+  }
+
+  .carousel-indicators button {
+    background-color: #667eea;
+  }
+</style>
+
+<div class="container my-5">
+  <!-- Hero Section - ИЗОБРАЖЕНИЕ ПРЕПОДАВАТЕЛЯ СОХРАНЕНО -->
+  <section class="hero-section">
     <div class="row align-items-center g-4">
       <div class="col-lg-6">
         <div class="hero-content">
-          <span class="badge bg-success-subtle text-success mb-3 px-3 py-2 rounded-pill">
-            🎓 Профессиональная подготовка
-          </span>
-          <h1 class="display-4 fw-bold mb-4 text-dark lh-base">
-            Подготовка к IELTS и вступительным тестам ВУЗов
-          </h1>
-          <p class="lead text-secondary mb-3">
-            Меня зовут <span class="fw-bold text-primary">Байрам</span>, я профессиональный преподаватель английского языка с опытом более 8 лет.
-          </p>
-          <div class="bg-light rounded-3 p-3 mb-4">
-            <p class="mb-2 text-muted">
-              <i class="bi bi-check-circle-fill text-success me-2"></i>
+          <span class="hero-badge">🎓 Профессиональная подготовка</span>
+          <h1>Подготовка к IELTS и вступительным тестам ВУЗов</h1>
+          <p>Меня зовут <span class="fw-bold">Байрам</span>, я профессиональный преподаватель английского языка с опытом более 8 лет.</p>
+          <div class="hero-achievements">
+            <p class="mb-2">
+              <i class="bi bi-check-circle-fill me-2"></i>
               Мои выпускники учатся в <strong>МГУ</strong>, <strong>НИУ ВШЭ</strong>, <strong>МФТИ</strong>
             </p>
-            <p class="mb-0 text-muted">
-              <i class="bi bi-check-circle-fill text-success me-2"></i>
+            <p class="mb-0">
+              <i class="bi bi-check-circle-fill me-2"></i>
               Авторские программы и материалы
             </p>
           </div>
-          <a href="#tariff" class="btn btn-success btn-lg px-5 py-3 rounded-pill shadow-sm">
+          <a href="#tariffs" class="course-btn btn-lg px-5 py-3">
             <i class="bi bi-rocket-takeoff me-2"></i>Выбрать курс
           </a>
         </div>
@@ -36,171 +253,110 @@
         <img
           src="https://cdn.cpdonline.co.uk/wp-content/uploads/2023/02/24155222/Teacher-Teaching-Online.jpg"
           class="img-fluid rounded-4 shadow-lg"
-          alt="Преподаватель"
-          style="max-height: 500px; object-fit: cover;"
+          alt="Преподаватель Байрам"
+          style="max-height: 500px; object-fit: cover; border-radius: 16px;"
         />
       </div>
     </div>
   </section>
 
-  <!-- Как проходит обучение -->
-  <section class="py-5 bg-light rounded-4 my-5">
+  <!-- Learning Process Section - ВСЕ 3 ИЗОБРАЖЕНИЯ СОХРАНЕНЫ -->
+  <section class="learning-process my-5">
     <div class="text-center mb-5">
-      <h2 class="fw-bold mb-3 text-dark">
-        <i class="bi bi-lightbulb text-warning me-2"></i>
-        Как проходит обучение
-      </h2>
+      <h2 class="section-title">📚 Как проходит обучение</h2>
       <p class="text-muted">Структурированный процесс и индивидуальный подход к каждому ученику</p>
     </div>
-
-    <div class="row g-4 px-3">
+    <div class="row g-4">
       <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm hover-lift" style="transition: transform 0.3s;">
-          <div class="card-img-wrapper position-relative overflow-hidden rounded-top-3">
-            <img
-              src="https://antaltalent.ru/wp-content/uploads/2023/01/tpk_prev.jpg"
-              class="card-img-top"
-              alt="Тестирование"
-              style="height: 200px; object-fit: cover;"
-            />
-            <div class="position-absolute top-0 start-0 m-3">
-              <span class="badge bg-primary rounded-pill px-3 py-2">Шаг 1</span>
-            </div>
-          </div>
-          <div class="card-body p-4">
-            <h5 class="card-title fw-bold mb-3">
+        <div class="process-card position-relative">
+          <img src="https://antaltalent.ru/wp-content/uploads/2023/01/tpk_prev.jpg" alt="Тестирование" />
+          <span class="process-badge">Шаг 1</span>
+          <div class="process-card-body">
+            <h5 class="fw-bold mb-3">
               <i class="bi bi-clipboard-check text-primary me-2"></i>
               Бесплатное тестирование
             </h5>
-            <p class="card-text text-muted">
-              Определим ваш уровень знаний, чтобы построить персональный план обучения.
-            </p>
+            <p class="text-muted mb-0">Определим ваш уровень знаний, чтобы построить персональный план обучения.</p>
           </div>
         </div>
       </div>
 
       <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm hover-lift" style="transition: transform 0.3s;">
-          <div class="card-img-wrapper position-relative overflow-hidden rounded-top-3">
-            <img
-              src="https://www.unicraft.org/wp-content/uploads/2021/02/cropped-colleagues-generating-business-ideas_1098-19137.jpg"
-              class="card-img-top"
-              alt="Обратная связь"
-              style="height: 200px; object-fit: cover;"
-            />
-            <div class="position-absolute top-0 start-0 m-3">
-              <span class="badge bg-success rounded-pill px-3 py-2">Шаг 2</span>
-            </div>
-          </div>
-          <div class="card-body p-4">
-            <h5 class="card-title fw-bold mb-3">
+        <div class="process-card position-relative">
+          <img src="https://www.unicraft.org/wp-content/uploads/2021/02/cropped-colleagues-generating-business-ideas_1098-19137.jpg" alt="Обратная связь" />
+          <span class="process-badge bg-success text-white">Шаг 2</span>
+          <div class="process-card-body">
+            <h5 class="fw-bold mb-3">
               <i class="bi bi-chat-dots text-success me-2"></i>
               Обратная связь
             </h5>
-            <p class="card-text text-muted">
-              Получайте рекомендации от преподавателя, чтобы двигаться к результату быстрее.
-            </p>
+            <p class="text-muted mb-0">Получайте рекомендации от преподавателя, чтобы двигаться к результату быстрее.</p>
           </div>
         </div>
       </div>
 
       <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm hover-lift" style="transition: transform 0.3s;">
-          <div class="card-img-wrapper position-relative overflow-hidden rounded-top-3">
-            <img
-              src="https://shablon.klev.club/uploads/posts/2024-09/shablon-klev-club-zl8b-p-shabloni-kalendar-na-mesyats-bez-dat-1.jpg"
-              class="card-img-top"
-              alt="График занятий"
-              style="height: 200px; object-fit: cover;"
-            />
-            <div class="position-absolute top-0 start-0 m-3">
-              <span class="badge bg-info rounded-pill px-3 py-2">Шаг 3</span>
-            </div>
-          </div>
-          <div class="card-body p-4">
-            <h5 class="card-title fw-bold mb-3">
+        <div class="process-card position-relative">
+          <img src="https://shablon.klev.club/uploads/posts/2024-09/shablon-klev-club-zl8b-p-shabloni-kalendar-na-mesyats-bez-dat-1.jpg" alt="График занятий" />
+          <span class="process-badge bg-info text-white">Шаг 3</span>
+          <div class="process-card-body">
+            <h5 class="fw-bold mb-3">
               <i class="bi bi-calendar-check text-info me-2"></i>
               Удобный график
             </h5>
-            <p class="card-text text-muted">
-              Выбирайте комфортное время занятий — офлайн или онлайн.
-            </p>
+            <p class="text-muted mb-0">Выбирайте комфортное время занятий — офлайн или онлайн.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Тарифы -->
-  <section id="tariffs" class="py-5">
+  <!-- Tariffs Section -->
+  <section id="tariffs" class="my-5">
     <div class="text-center mb-5">
-      <h2 class="fw-bold mb-3 text-dark">
-        <i class="bi bi-star-fill text-warning me-2"></i>
-        Выберите свой курс
-      </h2>
+      <h2 class="section-title">🌟 Выберите свой курс</h2>
       <p class="text-muted">Гибкие тарифы для любых целей и уровней подготовки</p>
     </div>
-
     <div class="row g-4">
       {% for course in courses %}
       <div class="col-lg-6">
-        <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden hover-lift" style="transition: all 0.3s;">
-          <!-- Заголовок курса -->
-          <div class="card-header bg-gradient text-white p-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-            <h4 class="card-title text-center fw-bold mb-2">
-              <i class="bi bi-book me-2"></i>{{ course.name }}
-            </h4>
-            <p class="text-center mb-0 opacity-75">
-              {{ course.description|truncatewords:15 }}
-            </p>
+        <div class="tariff-card">
+          <div class="tariff-header text-center">
+            <h4 class="mb-2">{{ course.name }}</h4>
+            <p class="mb-0 opacity-90">{{ course.description|truncatewords:15 }}</p>
           </div>
-
-          <div class="card-body p-4">
-            <!-- Тарифы курса -->
+          <div class="p-4">
             {% if course.tariffs.all %}
-              <div class="tariffs-list">
-                {% for tariff in course.tariffs.all %}
-                <div class="tariff-item border rounded-3 p-3 mb-3 {% if tariff.is_free %}bg-success-subtle{% else %}bg-light{% endif %}" style="transition: all 0.2s;">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h6 class="fw-bold mb-1">
-                        {% if tariff.is_free %}
-                          <i class="bi bi-gift text-success me-1"></i>
-                        {% else %}
-                          <i class="bi bi-tag text-primary me-1"></i>
-                        {% endif %}
-                        {{ tariff.name }}
-                      </h6>
-                      <small class="text-muted">{{ tariff.description|truncatewords:8 }}</small>
-                    </div>
-                    <div class="text-end">
-                      {% if tariff.is_free %}
-                        <span class="badge bg-success px-3 py-2 mb-2">Бесплатно</span>
-                      {% else %}
-                        <div class="fw-bold text-success fs-5 mb-2">{{ tariff.price|floatformat:0 }} сум</div>
-                      {% endif %}
-                      <a href="{% url 'buy_tariff' tariff.id %}" class="btn btn-sm {% if tariff.is_free %}btn-outline-success{% else %}btn-outline-primary{% endif %} rounded-pill px-3">
-                        {% if tariff.is_free %}
-                          <i class="bi bi-play-circle me-1"></i>Начать
-                        {% else %}
-                          <i class="bi bi-cart me-1"></i>Купить
-                        {% endif %}
-                      </a>
-                    </div>
+              {% for tariff in course.tariffs.all %}
+              <div class="tariff-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="fw-bold mb-1">
+                      <i class="bi bi-{% if tariff.is_free %}gift text-success{% else %}tag text-primary{% endif %} me-1"></i>
+                      {{ tariff.name }}
+                    </h6>
+                    <small class="text-muted">{{ tariff.description|truncatewords:8 }}</small>
+                  </div>
+                  <div class="text-end">
+                    {% if tariff.is_free %}
+                      <span class="badge bg-success px-3 py-2 mb-2">Бесплатно</span>
+                    {% else %}
+                      <div class="fw-bold text-success fs-5 mb-2">{{ tariff.price|floatformat:0 }} сум</div>
+                    {% endif %}
+                    <a href="{% url 'buy_tariff' tariff.id %}" class="course-btn btn-sm px-3 py-2">
+                      {% if tariff.is_free %}<i class="bi bi-play-circle me-1"></i>Начать
+                      {% else %}<i class="bi bi-cart me-1"></i>Купить{% endif %}
+                    </a>
                   </div>
                 </div>
-                {% endfor %}
               </div>
+              {% endfor %}
             {% else %}
               <p class="text-muted text-center">Тарифы скоро появятся</p>
             {% endif %}
           </div>
-
-          <!-- Кнопка подробнее -->
-          <div class="card-footer bg-transparent border-0 p-4 pt-0">
-            <a href="{% url 'course_detail' course.id %}" class="btn btn-primary w-100 py-3 rounded-pill">
-              <i class="bi bi-info-circle me-2"></i>Подробнее о курсе
-            </a>
+          <div class="p-4 pt-0">
+            <a href="{% url 'course_detail' course.id %}" class="course-btn w-100">Подробнее о курсе</a>
           </div>
         </div>
       </div>
@@ -208,52 +364,27 @@
     </div>
   </section>
 
-  <!-- Отзывы -->
-  <section class="py-5 bg-light rounded-4 my-5" id="comments">
+  <!-- Comments Section -->
+  <section id="comments" class="comments-section my-5">
     <div class="text-center mb-5">
-      <h2 class="fw-bold text-dark mb-3">
-        <i class="bi bi-chat-heart text-danger me-2"></i>
-        Отзывы учеников
-      </h2>
+      <h2 class="section-title">💬 Отзывы учеников</h2>
       <p class="text-muted">Реальные истории успеха от наших студентов</p>
     </div>
 
     {% if comments %}
     <div id="carouselComments" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner px-5">
+      <div class="carousel-inner">
         {% for comment in comments %}
-        <div class="carousel-item {% if forloop.first %}active{% endif %}" data-bs-interval="5000">
-          <div class="text-center">
-            <!-- Аватар -->
-            <div class="mb-4">
-              {% if comment.user.avatar %}
-              <img
-                src="{{ comment.user.avatar.url }}"
-                class="rounded-circle shadow-lg border border-4 border-white"
-                alt="Аватар {{ comment.user.first_name }}"
-                width="120"
-                height="120"
-                style="object-fit: cover;"
-                loading="lazy"
-              />
-              {% else %}
-              <img
-                src="https://ui-avatars.com/api/?name={{ comment.user.first_name }}+{{ comment.user.last_name }}&size=120&background=667eea&color=fff&bold=true"
-                class="rounded-circle shadow-lg border border-4 border-white"
-                alt="Аватар {{ comment.user.first_name }}"
-                width="120"
-                height="120"
-                loading="lazy"
-              />
-              {% endif %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="text-center comment-carousel-item">
+            <div class="comment-avatar">
+              {{ comment.user.first_name.0 }}{{ comment.user.last_name.0 }}
             </div>
-
-            <!-- Текст отзыва -->
-            <div class="mx-auto" style="max-width: 600px;">
-              <i class="bi bi-quote text-primary fs-1 opacity-25"></i>
-              <p class="lead text-dark mb-3">{{ comment.text }}</p>
-              <h5 class="fw-bold text-dark">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
-              <div class="text-warning">
+            <div style="max-width: 600px; margin: 0 auto;">
+              <p class="lead text-dark mb-4">{{ comment.text }}</p>
+              <h5 class="fw-bold mb-2">{{ comment.user.first_name }} {{ comment.user.last_name }}</h5>
+              <small class="text-muted">{{ comment.created_at|date:"d.m.Y" }}</small>
+              <div class="text-warning mt-3">
                 <i class="bi bi-star-fill"></i>
                 <i class="bi bi-star-fill"></i>
                 <i class="bi bi-star-fill"></i>
@@ -265,73 +396,39 @@
         </div>
         {% endfor %}
       </div>
-
-      <!-- Кнопки управления -->
       <button class="carousel-control-prev" type="button" data-bs-target="#carouselComments" data-bs-slide="prev">
-        <div class="bg-white rounded-circle p-3 shadow">
-          <i class="bi bi-chevron-left text-dark fs-4"></i>
-        </div>
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Previous</span>
       </button>
       <button class="carousel-control-next" type="button" data-bs-target="#carouselComments" data-bs-slide="next">
-        <div class="bg-white rounded-circle p-3 shadow">
-          <i class="bi bi-chevron-right text-dark fs-4"></i>
-        </div>
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Next</span>
       </button>
-
-      <!-- Индикаторы -->
-      <div class="carousel-indicators position-static mt-4">
+      <div class="carousel-indicators">
         {% for comment in comments %}
-        <button
-          type="button"
-          data-bs-target="#carouselComments"
-          data-bs-slide-to="{{ forloop.counter0 }}"
-          class="{% if forloop.first %}active{% endif %}"
-          style="width: 10px; height: 10px; border-radius: 50%;"
-        ></button>
+        <button type="button" data-bs-target="#carouselComments" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></button>
         {% endfor %}
       </div>
     </div>
     {% else %}
-    <div class="text-center">
-      <div class="bg-white rounded-4 p-5 shadow-sm mx-auto" style="max-width: 500px;">
-        <i class="bi bi-chat-dots text-muted fs-1 mb-3"></i>
-        <p class="text-muted mb-3">Пока нет отзывов. Будьте первым!</p>
-        {% if not user.is_authenticated %}
-        <a href="{% url 'login' %}" class="btn btn-primary rounded-pill px-4">
-          Войдите, чтобы оставить отзыв
-        </a>
-        {% endif %}
-      </div>
+    <div class="text-center py-5">
+      <i class="bi bi-chat-dots text-muted fs-1 mb-3"></i>
+      <p class="text-muted">Пока нет отзывов. Будьте первым!</p>
     </div>
     {% endif %}
 
-    <!-- Форма добавления комментария -->
+    <!-- Форма комментария -->
     {% if user.is_authenticated %}
-    <div class="container mt-5" style="max-width: 700px;">
-      <div class="card shadow border-0 rounded-4">
-        <div class="card-body p-4">
-          <h5 class="card-title fw-bold mb-4">
-            <i class="bi bi-pencil-square text-primary me-2"></i>
-            Оставьте свой отзыв
-          </h5>
-          <form id="commentForm">
-            {% csrf_token %}
-            {{ comment_form.as_p }}
-            <button type="submit" class="btn btn-success w-100 py-3 rounded-pill mt-3">
-              <i class="bi bi-send me-2"></i>Отправить отзыв
-            </button>
-          </form>
-          <div id="commentMessage" class="mt-3"></div>
-        </div>
+    <div class="mt-5">
+      <div class="comment-form mx-auto" style="max-width: 700px;">
+        <h5 class="fw-bold mb-4">📝 Оставьте свой отзыв</h5>
+        <form id="commentForm">
+          {% csrf_token %}
+          {{ comment_form.as_p }}
+          <button type="submit" class="course-btn w-100">Отправить отзыв</button>
+        </form>
+        <div id="commentMessage" class="mt-3"></div>
       </div>
-    </div>
-    {% else %}
-    <div class="text-center mt-5">
-      <a href="{% url 'login' %}" class="btn btn-primary btn-lg rounded-pill px-5">
-        <i class="bi bi-box-arrow-in-right me-2"></i>Войдите, чтобы оставить отзыв
-      </a>
     </div>
     {% endif %}
   </section>
@@ -340,69 +437,40 @@
 <!-- AJAX для комментариев -->
 {% if user.is_authenticated %}
 <script>
-  document.getElementById("commentForm").addEventListener("submit", async function (e) {
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("commentForm");
+  if (!form) return;
+  
+  const messageDiv = document.getElementById("commentMessage");
+  
+  form.addEventListener("submit", async function(e) {
     e.preventDefault();
-    const form = e.target;
     const data = new FormData(form);
-    const messageDiv = document.getElementById("commentMessage");
 
     try {
-      const response = await fetch("{% url 'home' %}", {
+      const response = await fetch("", {
         method: "POST",
         headers: { "X-Requested-With": "XMLHttpRequest" },
         body: data,
       });
       const result = await response.json();
 
-      if (result.success && result.user && result.text) {
-        messageDiv.innerHTML = '<div class="alert alert-success rounded-pill"><i class="bi bi-check-circle me-2"></i>Комментарий добавлен!</div>';
-
-        const carouselInner = document.querySelector("#carouselComments .carousel-inner");
-        const newItem = document.createElement("div");
-        newItem.className = "carousel-item";
-
-        let avatarHTML = result.avatar_url
-          ? `<img src="${result.avatar_url}" class="rounded-circle shadow-lg border border-4 border-white" width="120" height="120" style="object-fit: cover;" alt="${result.user}">`
-          : `<img src="https://ui-avatars.com/api/?name=${encodeURIComponent(result.user)}&size=120&background=667eea&color=fff&bold=true" class="rounded-circle shadow-lg border border-4 border-white" width="120" height="120" alt="${result.user}">`;
-
-        newItem.innerHTML = `
-          <div class="text-center">
-            <div class="mb-4">${avatarHTML}</div>
-            <div class="mx-auto" style="max-width: 600px;">
-              <i class="bi bi-quote text-primary fs-1 opacity-25"></i>
-              <p class="lead text-dark mb-3">${result.text}</p>
-              <h5 class="fw-bold text-dark">${result.user}</h5>
-              <div class="text-warning">
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              </div>
-            </div>
-          </div>
-        `;
-        carouselInner.appendChild(newItem);
-
+      if (result.success) {
+        messageDiv.innerHTML = '<div class="alert alert-success rounded-3">✅ Комментарий добавлен!</div>';
         form.reset();
-        setTimeout(() => { messageDiv.innerHTML = ""; }, 3000);
+        setTimeout(() => messageDiv.innerHTML = "", 3000);
+        
+        // Перезагрузка страницы для обновления карусели
+        setTimeout(() => location.reload(), 1000);
       } else {
-        messageDiv.innerHTML = `<div class="alert alert-danger rounded-pill">${result.error || "Ошибка при добавлении"}</div>`;
+        messageDiv.innerHTML = `<div class="alert alert-danger rounded-3">${result.error}</div>`;
       }
     } catch (error) {
-      messageDiv.innerHTML = '<div class="alert alert-danger rounded-pill">Ошибка сети</div>';
-      setTimeout(() => { messageDiv.innerHTML = ""; }, 3000);
+      messageDiv.innerHTML = '<div class="alert alert-danger rounded-3">Ошибка сети</div>';
     }
   });
+});
 </script>
 {% endif %}
 
-<style>
-  .hover-lift:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
-  }
-  
-  .tariff-item:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.1);
-  }
-</style>
-
-{% endblock content %}
+{% endblock %}
