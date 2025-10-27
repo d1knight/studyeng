@@ -325,11 +325,14 @@ def topic_detail(request, topic_id):
             "correct_answers": correct_answers_dict,
         })
 
+    is_paid_course = chapter.course.tariffs.filter(price__gt=0).exists()
+
     return render(request, "english/topic.html", {
         "topic": topic,
         "exercises": exercises,
         "courses": Course.objects.all(),
-        "tariff": chapter.course.tariffs.filter(is_free=False).first(),
+        "tariff": chapter.course.tariffs.filter(price__gt=0).first(),
+        "is_paid_course": is_paid_course,
     })
 
 
