@@ -397,7 +397,6 @@ def generate_code(request: HttpRequest):
 def profile(request):
     # Получаем комментарии пользователя
     comments = Comment.objects.filter(user=request.user).order_by('-created_at')
-    courses = Course.objects.all()
 
     # Получаем оплаченные тарифы и связанные курсы
     payments = Payment.objects.filter(user=request.user, status="paid")
@@ -465,7 +464,7 @@ def profile(request):
         'comment_form': form,
         'comments': comments,
         'courses_data': courses_data,
-        'courses':courses,
+        'courses': Course.objects.all(),
     }
     return render(request, 'english/profile.html', context)
 

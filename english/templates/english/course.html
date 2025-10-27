@@ -33,14 +33,12 @@
             <span class="me-2 text-primary">Глава {{ chapter.order_index }}:</span>
             {{ chapter.name }}
             
-            <!-- Значок платная/бесплатная глава -->
             {% if chapter.is_paid %}
               <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">💳 Платная</span>
             {% else %}
               <span class="badge bg-success ms-2" style="font-size: 0.7rem;">✓ Бесплатная</span>
             {% endif %}
             
-            <!-- Статус открытия -->
             {% if user_chapter %}
               {% if user_chapter.is_open %}
                 <i class="bi bi-unlock ms-2 text-success"></i>
@@ -92,7 +90,6 @@
               {% endfor %}
             </ul>
 
-            <!-- Уведомления для закрытых глав -->
             {% if chapter.requires_payment and user.is_authenticated %}
               <div class="alert alert-warning mt-3 py-2 px-3 rounded-3">
                 <i class="bi bi-credit-card me-2"></i>
@@ -141,18 +138,30 @@
     {% endfor %}
   </div>
 
-  <!-- Кнопка покупки тарифа (только для платных курсов) -->
+  <!-- Кнопки и промо-блок только для платных курсов -->
   {% if not user_has_tariff and course.tariffs.all %}
     {% with first_tariff=course.tariffs.all.0 %}
       {% if not first_tariff.is_free %}
-        <div class="text-center mt-4">
-          <a href="{% url 'buy_tariff' first_tariff.id %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
-            💳 Купить тариф для этого курса
-          </a>
+        <div class="text-center mt-5 p-4 bg-light rounded-3 shadow-sm">
+          <p class="mb-3 text-dark" style="font-size: 1.1rem;">
+            🌟 <strong>Хотите учиться эффективнее?</strong><br>
+            Получите доступ к нашему <strong>закрытому Telegram-каналу</strong> — вас ждут 
+            <em>видеоразборы, практические упражнения</em> и поддержка преподавателя, 
+            которые помогут вам быстрее и глубже понять материал!
+          </p>
+          <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3">
+            <a href="{% url 'buy_tariff' first_tariff.id %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
+              💳 Купить тариф
+            </a>
+            <a href="https://t.me/Uralmirzaevich" target="_blank" class="btn btn-outline-success btn-lg px-5 py-3 rounded-3 shadow-sm">
+              💬 Связаться с учителем
+            </a>
+          </div>
         </div>
       {% endif %}
     {% endwith %}
   {% endif %}
+
 </div>
 
 <style>
@@ -160,12 +169,10 @@
     background-color: #f8f9fa;
     box-shadow: inset 0 -1px 0 rgba(0,0,0,.125);
   }
-  
   .accordion-button:focus {
     box-shadow: none;
     border-color: rgba(0,0,0,.125);
   }
-  
   .list-group-item:last-child {
     border-bottom: none !important;
   }

@@ -1,255 +1,591 @@
-{% extends "english/base.html" %} {% block content %}
+{% extends "english/base.html" %} 
+{% block content %}
+
+<style>
+  .profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 40px 20px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .profile-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+  }
+  
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  .avatar-wrapper {
+    position: relative;
+    margin-top: -60px;
+    margin-bottom: 20px;
+  }
+  
+  .avatar-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .avatar-img {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 5px solid #fff;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .avatar-img:hover {
+    transform: scale(1.05);
+  }
+  
+  .avatar-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    border: 3px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  }
+  
+  .avatar-badge:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  }
+  
+  .user-info h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 8px;
+  }
+  
+  .user-meta {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    color: #718096;
+    font-size: 14px;
+  }
+  
+  .user-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .section-title::before {
+    content: '';
+    width: 4px;
+    height: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+  
+  .course-card {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+  }
+  
+  .course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  }
+  
+  .course-card-body {
+    padding: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .course-info h6 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 8px;
+  }
+  
+  .course-info p {
+    color: #718096;
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .course-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #a0aec0;
+  }
+  
+  .course-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .progress-ring {
+    width: 60px;
+    height: 60px;
+    position: relative;
+  }
+  
+  .progress-ring svg {
+    transform: rotate(-90deg);
+  }
+  
+  .progress-ring-circle {
+    fill: none;
+    stroke: #e2e8f0;
+    stroke-width: 4;
+  }
+  
+  .progress-ring-progress {
+    fill: none;
+    stroke: url(#gradient);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.5s ease;
+  }
+  
+  .progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    font-weight: 700;
+    color: #667eea;
+  }
+  
+  .course-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 28px;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    white-space: nowrap;
+  }
+  
+  .course-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  .comment-form {
+    background: #f7fafc;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .comment-form textarea {
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    resize: vertical;
+    min-height: 100px;
+  }
+  
+  .comment-form textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+  
+  .comment-item {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+  }
+  
+  .comment-item:hover {
+    border-color: #cbd5e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  
+  .comment-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .comment-author-info strong {
+    color: #2d3748;
+    font-size: 15px;
+  }
+  
+  .comment-date {
+    color: #a0aec0;
+    font-size: 12px;
+    display: block;
+    margin-top: 2px;
+  }
+  
+  .comment-text {
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 0;
+  }
+  
+  .comment-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .btn-edit, .btn-delete {
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+  }
+  
+  .btn-edit {
+    background: #edf2f7;
+    color: #4a5568;
+  }
+  
+  .btn-edit:hover {
+    background: #e2e8f0;
+    color: #2d3748;
+  }
+  
+  .btn-delete {
+    background: #fed7d7;
+    color: #c53030;
+  }
+  
+  .btn-delete:hover {
+    background: #fc8181;
+    color: #fff;
+  }
+  
+  .btn-submit {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 32px;
+    color: #fff;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+  
+  .btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #a0aec0;
+  }
+  
+  .empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+  
+  .avatar-upload-btn {
+    display: none;
+  }
+  
+  .file-upload-wrapper {
+    margin-top: 16px;
+  }
+  
+  .file-info {
+    font-size: 12px;
+    color: #a0aec0;
+    margin-top: 8px;
+  }
+</style>
 
 <div class="container my-5">
   <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb bg-light p-3 rounded-3 shadow-sm">
+    <ol class="breadcrumb" style="background: transparent; padding: 0;">
       <li class="breadcrumb-item">
-        <a href="{% url 'home' %}" class="text-decoration-none text-primary"
-          >Главная</a
-        >
+        <a href="{% url 'home' %}" style="color: #667eea; text-decoration: none; font-weight: 500;">
+          🏠 Главная
+        </a>
       </li>
-      <li class="breadcrumb-item active" aria-current="page">Мой профиль</li>
+      <li class="breadcrumb-item active" style="color: #718096;">Мой профиль</li>
     </ol>
   </nav>
-  <div
-    class="card shadow-sm border-0 rounded-4 mx-auto"
-    style="max-width: 700px"
-  >
-    <div class="card-body p-4">
-      <h2 class="fw-bold text-center mb-4 text-dark">Мой профиль</h2>
 
-      <!-- 🔹 Аватар и информация о пользователе -->
-      <div class="text-center mb-4">
-        <div id="avatar-preview">
+  <div class="card shadow-sm border-0" style="max-width: 900px; margin: 0 auto; border-radius: 20px; overflow: hidden;">
+    <!-- Profile Header -->
+    <div class="profile-header"></div>
+
+    <div class="card-body p-0">
+      <!-- Avatar Section -->
+      <div class="avatar-wrapper text-center">
+        <div class="avatar-container">
           {% if user.avatar %}
-          <!-- Если пользователь загрузил аватар -->
-          <img
-            src="{{ user.avatar.url }}"
-            alt="Avatar"
-            class="rounded-circle shadow-sm"
-            style="width: 100px; height: 100px; object-fit: cover"
-            id="current-avatar"
-          />
+          <img src="{{ user.avatar.url }}" alt="Avatar" class="avatar-img" id="current-avatar" />
           {% else %}
-          <!-- Дефолтный аватар -->
-          <img
-            src="https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&size=100&background=0D8ABC&color=fff&bold=true"
-            alt="Avatar"
-            class="rounded-circle shadow-sm"
-            style="width: 100px; height: 100px; object-fit: cover"
-            id="current-avatar"
-          />
+          <img src="https://ui-avatars.com/api/?name={{ user.first_name }}+{{ user.last_name }}&size=140&background=667eea&color=fff&bold=true&format=svg" 
+               alt="Avatar" class="avatar-img" id="current-avatar" />
           {% endif %}
+          
+          <form method="post" enctype="multipart/form-data" id="avatar-form">
+            {% csrf_token %}
+            <label for="avatar-input" class="avatar-badge">
+              <svg width="18" height="18" fill="white" viewBox="0 0 16 16">
+                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+              </svg>
+            </label>
+            <input type="file" name="avatar" id="avatar-input" class="avatar-upload-btn" accept="image/*" onchange="this.form.submit()">
+          </form>
         </div>
 
-        <h5 class="mt-3 mb-0 fw-semibold">
-          {{ user.first_name }} {{ user.last_name }}
-        </h5>
-        {% if user.email %}
-        <p class="text-muted mb-2">{{ user.email }}</p>
-        {% endif %}
-        <p class="text-muted">
-          <strong>Телефон:</strong> {{ user.phone_number }}
-        </p>
-
-        <!-- 🔹 Форма смены аватара -->
-        <form
-          method="post"
-          enctype="multipart/form-data"
-          class="mt-3"
-          id="avatar-form"
-        >
-          {% csrf_token %}
-          <div class="input-group" style="max-width: 300px; margin: 0 auto">
-            <input
-              type="file"
-              name="avatar"
-              class="form-control form-control-sm"
-              accept="image/*"
-              id="avatar-input"
-            />
-            <button type="submit" class="btn btn-outline-primary btn-sm">
-              Изменить
-            </button>
+        <div class="user-info mt-3">
+          <h3>{{ user.first_name }} {{ user.last_name }}</h3>
+          <div class="user-meta">
+            {% if user.email %}
+            <span class="user-meta-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
+              </svg>
+              {{ user.email }}
+            </span>
+            {% endif %}
+            <span class="user-meta-item">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
+              </svg>
+              {{ user.phone_number }}
+            </span>
           </div>
-          <small class="text-muted d-block mt-1"
-            >Форматы: JPG, PNG, GIF (макс. 5 МБ)</small
-          >
-        </form>
-      </div>
-
-      <hr class="my-4" />
-
-      <!-- 🔹 Мои курсы -->
-      <h4 class="fw-semibold mb-3">Мои курсы</h4>
-      {% if courses_data %}
-      <div class="list-group mb-4">
-        {% for course_data in courses_data %}
-        <div
-          class="list-group-item mb-2 d-flex justify-content-between align-items-center"
-        >
-          <div>
-            <h6 class="mb-1 fw-bold">{{ course_data.course.name }}</h6>
-            <p class="mb-1 text-muted">
-              {{ course_data.course.description|truncatewords:20 }}
-            </p>
-            <small class="text-muted">
-              Тариф: {{ course_data.tariff.name|default:"Не указан" }} |
-              Прогресс: {{ course_data.progress }}%
-            </small>
-          </div>
-          <a
-            href="{% url 'course_detail' course_data.course.id %}"
-            class="btn btn-sm btn-primary"
-          >
-            Перейти к курсу
-          </a>
         </div>
-        {% endfor %}
       </div>
-      {% else %}
-      <p class="text-muted">
-        У вас пока нет курсов. <a href="/#home">Выберите курс</a>
-      </p>
-      {% endif %}
 
-      <hr class="my-4" />
-
-      <!-- 🔹 Форма добавления комментария -->
-      <h4 class="fw-semibold mb-3">Оставьте комментарий</h4>
-      <form method="post" class="mb-4">
-        {% csrf_token %} {{ comment_form.as_p }}
-        <button type="submit" name="add_comment" class="btn btn-success">
-          Отправить
-        </button>
-      </form>
-
-      <!-- 🔹 Список комментариев -->
-      <h5 class="mb-3">Комментарии:</h5>
-      {% if comments %}
-      <div class="list-group">
-        {% for comment in comments %}
-        <div
-          class="list-group-item mb-2 d-flex justify-content-between align-items-start"
-          id="comment-{{ comment.id }}"
-        >
-          <div class="flex-grow-1">
-            <strong
-              >{{ comment.user.first_name }} {{ comment.user.last_name
-              }}:</strong
-            >
-            <p class="mb-1 comment-text">{{ comment.text }}</p>
-            <small class="text-muted"
-              >{{ comment.created_at|date:"d.m.Y H:i" }}</small
-            >
-          </div>
-
-          {% if comment.user == user %}
-          <div class="ms-3 d-flex flex-column gap-1">
-            <button
-              class="btn btn-sm btn-warning edit-btn"
-              data-id="{{ comment.id }}"
-            >
-              Редактировать
-            </button>
-            <button
-              type="button"
-              class="btn btn-sm btn-danger delete-btn"
-              data-bs-toggle="modal"
-              data-bs-target="#deleteModal{{ comment.id }}"
-            >
-              Удалить
-            </button>
-
-            <!-- Модалка подтверждения -->
-            <div
-              class="modal fade"
-              id="deleteModal{{ comment.id }}"
-              tabindex="-1"
-              aria-labelledby="deleteModalLabel{{ comment.id }}"
-              aria-hidden="true"
-            >
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5
-                      class="modal-title"
-                      id="deleteModalLabel{{ comment.id }}"
-                    >
-                      Подтвердите удаление
-                    </h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="modal"
-                      aria-label="Close"
-                    ></button>
+      <div class="px-4 pb-4" style="max-width: 800px; margin: 0 auto;">
+        <!-- My Courses Section -->
+        <div class="mt-5">
+          <h4 class="section-title">📚 Мои курсы</h4>
+          {% if courses_data %}
+            {% for course_data in courses_data %}
+            <div class="course-card">
+              <div class="course-card-body">
+                <div class="course-info flex-grow-1">
+                  <h6>{{ course_data.course.name }}</h6>
+                  <p>{{ course_data.course.description|truncatewords:15 }}</p>
+                  <div class="course-meta">
+                    <span>
+                      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3Zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                      </svg>
+                      {{ course_data.tariff.name|default:"Базовый" }}
+                    </span>
                   </div>
-                  <div class="modal-body">
-                    Вы действительно хотите удалить этот комментарий?
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                  <div class="progress-ring">
+                    <svg width="60" height="60">
+                      <defs>
+                        <linearGradient id="gradient-{{ forloop.counter }}" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                          <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                        </linearGradient>
+                      </defs>
+                      <circle class="progress-ring-circle" cx="30" cy="30" r="26"></circle>
+                      <circle class="progress-ring-progress" cx="30" cy="30" r="26" 
+                              stroke-dasharray="163.36" 
+                              stroke-dashoffset="163.36"
+                              data-progress="{{ course_data.progress }}"
+                              style="stroke: url(#gradient-{{ forloop.counter }})"></circle>
+                    </svg>
+                    <div class="progress-text">{{ course_data.progress }}%</div>
                   </div>
-                  <div class="modal-footer">
-                    <button
-                      type="button"
-                      class="btn btn-secondary"
-                      data-bs-dismiss="modal"
-                    >
-                      Отмена
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-danger confirm-delete"
-                      data-id="{{ comment.id }}"
-                    >
-                      Удалить
-                    </button>
-                  </div>
+                  
+                  <a href="{% url 'course_detail' course_data.course.id %}" class="course-btn">
+                    Перейти →
+                  </a>
                 </div>
               </div>
             </div>
-          </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <div class="empty-state-icon">📖</div>
+              <p>У вас пока нет курсов</p>
+              <a href="/#home" style="color: #667eea; font-weight: 500; text-decoration: none;">Выбрать курс →</a>
+            </div>
           {% endif %}
         </div>
-        {% endfor %}
+
+        <!-- Comments Section -->
+        <div class="mt-5">
+          <h4 class="section-title">💬 Комментарии</h4>
+          
+          <div class="comment-form">
+            <form method="post">
+              {% csrf_token %}
+              {{ comment_form.as_p }}
+              <button type="submit" name="add_comment" class="btn-submit">
+                Отправить комментарий
+              </button>
+            </form>
+          </div>
+
+          {% if comments %}
+            {% for comment in comments %}
+            <div class="comment-item" id="comment-{{ comment.id }}">
+              <div class="comment-header">
+                <div class="comment-author">
+                  <div class="comment-avatar">
+                    {{ comment.user.first_name.0 }}{{ comment.user.last_name.0 }}
+                  </div>
+                  <div class="comment-author-info">
+                    <strong>{{ comment.user.first_name }} {{ comment.user.last_name }}</strong>
+                    <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                  </div>
+                </div>
+                
+                {% if comment.user == user %}
+                <div class="comment-actions">
+                  <button class="btn-edit edit-btn" data-id="{{ comment.id }}">Редактировать</button>
+                  <button class="btn-delete delete-btn" data-bs-toggle="modal" data-bs-target="#deleteModal{{ comment.id }}">Удалить</button>
+                </div>
+                {% endif %}
+              </div>
+              
+              <p class="comment-text">{{ comment.text }}</p>
+
+              <!-- Delete Modal -->
+              {% if comment.user == user %}
+              <div class="modal fade" id="deleteModal{{ comment.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content" style="border-radius: 16px; border: none;">
+                    <div class="modal-header" style="border: none; padding: 24px 24px 0;">
+                      <h5 class="modal-title" style="font-weight: 700; color: #2d3748;">Подтвердите удаление</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" style="padding: 16px 24px; color: #718096;">
+                      Вы действительно хотите удалить этот комментарий?
+                    </div>
+                    <div class="modal-footer" style="border: none; padding: 0 24px 24px;">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius: 10px;">Отмена</button>
+                      <button type="button" class="btn btn-danger confirm-delete" data-id="{{ comment.id }}" style="border-radius: 10px;">Удалить</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <div class="empty-state-icon">💭</div>
+              <p>Комментариев пока нет. Будьте первым!</p>
+            </div>
+          {% endif %}
+        </div>
       </div>
-      {% else %}
-      <p class="text-muted">Комментариев пока нет.</p>
-      {% endif %}
     </div>
   </div>
 </div>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const csrfToken = document.querySelector(
-      "[name=csrfmiddlewaretoken]"
-    ).value;
+    const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
 
-    // 🔹 Предпросмотр аватара перед загрузкой
+    // Avatar preview
     const avatarInput = document.getElementById("avatar-input");
     if (avatarInput) {
       avatarInput.addEventListener("change", function (e) {
         const file = e.target.files[0];
         if (file) {
-          // Проверка размера (5 МБ)
           if (file.size > 5 * 1024 * 1024) {
             alert("Файл слишком большой! Максимум: 5 МБ");
             e.target.value = "";
             return;
           }
 
-          // Предпросмотр
           const reader = new FileReader();
           reader.onload = function (event) {
-            const currentAvatar = document.getElementById("current-avatar");
-            currentAvatar.src = event.target.result;
+            document.getElementById("current-avatar").src = event.target.result;
           };
           reader.readAsDataURL(file);
         }
       });
     }
 
-    // 🔹 Редактирование и удаление комментариев
+    // Edit and delete comments
     document.addEventListener("click", function (e) {
       if (e.target && e.target.classList.contains("edit-btn")) {
         const btn = e.target;
@@ -263,21 +599,18 @@
         const input = document.createElement("input");
         input.type = "text";
         input.value = originalText;
-        input.classList.add("form-control", "mb-2");
+        input.className = "form-control mb-2";
+        input.style.cssText = "border: 2px solid #667eea; border-radius: 10px; padding: 10px 14px;";
 
         const saveBtn = document.createElement("button");
         saveBtn.textContent = "Сохранить";
-        saveBtn.classList.add("btn", "btn-primary", "btn-sm", "mb-1");
+        saveBtn.className = "btn-submit me-2";
+        saveBtn.style.padding = "8px 20px";
 
         const cancelBtn = document.createElement("button");
         cancelBtn.textContent = "Отмена";
-        cancelBtn.classList.add(
-          "btn",
-          "btn-secondary",
-          "btn-sm",
-          "mb-1",
-          "ms-1"
-        );
+        cancelBtn.className = "btn btn-secondary";
+        cancelBtn.style.cssText = "border-radius: 10px; padding: 8px 20px;";
 
         textEl.style.display = "none";
         btn.style.display = "none";
@@ -285,9 +618,13 @@
         const deleteBtn = commentDiv.querySelector(".delete-btn");
         if (deleteBtn) deleteBtn.style.display = "none";
 
-        commentDiv.querySelector(".flex-grow-1").appendChild(input);
-        commentDiv.querySelector(".flex-grow-1").appendChild(saveBtn);
-        commentDiv.querySelector(".flex-grow-1").appendChild(cancelBtn);
+        const actionContainer = document.createElement("div");
+        actionContainer.className = "mt-2";
+        actionContainer.appendChild(saveBtn);
+        actionContainer.appendChild(cancelBtn);
+
+        textEl.parentElement.insertBefore(input, textEl.nextSibling);
+        input.parentElement.insertBefore(actionContainer, input.nextSibling);
 
         saveBtn.addEventListener("click", function () {
           const newText = input.value;
@@ -298,9 +635,7 @@
               "X-Requested-With": "XMLHttpRequest",
               "Content-Type": "application/x-www-form-urlencoded",
             },
-            body: `edit_comment=1&comment_id=${commentId}&text=${encodeURIComponent(
-              newText
-            )}&csrfmiddlewaretoken=${csrfToken}`,
+            body: `edit_comment=1&comment_id=${commentId}&text=${encodeURIComponent(newText)}&csrfmiddlewaretoken=${csrfToken}`,
           })
             .then((res) => res.json())
             .then((data) => {
@@ -308,8 +643,7 @@
                 textEl.textContent = data.comment.text;
                 textEl.style.display = "";
                 input.remove();
-                saveBtn.remove();
-                cancelBtn.remove();
+                actionContainer.remove();
                 btn.style.display = "";
                 if (deleteBtn) deleteBtn.style.display = "";
               }
@@ -319,8 +653,7 @@
         cancelBtn.addEventListener("click", function () {
           textEl.style.display = "";
           input.remove();
-          saveBtn.remove();
-          cancelBtn.remove();
+          actionContainer.remove();
           btn.style.display = "";
           if (deleteBtn) deleteBtn.style.display = "";
         });
