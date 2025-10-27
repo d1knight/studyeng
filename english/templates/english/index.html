@@ -3,7 +3,7 @@
 {% block title %}Главная{% endblock %}
 {% block content %}
 <style>
-  /* Hero Section - с изображением преподавателя */
+  /* Hero Section */
   .hero-section {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 20px;
@@ -66,7 +66,34 @@
     color: #fff !important;
   }
 
-  /* Learning Process Section - ВСЕ ИЗОБРАЖЕНИЯ СОХРАНЕНЫ */
+  /* Course Button */
+  .course-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+    color: #fff;
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .course-btn:hover {
+    background: linear-gradient(135deg, #ff8e53 0%, #ff6b6b 100%);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .course-btn i {
+    margin-right: 8px;
+    font-size: 1.2em;
+  }
+
+  /* Learning Process Section */
   .learning-process {
     background: #f7fafc;
     border-radius: 16px;
@@ -131,29 +158,40 @@
   /* Tariffs Section */
   .tariff-card {
     border: none;
-    border-radius: 16px;
+    border-radius: 20px;
     background: #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
     overflow: hidden;
+    min-height: 500px; /* Увеличенный размер карточки */
   }
 
   .tariff-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.2);
   }
 
   .tariff-header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
-    padding: 24px;
+    padding: 32px;
+    text-align: center;
+  }
+
+  .tariff-header h4 {
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .tariff-header p {
+    font-size: 16px;
   }
 
   .tariff-item {
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
     transition: all 0.3s ease;
     background: #fff;
   }
@@ -161,6 +199,25 @@
   .tariff-item:hover {
     border-color: #667eea;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+  }
+
+  .tariff-item i {
+    font-size: 24px; /* Увеличенный размер иконок */
+    margin-right: 12px;
+  }
+
+  .tariff-item h6 {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .tariff-item .badge {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  .tariff-item .fs-5 {
+    font-size: 22px !important; /* Увеличенный размер цены */
   }
 
   /* Comments Section */
@@ -210,7 +267,7 @@
     outline: none;
   }
 
-  /* Карусель */
+  /* Carousel */
   .carousel-control-prev-icon,
   .carousel-control-next-icon {
     background: #fff;
@@ -226,7 +283,7 @@
 </style>
 
 <div class="container my-5">
-  <!-- Hero Section - ИЗОБРАЖЕНИЕ ПРЕПОДАВАТЕЛЯ СОХРАНЕНО -->
+  <!-- Hero Section -->
   <section class="hero-section">
     <div class="row align-items-center g-4">
       <div class="col-lg-6">
@@ -251,7 +308,7 @@
       </div>
       <div class="col-lg-6 text-center">
         <img
-          src="https://cdn.cpdonline.co.uk/wp-content/uploads/2023/02/24155222/Teacher-Teaching-Online.jpg"
+          src="{% static 'img/teacher.png'  %}"
           class="img-fluid rounded-4 shadow-lg"
           alt="Преподаватель Байрам"
           style="max-height: 500px; object-fit: cover; border-radius: 16px;"
@@ -260,7 +317,7 @@
     </div>
   </section>
 
-  <!-- Learning Process Section - ВСЕ 3 ИЗОБРАЖЕНИЯ СОХРАНЕНЫ -->
+  <!-- Learning Process Section -->
   <section class="learning-process my-5">
     <div class="text-center mb-5">
       <h2 class="section-title">📚 Как проходит обучение</h2>
@@ -269,7 +326,7 @@
     <div class="row g-4">
       <div class="col-md-4">
         <div class="process-card position-relative">
-          <img src="https://antaltalent.ru/wp-content/uploads/2023/01/tpk_prev.jpg" alt="Тестирование" />
+          <img src="{% static 'img/test.png' %}" alt="Тестирование" />
           <span class="process-badge">Шаг 1</span>
           <div class="process-card-body">
             <h5 class="fw-bold mb-3">
@@ -283,7 +340,7 @@
 
       <div class="col-md-4">
         <div class="process-card position-relative">
-          <img src="https://www.unicraft.org/wp-content/uploads/2021/02/cropped-colleagues-generating-business-ideas_1098-19137.jpg" alt="Обратная связь" />
+          <img src="{% static 'img/support.png' %}" alt="Обратная связь" />
           <span class="process-badge bg-success text-white">Шаг 2</span>
           <div class="process-card-body">
             <h5 class="fw-bold mb-3">
@@ -297,7 +354,7 @@
 
       <div class="col-md-4">
         <div class="process-card position-relative">
-          <img src="https://shablon.klev.club/uploads/posts/2024-09/shablon-klev-club-zl8b-p-shabloni-kalendar-na-mesyats-bez-dat-1.jpg" alt="График занятий" />
+          <img src="{% static 'img/calendar.png' %}" alt="График занятий" />
           <span class="process-badge bg-info text-white">Шаг 3</span>
           <div class="process-card-body">
             <h5 class="fw-bold mb-3">
@@ -417,7 +474,7 @@
     </div>
     {% endif %}
 
-    <!-- Форма комментария -->
+    <!-- Comment Form -->
     {% if user.is_authenticated %}
     <div class="mt-5">
       <div class="comment-form mx-auto" style="max-width: 700px;">
@@ -431,8 +488,7 @@
       </div>
     </div>
     {% endif %}
-  </section>
-</div>
+  </div>
 
 <!-- AJAX для комментариев -->
 {% if user.is_authenticated %}
