@@ -467,12 +467,18 @@ def logout_view(request):
     logout(request)
     return redirect('/')
 
-
 def buy_tariff(request, tariff_id):
     tariff = get_object_or_404(CourseTariff, id=tariff_id)
     course = tariff.course
+    courses = Course.objects.all()
 
     user_authenticated = request.user.is_authenticated
+
+    # Если тариф бесплатный - перенаправляем на курс напрямую
+    # Не нужно "активировать" бесплатный тариф
+    if tariff.is_free() and user_authenticated:
+        messages.info(request, f"Курс '{course.name}' бесплатный! Просто начните обучение.")
+        return redirect('course_detail', course_id=course.id)
 
     if request.method == "POST":
         if not user_authenticated:
@@ -482,29 +488,22 @@ def buy_tariff(request, tariff_id):
         receipt = request.FILES.get("receipt")
         if not receipt:
             messages.error(request, "Пожалуйста, загрузите скриншот чека.")
-            return render(request, "english/buy_tariff.html", {"tariff": tariff, "user_authenticated": user_authenticated})
+            return render(request, "english/buy_tariff.html", {
+                "tariff": tariff, 
+                "user_authenticated": user_authenticated,
+                "courses": courses
+            })
 
+        # Создаём платёж со статусом pending (ожидает проверки)
         payment = Payment.objects.create(
             user=request.user,
             tariff=tariff,
             amount=tariff.price,
             receipt=receipt,
-            status="paid"
+            status="pending"  # Администратор проверит и изменит на "paid"
         )
 
-        # Создаём записи UserChapter: только первая глава открыта
-        for chapter in course.chapters.all():
-            user_chapter, created = UserChapter.objects.get_or_create(
-                user=request.user, 
-                chapter=chapter,
-                defaults={'is_open': chapter.order_index == 1}
-            )
-
-        # Очистка кэша
-        cache.clear()
-
-        current_time = datetime.now().strftime("%I:%M %p, %d.%m.%Y")
-        messages.success(request, f"Платеж за тариф '{tariff.name}' успешно обработан в {current_time}. Начните с первой главы!")
+        messages.info(request, f"Ваш платёж отправлен на проверку. Администратор проверит чек и активирует тариф '{tariff.name}'.")
         return redirect("profile")
 
     # Другие тарифы курса
@@ -514,9 +513,9 @@ def buy_tariff(request, tariff_id):
         "tariff": tariff,
         "other_tariffs": other_tariffs,
         "user_authenticated": user_authenticated,
+        "courses": courses,
     }
     return render(request, "english/buy_tariff.html", context)
-
 
 def exercise_view(request, pk):
     exercise = Exercise.objects.get(pk=pk)

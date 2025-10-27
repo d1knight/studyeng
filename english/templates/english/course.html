@@ -129,21 +129,17 @@
     {% endfor %}
   </div>
 
-  <!-- Кнопка покупки тарифа -->
-  {% if not user_has_tariff %}
-    <div class="text-center mt-4">
-      {% if course.tariffs.all %}
-        {% with first_tariff=course.tariffs.all.0 %}
+  <!-- Кнопка покупки тарифа (только для платных курсов) -->
+  {% if not user_has_tariff and course.tariffs.all %}
+    {% with first_tariff=course.tariffs.all.0 %}
+      {% if not first_tariff.is_free %}
+        <div class="text-center mt-4">
           <a href="{% url 'buy_tariff' first_tariff.id %}" class="btn btn-primary btn-lg px-5 py-3 rounded-3 shadow">
-            {% if first_tariff.is_free %}
-              ✓ Активировать бесплатный тариф
-            {% else %}
-              💳 Купить тариф для этого курса
-            {% endif %}
+            💳 Купить тариф для этого курса
           </a>
-        {% endwith %}
+        </div>
       {% endif %}
-    </div>
+    {% endwith %}
   {% endif %}
 </div>
 

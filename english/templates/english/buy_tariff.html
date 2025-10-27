@@ -5,7 +5,13 @@
   <!-- === Блок текущего тарифа === -->
   <div class="card shadow-sm border-0 rounded-4 mx-auto p-3" style="max-width: 600px;">
     <div class="card-body p-4">
-      <h2 class="text-center mb-3 fw-bold text-dark">Оплата тарифа</h2>
+      <h2 class="text-center mb-3 fw-bold text-dark">
+        {% if tariff.is_free %}
+          Бесплатный курс
+        {% else %}
+          Оплата тарифа
+        {% endif %}
+      </h2>
       <h4 class="text-center text-primary mb-4">{{ tariff.name }}</h4>
 
       <div class="text-center mb-4">
@@ -31,7 +37,11 @@
       {% if not user_authenticated %}
         <div class="alert alert-info text-center py-2 px-3 rounded-3 mb-4 shadow-sm">
           <i class="bi bi-person-circle me-2"></i>
-          Авторизуйтесь, чтобы {{ tariff.is_free|yesno:"активировать,купить" }} тариф.
+          {% if tariff.is_free %}
+            Авторизуйтесь, чтобы начать обучение.
+          {% else %}
+            Авторизуйтесь, чтобы купить тариф.
+          {% endif %}
         </div>
         <div class="text-center">
           <a href="{% url 'login' %}" class="btn btn-outline-primary rounded-3 px-4">
@@ -40,20 +50,24 @@
         </div>
       {% else %}
         {% if tariff.is_free %}
-          <!-- Форма для бесплатного тарифа -->
+          <!-- Информация для бесплатного курса -->
           <div class="alert alert-success rounded-3 mb-4">
             <h5 class="fw-bold mb-3">
               <i class="bi bi-gift me-2"></i>Бесплатный доступ
             </h5>
-            <p class="mb-0">Нажмите кнопку ниже, чтобы активировать бесплатный тариф и получить доступ к платным главам курса.</p>
+            <p class="mb-3">Этот курс полностью бесплатный! Вы можете сразу начать обучение.</p>
+            <ul class="mb-0">
+              <li>Все бесплатные главы доступны сразу</li>
+              <li>Проходите главы последовательно</li>
+              <li>Набирайте 80%+ в контрольных для открытия следующих глав</li>
+            </ul>
           </div>
           
-          <form method="post" class="text-center">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success btn-lg w-100 py-3 rounded-3 shadow-sm">
-              <i class="bi bi-check-circle me-2"></i>Активировать бесплатный тариф
-            </button>
-          </form>
+          <div class="text-center">
+            <a href="{% url 'course_detail' tariff.course.id %}" class="btn btn-success btn-lg w-100 py-3 rounded-3 shadow-sm">
+              <i class="bi bi-play-circle me-2"></i>Начать обучение
+            </a>
+          </div>
         {% else %}
           <!-- Форма для платного тарифа -->
           <div class="alert alert-warning rounded-3 mb-4">
@@ -139,7 +153,7 @@
               {% if user_authenticated %}
                 <a href="{% url 'buy_tariff' t.id %}" class="btn btn-outline-primary w-100 rounded-3 shadow-sm">
                   {% if t.is_free %}
-                    ✓ Активировать
+                    👁️ Посмотреть
                   {% else %}
                     💳 Купить тариф
                   {% endif %}
